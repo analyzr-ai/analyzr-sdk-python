@@ -17,23 +17,6 @@ import pandas as pd
 from copy import deepcopy
 from sklearn.datasets import load_iris
 
-from .constants import GEO_DATAFRAME_COLUMNS_ORDER
-
-
-def reorder_columns(df):
-    """
-    Reorders column order to match <GEO_DATAFRAME_COLUMNS_ORDER>, and add missing
-    columns if necessary.
-
-    :param df:
-    :return df2:
-    """
-    df2 = deepcopy(df)
-    for col in GEO_DATAFRAME_COLUMNS_ORDER:
-        if col not in df2.columns:
-            df2[col] = None
-    return df2[GEO_DATAFRAME_COLUMNS_ORDER]
-
 def xref_encode(series):
     """
     Replaces categorical values in a Series with UUIDs

@@ -2,7 +2,7 @@
 
 ## Overview
 This Python client will give you access to the G2M Analyzer API from any machine. See files in the `examples` folder
-for examples showing how to use the client. Note that a `client_id` should always be provided when querying the API; it is used for reporting purposes.
+for examples showing how to use the client. Note that a `client_id` should always be provided when querying the API; it is used for reporting purposes. For more info please see https://analyzr.ai.
 
 ## Installing the client in production mode:
 Getting the client set up will require the following:
@@ -30,3 +30,5 @@ Login successful
 >>> Analyzer().version()
 {'status': 200, 'response': {'version': 'x.x.xxx', 'tenant': <your tenant name>, 'copyright': '2022 (c) Go2Market Insights LLC. All rights reserved.'}}
 ```
+
+5. For additional help and documentation see https://support.analyzr.ai. 

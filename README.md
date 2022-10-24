@@ -14,7 +14,7 @@ pip install analyzr-sdk-python
 
 2. Get an API username and password from your Analyzr admin (you may need SSO credentials from your local admin instead).
 
-3. To confirm you are able to connect to the API, and check the API version
+3. Confirm you are able to connect to the API, and check the API version
 as follows from a Python session:
 ```
 >>> from analyzrclient import Analyzer

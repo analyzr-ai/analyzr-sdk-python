@@ -15,7 +15,6 @@ import uuid
 import numpy as np
 import pandas as pd
 from copy import deepcopy
-from sklearn.datasets import load_iris
 
 def xref_encode(series):
     """
@@ -347,8 +346,5 @@ def get_test_data():
     :param:
     :return df:
     """
-    iris = load_iris()
-    cols = ['X1', 'X2', 'X3', 'X4']
-    df = pd.DataFrame(iris.data, columns=cols).reset_index()
-    df['PC_ID'] = iris.target
+    df = pd.read_csv('https://g2mstaticfiles.blob.core.windows.net/$web/titanic.csv', encoding = "ISO-8859-1", low_memory=False)
     return df

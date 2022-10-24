@@ -12,7 +12,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 import pandas as pd
-from sklearn.datasets import make_classification
 
 def load_titanic_dataset():
     """
@@ -29,8 +28,6 @@ def generate_synthetic_dataset(n_features=2, n_samples=1000):
     :return df:
     :return vars:
     """
-    X, _ = make_classification(n_samples=n_samples, n_features=n_features, n_informative=n_features, n_redundant=0,
-        n_clusters_per_class=1, random_state=4)
-    vars = ['X{}'.format(i+1) for i in range(0, n_features)]
-    df = pd.DataFrame(X, columns=vars).reset_index()
+    df = pd.read_csv('https://g2mstaticfiles.blob.core.windows.net/$web/synthetic_data_2_1000.csv', encoding = "ISO-8859-1", low_memory=False)
+    vars = df.columns[1:]
     return df, vars

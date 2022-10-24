@@ -4,16 +4,12 @@
 This Python client will give you access to the Analyzr API from any machine. See files in the `examples` folder
 for examples showing how to use the client. Note that a `client_id` should always be provided when querying the API; it is used for reporting purposes. For more info please see https://analyzr.ai.
 
-## Installing the client in production mode:
+## Installation instructions:
 Getting the client set up will require the following:
 
 1. Install the latest version of the client on your local machine:
 ```
 pip install analyzr-sdk-python
-```
-If it simply needs to be updated, use:
-```
-pip install analyzr-sdk-python --upgrade
 ```
 
 2. Get an API username and password from your Analyzr admin (you may need SSO credentials from your local admin instead).

@@ -6,6 +6,13 @@
 Welcome to Analyzr Python SDK's documentation!
 ==============================================
 
+This Python client will give you access to the Analyzr API from any machine.
+See sample Jupyter notebooks in the `examples` folder in the `repo <https://github.com/analyzr-ai/analyzr-sdk-python/>`_
+for examples showing how to use the client.
+Note that a `client_id` should always be provided when querying the API; it is
+used for reporting purposes.
+For additional documentation and support see https://support.analyzr.ai.
+
 .. toctree::
    :maxdepth: 4
    :caption: Contents:

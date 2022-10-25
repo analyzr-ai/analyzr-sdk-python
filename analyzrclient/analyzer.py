@@ -64,7 +64,6 @@ class Analyzer:
         Log out of Analyzr API
 
         :param verbose: Set to True for verbose screen output
-        :return:
         :rtype: None
         """
         return self.__client._logout(verbose=verbose)

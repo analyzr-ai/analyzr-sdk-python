@@ -49,14 +49,6 @@ analyzrclient.runner\_task module
   :undoc-members:
   :show-inheritance:
 
-analyzrclient.utils module
---------------------------
-
-.. automodule:: analyzrclient.utils
-  :members:
-  :undoc-members:
-  :show-inheritance:
-
 Module contents
 ---------------
 

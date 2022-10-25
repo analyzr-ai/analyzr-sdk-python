@@ -7,6 +7,4 @@ Reference
    :toctree: generated
 
    analyzer
-   analyzer.version
-   analyzer.login
-   analyzer.logout
+   analyzer.analyzer

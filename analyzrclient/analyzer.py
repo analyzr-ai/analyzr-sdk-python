@@ -13,7 +13,9 @@ from .runner_task import TaskRunner
 
 class Analyzer:
     """
-    Parent class for Analyzr client
+    Parent class for Analyzr client. This is the class that should be instantiated
+    by the client. For detailed methods, see the appropriate runner class.
+    
     """
     def __init__(self, host=None, verbose=False):
         """

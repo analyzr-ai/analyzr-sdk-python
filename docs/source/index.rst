@@ -14,7 +14,7 @@ used for reporting purposes.
 For additional documentation and support see https://support.analyzr.ai.
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
    :caption: Contents:
 
    usage

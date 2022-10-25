@@ -16,12 +16,13 @@ class Analyzer:
     Parent class for Analyzr client. This is the class that should be instantiated
     by the client. For detailed methods, see the appropriate runner class.
 
+    :param host: the FQDN for your API tenant
+    :verbose: Set to true for verbose output
+    :rtype: None
     """
+
     def __init__(self, host=None, verbose=False):
         """
-        :param host: the FQDN for your API tenant
-        :verbose: Set to true for verbose output
-        :rtype: None
         """
         # General config
         self.__client = SamlSsoAuthClient(host=host, verbose=verbose)

@@ -10,6 +10,8 @@ Welcome to Analyzr Python SDK's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   usage
+   reference
 
 
 Indices and tables

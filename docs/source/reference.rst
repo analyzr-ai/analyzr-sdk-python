@@ -9,30 +9,6 @@ analyzrclient.analyzer module
   :undoc-members:
   :show-inheritance:
 
-analyzrclient.client\_basic\_auth module
-----------------------------------------
-
-.. automodule:: analyzrclient.client_basic_auth
-  :members:
-  :undoc-members:
-  :show-inheritance:
-
-analyzrclient.client\_saml\_sso module
---------------------------------------
-
-.. automodule:: analyzrclient.client_saml_sso
-  :members:
-  :undoc-members:
-  :show-inheritance:
-
-analyzrclient.constants module
-------------------------------
-
-.. automodule:: analyzrclient.constants
-  :members:
-  :undoc-members:
-  :show-inheritance:
-
 analyzrclient.runner\_base module
 ---------------------------------
 

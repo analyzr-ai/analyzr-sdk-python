@@ -7,4 +7,4 @@ Reference
    :toctree: generated
 
    analyzer
-   analyzer.analyzer
+   runner_base

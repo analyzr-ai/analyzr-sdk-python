@@ -32,16 +32,18 @@ class Analyzer:
 
     def version(self):
         """
-        Returns API version info
+        Provide API version info
 
-        :return version:
+        :return version: API version and other metadata
         """
         return self.__client._post(self.__uri, {'command': 'version'})
 
     def login(self, verbose=False):
         """
-        :param verbose:
-        :return status_code:
+        Log in to Analyzr API
+
+        :param verbose: Set to True for verbose screen output
+        :return:
         """
         status_code = self.__client._login(verbose=verbose)
         if status_code==200:
@@ -53,7 +55,9 @@ class Analyzer:
 
     def logout(self, verbose=False):
         """
-        :param verbose:
+        Log out of Analyzr API
+
+        :param verbose: Set to True for verbose screen output
         :return:
         """
         return self.__client._logout(verbose=verbose)

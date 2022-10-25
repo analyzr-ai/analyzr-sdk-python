@@ -13,6 +13,7 @@ from .runner_task import TaskRunner
 
 class Analyzer:
     """
+    Parent class for Analyzr client
     """
     def __init__(self, host=None, verbose=False):
         """
@@ -56,17 +57,3 @@ class Analyzer:
         :return:
         """
         return self.__client._logout(verbose=verbose)
-
-    def export(self, model_id, verbose=False):
-        """
-        :param model_id:
-        :param verbose:
-        :return res:
-        """
-        return self.__client._post(
-            self.__uri,
-            {
-                'command': 'model-export',
-                'model_id': model_id,
-            }
-        )

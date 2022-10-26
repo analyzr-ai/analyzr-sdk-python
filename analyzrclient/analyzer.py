@@ -18,7 +18,6 @@ class Analyzer:
 
     :param host: the FQDN for your API tenant
     :verbose: Set to true for verbose output
-    :rtype: None
     """
 
     def __init__(self, host=None, verbose=False):

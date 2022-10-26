@@ -234,24 +234,32 @@ class PropensityRunner(BaseRunner):
                 algorithm='random-forest-classifier', train_size=0.5, buffer_batch_size=1000,
                 verbose=False, timeout=600, step=2, poll=True, smote=False, compressed=False, staging=True, encoding=True):
         """
-        :param df:
+        Train propensity model on user-provided dataset
+
+        :param df: dataframe containing dataset to be used for training. The data is homomorphically encrypted by the client prior to being transferred to the API buffer when `encoding` is set to `True`
         :param client_id: Short name for account being used. Used for reporting purposes only
-        :param idx_var:
-        :param outcome_var:
-        :param categorical_vars:
-        :param numerical_vars:
-        :param algorithm:
-        :param train_size:
-        :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer
+        :param idx_var: name of index field identifying unique record IDs in `df` for audit purposes
+        :param outcome_var: name of dependent variable, usually a boolean variable set to `0` or `1`
+        :param categorical_vars: array of field names identifying categorical fields in the dataframe `df`
+        :param numerical_vars: array of field names identifying categorical fields in the dataframe `df`
+        :param bool_vars: array of field names identifying boolean fields in the dataframe `df`
+        :param algorithm: can be any of the following: `random-forest-classifier`, `gradient-boosting-classifier`, `xgboost-classifier`, `ada-boost-classifier`, `extra-trees-classifier`, `logistic-regression-classifier`. Algorithms are sourced from Scikit-Learn unless otherwise indicated.
+        :param train_size: Share of training dataset assigned to training vs. testing, e.g. if train_size is set to 0.8 80% of the dataset will be assigned to training and 20% will be randomly set aside for testing and validation
+        :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer
         :param verbose: Set to true for verbose output
-        :param timeout:
-        :param step:
+        :param timeout: client will keep polling API for a period of `timeout` seconds
+        :param step: polling interval, in seconds
         :param poll: keep polling API while the job is being run (default is `True`)
-        :param smote:
-        :param compressed:
-        :param staging:
-        :param encoding:
-        :return res5:
+        :param smote: apply SMOTE pre-processing
+        :param compressed: perform additional compression when uploading data to buffer
+        :param staging: when set to True the API will use temporay secure cloud storage to buffer the data rather than a relational database (default is `True`)
+        :param encoding: decode results with homomorphic encryption
+        :return: JSON object with the following attributes, as applicable:
+                    `model_id` (UUID provided with initial request),
+                    `features` (table of feature importances),
+                    `confusion_matrix` (confusion matrix using test dataset),
+                    `stats` (error stats including accuracy, precision, recall, F1, AUC, Gini),
+                    `roc` (receiver operating characteristic curve)
         """
 
         # Encode data

@@ -91,8 +91,12 @@ class ClusterRunner(BaseRunner):
 
         :param df: dataframe containing dataset to be clustered. The data is homomorphically encrypted by the client prior to being transferred to the API buffer
         :param client_id: Short name for account being used. Used for reporting purposes only
-        :param idx_field: name of index field identifying unique record IDs in `df` for audit purposes
-        :param categorical_fields: array of field names identifying categorical fields in the dataframe `df`
+        :param idx_var: name of index field identifying unique record IDs in `df` for audit purposes
+        :param categorical_vars: array of field names identifying categorical fields in the dataframe `df`
+        :param numerical_vars: array of field names identifying categorical fields in the dataframe `df`
+        :param algorithm: can be any of the following: `pca-kmeans`, `incremental-pca-kmeans`, `pca-kmeans-simple`, `kmeans`,
+        `minibatch-kmeans`, `gaussian-mixture`, `birch`, `dbscan`, `optics`, `mean-shift`, `spectral-clustering`, `hierarchical-agglomerative`. Algorithms
+        are sourced from Scikit-Learn unless otherwise indicated.
         :param n_components: number of clustering components
         :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer
         :param cluster_batch_size: batch size for the purpose of clustering the data provided in the dataframe `df`

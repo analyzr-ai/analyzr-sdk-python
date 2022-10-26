@@ -93,16 +93,6 @@ class ClusterRunner(BaseRunner):
         :param client_id: Short name for account being used. Used for reporting purposes only
         :param idx_field: name of index field identifying unique record IDs in `df` for audit purposes name of index field identifying unique record IDs for audit purposes
         :param categorical_fields: array of field names identifying categorical fields in the dataframe `df`
-        :param algorithm: can be any of the following: 'pca-kmeans', 'incremental-pca-kmeans', 'pca-kmeans-simple', 'kmeans',
-        'minibatch-kmeans', 'gaussian-mixture', 'birch', 'dbscan', 'optics', 'mean-shift', 'spectral-clustering', 'hierarchical-agglomerative'. Algorithms
-        are sourced from Scikit-Learn unless otherwise indicated.
-        :param n_components: number of clustering components
-        :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer
-        :param cluster_batch_size: batch size for the purpose of clustering the data provided in the dataframe `df`
-        :param verbose: Set to true for verbose output
-        :param poll: keep polling API while the job is being run (default is `True`) keep polling API while the job is being run (default is `True`)
-        :param compressed: perform additional compression when uploading data to buffer
-        :param staging: when set to True the API will use temporay secure cloud storage to buffer the data rather than a relational database (default is `True`)
         """
         request_id = self._get_request_id()
         return self.__train(

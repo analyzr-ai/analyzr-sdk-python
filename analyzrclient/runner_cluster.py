@@ -30,10 +30,10 @@ class ClusterRunner(BaseRunner):
         :param client_id: Short name for account being used. Used for reporting purposes only.
         :param verbose: Set to true for verbose output
         :param data: if data is not None, cluster IDs will be appended and stats compiled
-        :return: * JSON object with the following attributes:
-            * status: can be Pending, Complete, or Failed
-            * request_id: UUID provided with initial request
-            * data: dataframe with clustering results, if applicable
+        :return: JSON object with the following attributes:
+                    `status` (can be Pending, Complete, or Failed),
+                    `request_id` (UUID provided with initial request),
+                    `data` (dataframe with clustering results, if applicable)
         """
         res1 = {}
         res1['request_id'] = request_id

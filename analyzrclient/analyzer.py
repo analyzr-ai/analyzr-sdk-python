@@ -39,7 +39,7 @@ class Analyzer:
         """
         Provide API version info
 
-        :return: * JSON object with API version and other metadata
+        :return: JSON object with API version and other metadata
         """
         return self.__client._post(self.__uri, {'command': 'version'})
 

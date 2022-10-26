@@ -99,7 +99,7 @@ class ClusterRunner(BaseRunner):
         :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer
         :param cluster_batch_size: batch size for the purpose of clustering the data provided in the dataframe `df`
         :param verbose: Set to true for verbose output
-        :param poll: keep polling API while the job is being run (default is `True`) keep polling API while the job is being run (default is `True`)
+        :param poll: keep polling API while the job is being run (default is `True`)
         :param compressed: perform additional compression when uploading data to buffer
         :param staging: when set to True the API will use temporay secure cloud storage to buffer the data rather than a relational database (default is `True`)
         :return: JSON object with the following attributes:
@@ -206,18 +206,23 @@ class ClusterRunner(BaseRunner):
             buffer_batch_size=1000, cluster_batch_size=None, timeout=600,
             verbose=False, compressed=False, staging=True):
         """
-        :param df:
-        :param model_id:
+        Assign cluster IDs to dataset using a pre-trained model
+
+        :param df: dataframe containing dataset to be clustered. The data is homomorphically encrypted by the client prior to being transferred to the API buffer
+        :param model_id: UUID for a specific model object
         :param client_id: Short name for account being used. Used for reporting purposes only
-        :param idx_field: name of index field identifying unique record IDs for audit purposes
-        :param categorical_fields:
-        :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer
-        :param cluster_batch_size:
+        :param idx_var: name of index field identifying unique record IDs in `df` for audit purposes
+        :param categorical_vars: array of field names identifying categorical fields in the dataframe `df`
+        :param numerical_vars: array of field names identifying categorical fields in the dataframe `df`
+        :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer
+        :param cluster_batch_size: batch size for the purpose of clustering the data provided in the dataframe `df`
+        :param timeout: client will keep polling API for a period of `timeout` seconds
         :param verbose: Set to true for verbose output
-        :param compressed:
-        :param staging:
-        :param timeout:
-        :return res:
+        :param compressed: perform additional compression when uploading data to buffer
+        :param staging: when set to True the API will use temporay secure cloud storage to buffer the data rather than a relational database (default is `True`)
+        :return: JSON object with the following attributes:
+                    `model_id` (UUID provided with initial request),
+                    `data2`: original dataset with cluster IDs appended
         """
         return self.__predict(
             df,

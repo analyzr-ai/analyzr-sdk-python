@@ -87,7 +87,7 @@ class ClusterRunner(BaseRunner):
             algorithm='pca-kmeans', n_components=5, buffer_batch_size=1000, cluster_batch_size=None,
             verbose=False, poll=True, compressed=False, staging=True):
         """
-        Run clustering algorithm on user-provided dataset.
+        Run clustering algorithm on user-provided dataset
 
         :param df: dataframe containing dataset to be clustered. The data is homomorphically encrypted by the client prior to being transferred to the API buffer
         :param client_id: Short name for account being used. Used for reporting purposes only

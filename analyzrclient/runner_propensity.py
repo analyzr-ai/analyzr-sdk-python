@@ -10,6 +10,8 @@ class PropensityRunner(BaseRunner):
     """
     Runs the propensity scoring pipeline
 
+    :param client: SAML SSO client object
+    :param base_url: Base URL for the Analyzr API tenant
     """
     def __init__(self, client=None, base_url=None):
         """
@@ -186,11 +188,18 @@ class PropensityRunner(BaseRunner):
 
     def check_status(self, model_id=None, client_id=None, verbose=False, encoding=True):
         """
-        :param request_id:
+        Check the status of a specific model run, and retrieve results if model run is complete
+
+        :param request_id: UUID for a specific model object
         :param client_id: Short name for account being used. Used for reporting purposes only
         :param verbose: Set to true for verbose output
-        :param encoding:
-        :return res1:
+        :param encoding: decode results with homomorphic encryption
+        :return: JSON object with the following attributes, as applicable:
+                    `status` (can be Pending, Complete, or Failed),
+                    `features` (table of feature importances),
+                    `confusion_matrix` (confusion matrix using test dataset),
+                    `stats` (error stats including accuracy, precision, recall, F1, AUC, Gini),
+                    `roc` (receiver operating characteristic curve)
         """
         res1 = {}
         res1['model_id'] = model_id

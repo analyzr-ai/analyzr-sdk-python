@@ -10,15 +10,15 @@ DEBUG = True
 
 class ClusterRunner(BaseRunner):
     """
-    Run the clustering pipeline
-
-    :param client: SAML SSO client object
-    :param base_url: Base URL for the Analyzr API tenant
     """
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
     
 >>>>>>> parent of 972b22b (Current update)
+=======
+
+>>>>>>> parent of 082ae91 (Revert "Current update")
     def __init__(self, client=None, base_url=None):
         """
         """

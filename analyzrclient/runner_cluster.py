@@ -13,7 +13,7 @@ class ClusterRunner(BaseRunner):
     Run the clustering pipeline
 
     :param client: SAML SSO client object
-    :base_url: Base URL for the Analyzr API tenant
+    :param base_url: Base URL for the Analyzr API tenant
     """
     def __init__(self, client=None, base_url=None):
         """

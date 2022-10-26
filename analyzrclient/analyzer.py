@@ -17,7 +17,7 @@ class Analyzer:
     by the client. For detailed methods, see the appropriate runner class.
 
     :param host: the FQDN for your API tenant
-    :verbose: Set to true for verbose output
+    :param verbose: Set to true for verbose output
     """
 
     def __init__(self, host=None, verbose=False):

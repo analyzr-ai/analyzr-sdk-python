@@ -27,8 +27,8 @@ class ClusterRunner(BaseRunner):
         Check the status of a specific model run
 
         :param request_id: UUID for a specific model object
-        :param client_id: Short name for account being used. Used for reporting purposes only.
-        :param verbose: Set to true for verbose output
+        :param client_id: Short name for account being used. Used for reporting purposes only Short name for account being used. Used for reporting purposes only
+        :param verbose: Set to true for verbose output Set to true for verbose output
         :param data: if data is not None, cluster IDs will be appended and stats compiled
         :return: JSON object with the following attributes:
                     `status` (can be Pending, Complete, or Failed),
@@ -58,7 +58,7 @@ class ClusterRunner(BaseRunner):
                 res1['data'] = df2
                 if data is not None:
                     if DEBUG: print('Compiling stats...')
-                    res3 = self.post_process_results(data, df2, keys['idx_var'], list(keys['xref'].keys()))
+                    res3 = self.__post_process_results(data, df2, keys['idx_var'], list(keys['xref'].keys()))
                     res3['status'] = res1['status']
                     res3['request_id'] = request_id
                     res1 = res3
@@ -67,7 +67,7 @@ class ClusterRunner(BaseRunner):
 
         return res1
 
-    def post_process_results(self, df, pc_id, idx_var, categorical_vars):
+    def __post_process_results(self, df, pc_id, idx_var, categorical_vars):
         """
         :param df:
         :param pc_id:
@@ -86,19 +86,28 @@ class ClusterRunner(BaseRunner):
             algorithm='pca-kmeans', n_components=5, buffer_batch_size=1000, cluster_batch_size=None,
             verbose=False, poll=True, compressed=False, staging=True):
         """
-        :param df:
-        :param client_id:
-        :param idx_field:
-        :param categorical_fields:
-        :param algorithm:
-        :param n_components:
-        :param buffer_batch_size:
-        :param cluster_batch_size:
-        :param verbose:
-        :param poll:
-        :param compressed:
-        :param staging:
-        :return res:
+        Run clustering algorithm on user-provided dataset.
+
+        :param df: dataframe containing dataset to be clustered. The data is homomorphically encrypted by the client prior to being transferred to the API buffer
+        :param client_id: Short name for account being used. Used for reporting purposes only
+        :param idx_field: name of index field identifying unique record IDs in `df` for audit purposes name of index field identifying unique record IDs for audit purposes
+        :param categorical_fields: array of field names identifying categorical fields in the dataframe `df`
+        :param algorithm: can be any of the following: 'pca-kmeans', 'incremental-pca-kmeans', 'pca-kmeans-simple', 'kmeans',
+        'minibatch-kmeans', 'gaussian-mixture', 'birch', 'dbscan', 'optics', 'mean-shift', 'spectral-clustering', 'hierarchical-agglomerative'. Algorithms
+        are sourced from Scikit-Learn unless otherwise indicated.
+        :param n_components: number of clustering components
+        :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer
+        :param cluster_batch_size: batch size for the purpose of clustering the data provided in the dataframe `df`
+        :param verbose: Set to true for verbose output
+        :param poll: keep polling API while the job is being run (default is `True`) keep polling API while the job is being run (default is `True`)
+        :param compressed: perform additional compression when uploading data to buffer
+        :param staging: when set to True the API will use temporay secure cloud storage to buffer the data rather than a relational database (default is `True`)
+        :return: JSON object with the following attributes:
+                    `request_id` (UUID provided with initial request),
+                    `data`: original dataset with cluster IDs appended
+                    `distances`: distance matrix showing inter-cluster distances (centroid to centroid)
+                    `stats`: count, frequency, and attribute averages by cluster ID
+                    
         """
         request_id = self._get_request_id()
         return self.__train(
@@ -148,20 +157,20 @@ class ClusterRunner(BaseRunner):
 
         #  Compile results
         if verbose and not poll: print('Clustering job started with polling disabled. You will need to request results for this request ID.')
-        res5 = self.post_process_results(df, df2, idx_var, categorical_vars) if poll else {}
+        res5 = self.__post_process_results(df, df2, idx_var, categorical_vars) if poll else {}
         res5['request_id'] = request_id # append request ID for future reference
         return res5
 
     def __cluster_train(self, request_id=None, client_id=None, idx_field=None, categorical_fields=[], algorithm='pca-kmeans', n_components=5, batch_size=None, verbose=False, staging=False):
         """
         :param request_id:
-        :param client_id:
-        :param idx_field:
+        :param client_id: Short name for account being used. Used for reporting purposes only
+        :param idx_field: name of index field identifying unique record IDs for audit purposes
         :param categorical_fields:
         :param algorithm:
         :param n_components:
         :param batch_size:
-        :param verbose:
+        :param verbose: Set to true for verbose output
         :param staging:
         :return res:
         """
@@ -200,12 +209,12 @@ class ClusterRunner(BaseRunner):
         """
         :param df:
         :param model_id:
-        :param client_id:
-        :param idx_field:
+        :param client_id: Short name for account being used. Used for reporting purposes only
+        :param idx_field: name of index field identifying unique record IDs for audit purposes
         :param categorical_fields:
-        :param buffer_batch_size:
+        :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer
         :param cluster_batch_size:
-        :param verbose:
+        :param verbose: Set to true for verbose output
         :param compressed:
         :param staging:
         :param timeout:
@@ -294,12 +303,12 @@ class ClusterRunner(BaseRunner):
     def __cluster_predict(self, request_id=None, model_id=None, client_id=None, idx_field=None, categorical_fields=[], batch_size=None, verbose=False, staging=False):
         """
         :param request_id:
-        :param client_id:
+        :param client_id: Short name for account being used. Used for reporting purposes only
         :param model_id:
-        :param idx_field:
+        :param idx_field: name of index field identifying unique record IDs for audit purposes
         :param categorical_fields:
         :param batch_size:
-        :param verbose:
+        :param verbose: Set to true for verbose output
         :param staging:
         :return res:
         """

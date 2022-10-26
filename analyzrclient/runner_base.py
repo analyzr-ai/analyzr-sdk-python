@@ -34,9 +34,9 @@ class BaseRunner:
         """
         :param df:
         :param batch_size:
-        :param client_id:
+        :param client_id: Short name for account being used. Used for reporting purposes only
         :param request_id:
-        :param verbose:
+        :param verbose: Set to true for verbose output
         :param compressed:
         :param staging:
         :return res:
@@ -68,9 +68,9 @@ class BaseRunner:
         :param batch:
         :param idx:
         :param n:
-        :param client_id:
+        :param client_id: Short name for account being used. Used for reporting purposes only
         :param request_id:
-        :param verbose:
+        :param verbose: Set to true for verbose output
         :param compressed:
         :return success:
         """
@@ -99,9 +99,9 @@ class BaseRunner:
 
     def _buffer_read(self, client_id=None, request_id=None, dataframe_name='df', verbose=False, raw=False, staging=False):
         """
-        :param client_id:
+        :param client_id: Short name for account being used. Used for reporting purposes only
         :param request_id:
-        :param verbose:
+        :param verbose: Set to true for verbose output
         :param raw:
         :param staging:
         :return df:
@@ -119,9 +119,9 @@ class BaseRunner:
 
     def __read(self, client_id=None, request_id=None, dataframe_name='df', verbose=False, staging=False):
         """
-        :param client_id:
+        :param client_id: Short name for account being used. Used for reporting purposes only
         :param request_id:
-        :param verbose:
+        :param verbose: Set to true for verbose output
         :param staging:
         :return res:
         """
@@ -136,8 +136,8 @@ class BaseRunner:
 
     def queue_purge(self, client_id=None, verbose=False):
         """
-        :param client_id:
-        :param verbose:
+        :param client_id: Short name for account being used. Used for reporting purposes only
+        :param verbose: Set to true for verbose output
         :return res:
         """
         if verbose: print('Purging queue...')
@@ -151,8 +151,8 @@ class BaseRunner:
 
     def buffer_purge(self, client_id=None, verbose=False):
         """
-        :param client_id:
-        :param verbose:
+        :param client_id: Short name for account being used. Used for reporting purposes only
+        :param verbose: Set to true for verbose output
         :return res:
         """
         if verbose: print('Purging buffer...')
@@ -166,8 +166,8 @@ class BaseRunner:
 
     def buffer_usage(self, client_id=None, verbose=False):
         """
-        :param client_id:
-        :param verbose:
+        :param client_id: Short name for account being used. Used for reporting purposes only
+        :param verbose: Set to true for verbose output
         :return res:
         """
         if verbose: print('Checking buffer usage...')
@@ -181,9 +181,9 @@ class BaseRunner:
 
     def _buffer_clear(self, client_id=None, request_id=None, verbose=False):
         """
-        :param client_id:
+        :param client_id: Short name for account being used. Used for reporting purposes only
         :param request_id:
-        :param verbose:
+        :param verbose: Set to true for verbose output
         :param staging:
         :return res:
         """
@@ -207,7 +207,7 @@ class BaseRunner:
         :param numerical_vars:
         :param record_id_var:
         :param encode_field_names:
-        :param verbose:
+        :param verbose: Set to true for verbose output
         :return df2:
         :return xref: cross-reference dictionary for categorical variables
         :return zref: cross-reference dictionary for numerical variables
@@ -235,7 +235,7 @@ class BaseRunner:
         :param numerical_vars:
         :param record_id_var:
         :param encode_field_names:
-        :param verbose:
+        :param verbose: Set to true for verbose output
         :return df2:
         :return xref: cross-reference dictionary for categorical variables
         :return zref: cross-reference dictionary for numerical variables
@@ -295,7 +295,7 @@ class BaseRunner:
         :param numerical_vars:
         :param record_id_var:
         :param encode_field_names:
-        :param verbose:
+        :param verbose: Set to true for verbose output
         :return df2:
         :return xref: cross-reference dictionary for categorical variables
         :return zref: cross-reference dictionary for numerical variables
@@ -360,7 +360,7 @@ class BaseRunner:
         :param zref: cross-reference dictionary for numerical variables
         :param rref: cross-reference dictionary for the record ID variable
         :param fref: cross-reference dictionary for field names
-        :param verbose:
+        :param verbose: Set to true for verbose output
         :return df2:
         """
         if df is None or df.empty: return df
@@ -403,7 +403,7 @@ class BaseRunner:
         :param payload:
         :param timeout:
         :param step:
-        :param verbose:
+        :param verbose: Set to true for verbose output
         :return res:
         """
         counter = 0
@@ -424,8 +424,8 @@ class BaseRunner:
     def _status(self, request_id=None, client_id=None, verbose=False):
         """
         :param request_id:
-        :param client_id:
-        :param verbose:
+        :param client_id: Short name for account being used. Used for reporting purposes only
+        :param verbose: Set to true for verbose output
         :return res:
         """
         res = {}
@@ -449,7 +449,7 @@ class BaseRunner:
         """
         :param model_id:
         :param keys:
-        :param verbose:
+        :param verbose: Set to true for verbose output
         :return:
         """
         if verbose: print('Saving encoding keys locally...')
@@ -463,7 +463,7 @@ class BaseRunner:
     def _keys_load(self, model_id=None, verbose=False):
         """
         :param model_id:
-        :param verbose:
+        :param verbose: Set to true for verbose output
         :return keys:
         """
         if verbose: print('Loading encoding keys...')

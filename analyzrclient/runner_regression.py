@@ -39,12 +39,12 @@ class RegressionRunner(BaseRunner):
         :param df:
         :param model_id:
         :param request_id:
-        :param client_id:
+        :param client_id: Short name for account being used. Used for reporting purposes only
         :param idx_var:
         :param categorical_vars:
         :param numerical_vars:
-        :param buffer_batch_size:
-        :param verbose:
+        :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer
+        :param verbose: Set to true for verbose output
         :param compressed:
         :param staging:
         :return res5:
@@ -90,10 +90,10 @@ class RegressionRunner(BaseRunner):
         """
         :param request_id:
         :param model_id:
-        :param client_id:
-        :param idx_field:
+        :param client_id: Short name for account being used. Used for reporting purposes only
+        :param idx_field: name of index field identifying unique record IDs for audit purposes
         :param categorical_fields:
-        :param verbose:
+        :param verbose: Set to true for verbose output
         :param staging:
         :return:
         """
@@ -112,8 +112,8 @@ class RegressionRunner(BaseRunner):
     def __retrieve_predict_results(self, request_id=None, client_id=None, rref={}, verbose=False):
         """
         :param request_id:
-        :param client_id:
-        :param verbose:
+        :param client_id: Short name for account being used. Used for reporting purposes only
+        :param verbose: Set to true for verbose output
         :return data2:
         """
         data2 = self._buffer_read(request_id=request_id, client_id=client_id, dataframe_name='data2', verbose=verbose)
@@ -122,8 +122,8 @@ class RegressionRunner(BaseRunner):
     def check_status(self, model_id=None, client_id=None, verbose=False):
         """
         :param request_id:
-        :param client_id:
-        :param verbose:
+        :param client_id: Short name for account being used. Used for reporting purposes only
+        :param verbose: Set to true for verbose output
         :return res1:
         """
         res1 = {}
@@ -155,15 +155,15 @@ class RegressionRunner(BaseRunner):
                 verbose=False, timeout=600, poll=True, step=2, compressed=False, staging=True):
         """
         :param df:
-        :param client_id:
+        :param client_id: Short name for account being used. Used for reporting purposes only
         :param idx_var:
         :param outcome_var:
         :param categorical_vars:
         :param numerical_vars:
         :param algorithm:
         :param train_size:
-        :param buffer_batch_size:
-        :param verbose:
+        :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer
+        :param verbose: Set to true for verbose output
         :param compressed:
         :return res5:
         """
@@ -215,12 +215,12 @@ class RegressionRunner(BaseRunner):
                 verbose=False, staging=False):
         """
         :param request_id:
-        :param client_id:
-        :param idx_field:
+        :param client_id: Short name for account being used. Used for reporting purposes only
+        :param idx_field: name of index field identifying unique record IDs for audit purposes
         :param outcome_var:
         :param categorical_fields:
         :param algorithm:
-        :param verbose:
+        :param verbose: Set to true for verbose output
         :param staging:
         :return:
         """
@@ -242,9 +242,9 @@ class RegressionRunner(BaseRunner):
     def __retrieve_train_results(self, request_id=None, client_id=None, fref={}, verbose=False):
         """
         :param request_id:
-        :param client_id:
+        :param client_id: Short name for account being used. Used for reporting purposes only
         :param fref:
-        :param verbose:
+        :param verbose: Set to true for verbose output
         :return features:
         :return stats:
         """

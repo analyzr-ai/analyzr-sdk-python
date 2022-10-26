@@ -39,7 +39,7 @@ class SamlSsoAuthClient:
         Initialize API client object
 
         :param host: FQDN for the API including schema, e.g. https://acme.api.g2m.ai
-        :param verbose:
+        :param verbose: Set to true for verbose output
         :return:
         """
         if verbose: log.info("Starting: Init Client")
@@ -117,7 +117,7 @@ class SamlSsoAuthClient:
         The client calls the API at <host> and handles the SAML SSO flow
 
         :param attempts: used to limit max muber of attempts when current login fails
-        :param verbose:
+        :param verbose: Set to true for verbose output
         :return status_code:
         """
         if verbose: log.info("Starting: Login")
@@ -159,7 +159,7 @@ class SamlSsoAuthClient:
         """
         Log the client out
 
-        :param verbose:
+        :param verbose: Set to true for verbose output
         :return:
         """
         if verbose: log.info("Starting: Logout")

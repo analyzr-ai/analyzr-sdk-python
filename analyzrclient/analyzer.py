@@ -47,7 +47,7 @@ class Analyzer:
         """
         Log in to Analyzr API
 
-        :param verbose: Set to True for verbose screen output
+        :param verbose: Set to true for verbose output Set to True for verbose screen output
         :rtype: None
         """
         status_code = self.__client._login(verbose=verbose)
@@ -62,7 +62,7 @@ class Analyzer:
         """
         Log out of Analyzr API
 
-        :param verbose: Set to True for verbose screen output
+        :param verbose: Set to true for verbose output Set to True for verbose screen output
         :rtype: None
         """
         return self.__client._logout(verbose=verbose)

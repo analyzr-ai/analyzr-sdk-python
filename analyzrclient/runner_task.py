@@ -36,7 +36,7 @@ class TaskRunner(BaseRunner):
         Returns test task output
 
         :param type: can be 'simple' (default) or 'storage'
-        :param verbose:
+        :param verbose: Set to true for verbose output
         :param compressed:
         :return res:
         """
@@ -47,9 +47,9 @@ class TaskRunner(BaseRunner):
         """
         :param df:
         :param request_id:
-        :param client_id:
+        :param client_id: Short name for account being used. Used for reporting purposes only
         :param type: can be 'simple' (default), 'storage', or 'bz2'
-        :param verbose:
+        :param verbose: Set to true for verbose output
         :param comnpressed:
         :return res:
         """

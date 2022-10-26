@@ -10,7 +10,6 @@ DEBUG = True
 
 class ClusterRunner(BaseRunner):
     """
-    """
     Run the clustering pipeline
 
     :param client: SAML SSO client object

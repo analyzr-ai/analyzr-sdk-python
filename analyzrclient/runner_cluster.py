@@ -10,7 +10,7 @@ DEBUG = True
 
 class ClusterRunner(BaseRunner):
     """
-    Runs the clustering pipeline
+    Run the clustering pipeline
 
     :param client: SAML SSO client object
     :base_url: Base URL for the Analyzr API tenant
@@ -24,11 +24,16 @@ class ClusterRunner(BaseRunner):
 
     def check_status(self, request_id=None, client_id=None, verbose=False, data=None):
         """
-        :param request_id:
-        :param client_id:
-        :param verbose:
-        :param data: if data is not None, cluster IDs wil be appended and stats compiled
-        :return res1:
+        Check the status of a specific model run
+
+        :param request_id: UUID for a specific model object
+        :param client_id: Short name for account being used. Used for reporting purposes only.
+        :param verbose: Set to true for verbose output
+        :param data: if data is not None, cluster IDs will be appended and stats compiled
+        :return: JSON object with the followng attributes:
+            status: can be Pending, Complete, or Failed
+            request_id: UUID provided with initial request
+            data: dataframe with clustering results, if applicable
         """
         res1 = {}
         res1['request_id'] = request_id

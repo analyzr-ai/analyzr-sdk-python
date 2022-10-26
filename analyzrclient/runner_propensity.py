@@ -25,19 +25,26 @@ class PropensityRunner(BaseRunner):
         buffer_batch_size=1000, api_batch_size=2000, verbose=False, timeout=600, step=2,
         compressed=False, staging=True, encoding=True):
         """
-        :param df:
-        :param model_id:
-        :param request_id:
+        Predict probabilities of outcome (propensities) for user-specified dataset using a pre-trained model
+
+        :param df: dataframe containing dataset to be used for training. The data is homomorphically encrypted by the client prior to being transferred to the API buffer when `encoding` is set to `True`
+        :param model_id: UUID for a specific model object
         :param client_id: Short name for account being used. Used for reporting purposes only
-        :param idx_var:
-        :param categorical_vars:
-        :param numerical_vars:
+        :param idx_var: name of index field identifying unique record IDs in `df` for audit purposes
+        :param categorical_vars: array of field names identifying categorical fields in the dataframe `df`
+        :param numerical_vars: array of field names identifying categorical fields in the dataframe `df`
+        :param bool_vars: array of field names identifying boolean fields in the dataframe `df`
         :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer
+        :param api_batch_size: batch size for the purpose of processing data in the API
         :param verbose: Set to true for verbose output
-        :param compressed:
-        :param staging:
-        :param encoding:
-        :return res5:
+        :param timeout: client will keep polling API for a period of `timeout` seconds
+        :param step: polling interval, in seconds
+        :param compressed: perform additional compression when uploading data to buffer
+        :param staging: when set to True the API will use temporay secure cloud storage to buffer the data rather than a relational database (default is `True`)
+        :param encoding: decode results with homomorphic encryption
+        :return: JSON object with the following attributes:
+                    `model_id` (UUID provided with initial request),
+                    `data2`: original dataset with cluster IDs appended
         """
         res = {}
         res['model_id'] = model_id
@@ -245,7 +252,7 @@ class PropensityRunner(BaseRunner):
         :param bool_vars: array of field names identifying boolean fields in the dataframe `df`
         :param algorithm: can be any of the following: `random-forest-classifier`, `gradient-boosting-classifier`, `xgboost-classifier`, `ada-boost-classifier`, `extra-trees-classifier`, `logistic-regression-classifier`. Algorithms are sourced from Scikit-Learn unless otherwise indicated.
         :param train_size: Share of training dataset assigned to training vs. testing, e.g. if train_size is set to 0.8 80% of the dataset will be assigned to training and 20% will be randomly set aside for testing and validation
-        :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer
+        :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer
         :param verbose: Set to true for verbose output
         :param timeout: client will keep polling API for a period of `timeout` seconds
         :param step: polling interval, in seconds

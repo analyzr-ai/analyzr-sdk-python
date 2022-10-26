@@ -25,6 +25,16 @@ class ClusterRunner(BaseRunner):
 
     def check_status(self, request_id=None, client_id=None, verbose=False, data=None):
         """
+        Check the status of a specific model run
+
+        :param request_id: UUID for a specific model object
+        :param client_id: Short name for account being used. Used for reporting purposes only Short name for account being used. Used for reporting purposes only
+        :param verbose: Set to true for verbose output Set to true for verbose output
+        :param data: if data is not None, cluster IDs will be appended and stats compiled
+        :return: JSON object with the following attributes:
+                    `status` (can be Pending, Complete, or Failed),
+                    `request_id` (UUID provided with initial request),
+                    `data` (dataframe with clustering results, if applicable)
         """
         res1 = {}
         res1['request_id'] = request_id

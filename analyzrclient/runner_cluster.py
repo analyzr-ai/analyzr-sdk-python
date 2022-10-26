@@ -11,7 +11,6 @@ DEBUG = True
 class ClusterRunner(BaseRunner):
     """
     Run the clustering pipeline
-
     """
 
     def __init__(self, client=None, base_url=None):
@@ -23,16 +22,6 @@ class ClusterRunner(BaseRunner):
 
     def check_status(self, request_id=None, client_id=None, verbose=False, data=None):
         """
-        Check the status of a specific model run
-
-        :param request_id: UUID for a specific model object
-        :param client_id: Short name for account being used. Used for reporting purposes only Short name for account being used. Used for reporting purposes only
-        :param verbose: Set to true for verbose output Set to true for verbose output
-        :param data: if data is not None, cluster IDs will be appended and stats compiled
-        :return: JSON object with the following attributes:
-                    `status` (can be Pending, Complete, or Failed),
-                    `request_id` (UUID provided with initial request),
-                    `data` (dataframe with clustering results, if applicable)
         """
         res1 = {}
         res1['request_id'] = request_id
@@ -86,27 +75,6 @@ class ClusterRunner(BaseRunner):
             verbose=False, poll=True, compressed=False, staging=True):
         """
         Run clustering algorithm on user-provided dataset.
-
-        :param df: dataframe containing dataset to be clustered. The data is homomorphically encrypted by the client prior to being transferred to the API buffer
-        :param client_id: Short name for account being used. Used for reporting purposes only
-        :param idx_field: name of index field identifying unique record IDs in `df` for audit purposes name of index field identifying unique record IDs for audit purposes
-        :param categorical_fields: array of field names identifying categorical fields in the dataframe `df`
-        :param algorithm: can be any of the following: 'pca-kmeans', 'incremental-pca-kmeans', 'pca-kmeans-simple', 'kmeans',
-        'minibatch-kmeans', 'gaussian-mixture', 'birch', 'dbscan', 'optics', 'mean-shift', 'spectral-clustering', 'hierarchical-agglomerative'. Algorithms
-        are sourced from Scikit-Learn unless otherwise indicated.
-        :param n_components: number of clustering components
-        :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer
-        :param cluster_batch_size: batch size for the purpose of clustering the data provided in the dataframe `df`
-        :param verbose: Set to true for verbose output
-        :param poll: keep polling API while the job is being run (default is `True`) keep polling API while the job is being run (default is `True`)
-        :param compressed: perform additional compression when uploading data to buffer
-        :param staging: when set to True the API will use temporay secure cloud storage to buffer the data rather than a relational database (default is `True`)
-        :return: JSON object with the following attributes:
-                    `request_id` (UUID provided with initial request),
-                    `data`: original dataset with cluster IDs appended
-                    `distances`: distance matrix showing inter-cluster distances (centroid to centroid)
-                    `stats`: count, frequency, and attribute averages by cluster ID
-
         """
         request_id = self._get_request_id()
         return self.__train(

@@ -10,24 +10,13 @@ DEBUG = True
 
 class ClusterRunner(BaseRunner):
     """
-<<<<<<< HEAD
     """
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-    
->>>>>>> parent of 972b22b (Current update)
-=======
-
->>>>>>> parent of 082ae91 (Revert "Current update")
-=======
     Run the clustering pipeline
 
     :param client: SAML SSO client object
     :param base_url: Base URL for the Analyzr API tenant
     """
-    
->>>>>>> parent of 972b22b (Current update)
+
     def __init__(self, client=None, base_url=None):
         """
         """
@@ -120,7 +109,7 @@ class ClusterRunner(BaseRunner):
                     `data`: original dataset with cluster IDs appended
                     `distances`: distance matrix showing inter-cluster distances (centroid to centroid)
                     `stats`: count, frequency, and attribute averages by cluster ID
-                    
+
         """
         request_id = self._get_request_id()
         return self.__train(

@@ -94,9 +94,7 @@ class ClusterRunner(BaseRunner):
         :param idx_var: name of index field identifying unique record IDs in `df` for audit purposes
         :param categorical_vars: array of field names identifying categorical fields in the dataframe `df`
         :param numerical_vars: array of field names identifying categorical fields in the dataframe `df`
-        :param algorithm: can be any of the following: `pca-kmeans`, `incremental-pca-kmeans`, `pca-kmeans-simple`, `kmeans`,
-        `minibatch-kmeans`, `gaussian-mixture`, `birch`, `dbscan`, `optics`, `mean-shift`, `spectral-clustering`, `hierarchical-agglomerative`. Algorithms
-        are sourced from Scikit-Learn unless otherwise indicated.
+        :param algorithm: can be any of the following: `pca-kmeans`. Algorithms are sourced from Scikit-Learn unless otherwise indicated.
         :param n_components: number of clustering components
         :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer
         :param cluster_batch_size: batch size for the purpose of clustering the data provided in the dataframe `df`

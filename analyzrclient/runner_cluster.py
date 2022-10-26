@@ -58,7 +58,7 @@ class ClusterRunner(BaseRunner):
                 res1['data'] = df2
                 if data is not None:
                     if DEBUG: print('Compiling stats...')
-                    res3 = self.post_process_results(data, df2, keys['idx_var'], list(keys['xref'].keys()))
+                    res3 = self.__post_process_results(data, df2, keys['idx_var'], list(keys['xref'].keys()))
                     res3['status'] = res1['status']
                     res3['request_id'] = request_id
                     res1 = res3
@@ -67,7 +67,7 @@ class ClusterRunner(BaseRunner):
 
         return res1
 
-    def post_process_results(self, df, pc_id, idx_var, categorical_vars):
+    def __post_process_results(self, df, pc_id, idx_var, categorical_vars):
         """
         :param df:
         :param pc_id:
@@ -148,7 +148,7 @@ class ClusterRunner(BaseRunner):
 
         #  Compile results
         if verbose and not poll: print('Clustering job started with polling disabled. You will need to request results for this request ID.')
-        res5 = self.post_process_results(df, df2, idx_var, categorical_vars) if poll else {}
+        res5 = self.__post_process_results(df, df2, idx_var, categorical_vars) if poll else {}
         res5['request_id'] = request_id # append request ID for future reference
         return res5
 

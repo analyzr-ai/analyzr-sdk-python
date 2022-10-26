@@ -8,7 +8,7 @@ from .utils import *
 
 class PropensityRunner(BaseRunner):
     """
-    Runs the propensity scoring pipeline
+    Run the propensity scoring pipeline
 
     :param client: SAML SSO client object
     :param base_url: Base URL for the Analyzr API tenant

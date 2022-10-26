@@ -1,16 +1,3 @@
-"""
-Copyright (c) 2020-2021 Go2Market Insights, LLC
-All rights reserved.
-https://g2m.ai
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions
-of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
-THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-"""
 import os, sys, time, json
 import pandas as pd
 from copy import deepcopy
@@ -21,8 +8,10 @@ from .utils import *
 
 class RegressionRunner(BaseRunner):
     """
-    Runs the regression pipeline
+    Run the regression pipeline
 
+    :param client: SAML SSO client object
+    :param base_url: Base URL for the Analyzr API tenant
     """
     def __init__(self, client=None, base_url=None):
         """
@@ -36,18 +25,24 @@ class RegressionRunner(BaseRunner):
         buffer_batch_size=1000, verbose=False, timeout=600, step=2,
         compressed=False, staging=True):
         """
-        :param df:
-        :param model_id:
-        :param request_id:
+        Predict outcomes for user-specified dataset using a pre-trained model
+
+        :param df: dataframe containing dataset to be used for training. The data is homomorphically encrypted by the client prior to being transferred to the API buffer when `encoding` is set to `True`
+        :param model_id: UUID for a specific model object
         :param client_id: Short name for account being used. Used for reporting purposes only
-        :param idx_var:
-        :param categorical_vars:
-        :param numerical_vars:
+        :param idx_var: name of index field identifying unique record IDs in `df` for audit purposes
+        :param categorical_vars: array of field names identifying categorical fields in the dataframe `df`
+        :param numerical_vars: array of field names identifying categorical fields in the dataframe `df`
+        :param bool_vars: array of field names identifying boolean fields in the dataframe `df`
         :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer
         :param verbose: Set to true for verbose output
-        :param compressed:
-        :param staging:
-        :return res5:
+        :param timeout: client will keep polling API for a period of `timeout` seconds
+        :param step: polling interval, in seconds
+        :param compressed: perform additional compression when uploading data to buffer
+        :param staging: when set to True the API will use temporay secure cloud storage to buffer the data rather than a relational database (default is `True`)
+        :return: JSON object with the following attributes:
+                    `model_id` (UUID provided with initial request),
+                    `data2`: original dataset with cluster IDs appended
         """
 
         # Load encoding keys

@@ -14,6 +14,7 @@ class ClusterRunner(BaseRunner):
 
     :param client: SAML SSO client object
     :param base_url: Base URL for the Analyzr API tenant
+    
     """
 
     def __init__(self, client=None, base_url=None):

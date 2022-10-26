@@ -25,7 +25,7 @@ class ClusterRunner(BaseRunner):
 
     def check_status(self, request_id=None, client_id=None, verbose=False, data=None):
         """
-        Check the status of a specific model run
+        Check the status of a specific model run. Data is homomorphically encoded by default
 
         :param request_id: UUID for a specific model object
         :param client_id: Short name for account being used. Used for reporting purposes only

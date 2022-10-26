@@ -154,18 +154,28 @@ class RegressionRunner(BaseRunner):
                 algorithm=REGRESSION_DEFAULT_ALGO, train_size=0.5, buffer_batch_size=1000,
                 verbose=False, timeout=600, poll=True, step=2, compressed=False, staging=True):
         """
-        :param df:
+        Train regression model on user-provided dataset
+
+        :param df: dataframe containing dataset to be used for training. The data is homomorphically encrypted by the client prior to being transferred to the API by default
         :param client_id: Short name for account being used. Used for reporting purposes only
-        :param idx_var:
-        :param outcome_var:
-        :param categorical_vars:
-        :param numerical_vars:
-        :param algorithm:
-        :param train_size:
+        :param idx_var: name of index field identifying unique record IDs in `df` for audit purposes
+        :param outcome_var: name of dependent variable, usually a boolean variable set to `0` or `1`
+        :param categorical_vars: array of field names identifying categorical fields in the dataframe `df`
+        :param numerical_vars: array of field names identifying categorical fields in the dataframe `df`
+        :param bool_vars: array of field names identifying boolean fields in the dataframe `df`
+        :param algorithm: can be any of the following: `random-forest-regression`, `gradient-boosting-regression`, `xgboost-regression`, `linear-regression-classifier`. Algorithms are sourced from Scikit-Learn unless otherwise indicated.
+        :param train_size: Share of training dataset assigned to training vs. testing, e.g. if train_size is set to 0.8 80% of the dataset will be assigned to training and 20% will be randomly set aside for testing and validation
         :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer
         :param verbose: Set to true for verbose output
-        :param compressed:
-        :return res5:
+        :param timeout: client will keep polling API for a period of `timeout` seconds
+        :param poll: keep polling API while the job is being run (default is `True`)
+        :param step: polling interval, in seconds
+        :param compressed: perform additional compression when uploading data to buffer
+        :param staging: when set to True the API will use temporay secure cloud storage to buffer the data rather than a relational database (default is `True`)
+        :return: JSON object with the following attributes, as applicable:
+                    `model_id` (UUID provided with initial request),
+                    `features` (table of feature importances),
+                    `stats` (error stats including accuracy, precision, recall, F1, AUC, Gini),
         """
 
         # Encode data

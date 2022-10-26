@@ -1,7 +1,7 @@
 # Python SDK for the Analyzr API
 
 ## Overview
-This Python client will give you access to the Analyzr API from any machine. See files in the `examples` folder
+This Python client will give you access to the Analyzr API. See files in the `examples` folder
 for examples showing how to use the client. Note that a `client_id` should always be provided when querying the API; it is used for reporting purposes.
 * For general information please see https://analyzr.ai.
 * For help and support see https://support.analyzr.ai.

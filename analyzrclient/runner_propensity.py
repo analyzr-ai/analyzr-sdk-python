@@ -41,7 +41,7 @@ class PropensityRunner(BaseRunner):
         :param step: polling interval, in seconds
         :param compressed: perform additional compression when uploading data to buffer
         :param staging: when set to True the API will use temporay secure cloud storage to buffer the data rather than a relational database (default is `True`)
-        :param encoding: decode results with homomorphic encryption
+        :param encoding: encode and decode data with homomorphic encryption
         :return: JSON object with the following attributes:
                     `model_id` (UUID provided with initial request),
                     `data2`: original dataset with cluster IDs appended
@@ -260,7 +260,7 @@ class PropensityRunner(BaseRunner):
         :param smote: apply SMOTE pre-processing
         :param compressed: perform additional compression when uploading data to buffer
         :param staging: when set to True the API will use temporay secure cloud storage to buffer the data rather than a relational database (default is `True`)
-        :param encoding: decode results with homomorphic encryption
+        :param encoding: encode and decode data with homomorphic encryption
         :return: JSON object with the following attributes, as applicable:
                     `model_id` (UUID provided with initial request),
                     `features` (table of feature importances),

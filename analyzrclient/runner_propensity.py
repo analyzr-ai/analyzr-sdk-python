@@ -28,7 +28,7 @@ class PropensityRunner(BaseRunner):
         Predict probabilities of outcome (propensities) for user-specified dataset using a pre-trained model
 
         :param df: dataframe containing dataset to be used for training. The data is homomorphically encrypted by the client prior to being transferred to the API buffer when `encoding` is set to `True`
-        :param model_id: UUID for a specific model object
+        :param model_id: UUID for a specific model object. Refers to a model that was previously trained
         :param client_id: Short name for account being used. Used for reporting purposes only
         :param idx_var: name of index field identifying unique record IDs in `df` for audit purposes
         :param categorical_vars: array of field names identifying categorical fields in the dataframe `df`
@@ -197,7 +197,7 @@ class PropensityRunner(BaseRunner):
         """
         Check the status of a specific model run, and retrieve results if model run is complete
 
-        :param request_id: UUID for a specific model object
+        :param model_id: UUID for a specific model object
         :param client_id: Short name for account being used. Used for reporting purposes only
         :param verbose: Set to true for verbose output
         :param encoding: decode results with homomorphic encryption

@@ -25,10 +25,10 @@ class RegressionRunner(BaseRunner):
         buffer_batch_size=1000, verbose=False, timeout=600, step=2,
         compressed=False, staging=True):
         """
-        Predict outcomes for user-specified dataset using a pre-trained model
+        Predict outcomes for user-specified dataset using a pre-trained model. The data is homomorphically encrypted by the client prior to being transferred to the API buffer by default
 
-        :param df: dataframe containing dataset to be used for training. The data is homomorphically encrypted by the client prior to being transferred to the API buffer when `encoding` is set to `True`
-        :param model_id: UUID for a specific model object
+        :param df: dataframe containing dataset to be used for training.
+        :param model_id: UUID for a specific model object. Refers to a model that was previously trained
         :param client_id: Short name for account being used. Used for reporting purposes only
         :param idx_var: name of index field identifying unique record IDs in `df` for audit purposes
         :param categorical_vars: array of field names identifying categorical fields in the dataframe `df`
@@ -116,10 +116,15 @@ class RegressionRunner(BaseRunner):
 
     def check_status(self, model_id=None, client_id=None, verbose=False):
         """
-        :param request_id:
+        Check the status of a specific model run, and retrieve results if model run is complete. Data is homomorphically encoded by default
+
+        :param model_id: UUID for a specific model object
         :param client_id: Short name for account being used. Used for reporting purposes only
         :param verbose: Set to true for verbose output
-        :return res1:
+        :return: JSON object with the following attributes, as applicable:
+                    `status` (can be Pending, Complete, or Failed),
+                    `features` (table of feature importances),
+                    `stats` (error stats including R2, p, RMSE, MSE, MAE, MAPE),
         """
         res1 = {}
         res1['model_id'] = model_id

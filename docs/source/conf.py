@@ -61,4 +61,4 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = []
 
 #
-autodoc_mock_imports = ['pandas']
+autodoc_mock_imports = ['pandas', 'numpy']

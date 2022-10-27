@@ -237,9 +237,11 @@ class PropensityRunner(BaseRunner):
         return res1
 
     def train(self, df, client_id=None,
-                idx_var=None, outcome_var=None, categorical_vars=[], numerical_vars=[], bool_vars=[],
-                algorithm='random-forest-classifier', train_size=0.5, buffer_batch_size=1000,
-                verbose=False, timeout=600, step=2, poll=True, smote=False, compressed=False, staging=True, encoding=True):
+            idx_var=None, outcome_var=None, categorical_vars=[], numerical_vars=[], bool_vars=[],
+            algorithm='random-forest-classifier', train_size=0.5, buffer_batch_size=1000,
+            verbose=False, timeout=600, step=2, poll=True, smote=False,
+            param_grid=None, scoring=None, n_splits=None,
+            compressed=False, staging=True, encoding=True):
         """
         Train propensity model on user-provided dataset
 
@@ -258,6 +260,9 @@ class PropensityRunner(BaseRunner):
         :param step: polling interval, in seconds
         :param poll: keep polling API while the job is being run (default is `True`)
         :param smote: apply SMOTE pre-processing
+        :param param_grid: TBD
+        :param scoring: TBD
+        :param n_splits: TBD
         :param compressed: perform additional compression when uploading data to buffer
         :param staging: when set to True the API will use temporay secure cloud storage to buffer the data rather than a relational database (default is `True`)
         :param encoding: encode and decode data with homomorphic encryption
@@ -294,6 +299,9 @@ class PropensityRunner(BaseRunner):
                 smote=smote,
                 verbose=verbose,
                 staging=staging,
+                param_grid=param_grid,
+                scoring=scoring,
+                n_splits=n_splits,
             )
             if poll:
                 res2 = self._poll(payload={'request_id': res['request_id'], 'client_id': client_id, 'command': 'task-status'}, timeout=timeout, step=step, verbose=verbose)
@@ -326,6 +334,7 @@ class PropensityRunner(BaseRunner):
     def __train(self, request_id=None, client_id=None,
                 idx_field=None, outcome_var=None, categorical_fields=[],
                 algorithm='random-forest-classifier', train_size=0.5, smote=False,
+                param_grid=None, scoring=None, n_splits=None,
                 verbose=False, staging=False):
         """
         :param request_id:
@@ -338,6 +347,9 @@ class PropensityRunner(BaseRunner):
         :param smote:
         :param verbose: Set to true for verbose output
         :param staging:
+        :param param_grid:
+        :param scoring:
+        :param n_splits:
         :return:
         """
         if verbose: print('Training propensity model using data in buffer...')
@@ -352,6 +364,9 @@ class PropensityRunner(BaseRunner):
             'outcome_var': outcome_var,
             'categorical_fields': categorical_fields,
             'staging': staging,
+            'param_grid': param_grid,
+            'scoring': scoring,
+            'n_splits': n_splits,
         })
         if verbose: print('Training request posted.')
         return res

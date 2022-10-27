@@ -152,7 +152,8 @@ class RegressionRunner(BaseRunner):
     def train(self, df, client_id=None,
                 idx_var=None, outcome_var=None, categorical_vars=[], numerical_vars=[], bool_vars=[],
                 algorithm=REGRESSION_DEFAULT_ALGO, train_size=0.5, buffer_batch_size=1000,
-                verbose=False, timeout=600, poll=True, step=2, compressed=False, staging=True):
+                param_grid=None, verbose=False, timeout=600, poll=True, step=2,
+                compressed=False, staging=True):
         """
         Train regression model on user-provided dataset
 
@@ -166,6 +167,7 @@ class RegressionRunner(BaseRunner):
         :param algorithm: can be any of the following: `random-forest-regression`, `gradient-boosting-regression`, `xgboost-regression`, `linear-regression-classifier`. Algorithms are sourced from Scikit-Learn unless otherwise indicated.
         :param train_size: Share of training dataset assigned to training vs. testing, e.g. if train_size is set to 0.8 80% of the dataset will be assigned to training and 20% will be randomly set aside for testing and validation
         :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer
+        :param param_grid: TBD
         :param verbose: Set to true for verbose output
         :param timeout: client will keep polling API for a period of `timeout` seconds
         :param poll: keep polling API while the job is being run (default is `True`)
@@ -192,11 +194,16 @@ class RegressionRunner(BaseRunner):
         # Train regression model and retrieve results
         if res['batches_saved']==res['total_batches']:
             self.__train(
-                request_id=res['request_id'], client_id=client_id, idx_field=fref['forward'][idx_var],
+                request_id=res['request_id'],
+                client_id=client_id,
+                idx_field=fref['forward'][idx_var],
                 outcome_var=fref['forward'][outcome_var],
                 categorical_fields=[ fref['forward'][var] for var in categorical_vars ],
-                algorithm=algorithm, train_size=train_size,
-                verbose=verbose, staging=staging,
+                algorithm=algorithm,
+                train_size=train_size,
+                verbose=verbose,
+                staging=staging,
+                param_grid=param_grid,
             )
             if poll:
                 res2 = self._poll(payload={'request_id': res['request_id'], 'client_id': client_id, 'command': 'task-status'}, timeout=timeout, step=step, verbose=verbose)
@@ -220,9 +227,10 @@ class RegressionRunner(BaseRunner):
         return res5
 
     def __train(self, request_id=None, client_id=None,
-                idx_field=None, outcome_var=None, categorical_fields=[],
-                algorithm=REGRESSION_DEFAULT_ALGO, train_size=0.5,
-                verbose=False, staging=False):
+            idx_field=None, outcome_var=None, categorical_fields=[],
+            algorithm=REGRESSION_DEFAULT_ALGO, train_size=0.5,
+            param_grid=None,
+            verbose=False, staging=False):
         """
         :param request_id:
         :param client_id: Short name for account being used. Used for reporting purposes only
@@ -230,6 +238,7 @@ class RegressionRunner(BaseRunner):
         :param outcome_var:
         :param categorical_fields:
         :param algorithm:
+        :param param_grid:
         :param verbose: Set to true for verbose output
         :param staging:
         :return:
@@ -245,6 +254,7 @@ class RegressionRunner(BaseRunner):
             'outcome_var': outcome_var,
             'categorical_fields': categorical_fields,
             'staging': staging,
+            'param_grid': param_grid,
         })
         if verbose: print('Training request posted.')
         return res

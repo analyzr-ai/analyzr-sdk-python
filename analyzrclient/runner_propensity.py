@@ -261,8 +261,8 @@ class PropensityRunner(BaseRunner):
         :param poll: keep polling API while the job is being run (default is `True`)
         :param smote: apply SMOTE pre-processing
         :param param_grid: TBD
-        :param scoring: TBD
-        :param n_splits: TBD
+        :param scoring: Scoring methodology to evaluate the performance of the cross-validated model. Common methodologies include `roc_auc`, `acuracy`, and `f1`
+        :param n_splits: Number of folds (must be at least 2)
         :param compressed: perform additional compression when uploading data to buffer
         :param staging: when set to True the API will use temporay secure cloud storage to buffer the data rather than a relational database (default is `True`)
         :param encoding: encode and decode data with homomorphic encryption

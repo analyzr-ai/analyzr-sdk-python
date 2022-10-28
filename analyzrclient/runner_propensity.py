@@ -250,8 +250,8 @@ class PropensityRunner(BaseRunner):
         :return data2:
         """
         data2 = self._buffer_read(
-            request_id=request_id, client_id=client_id, dataframe_name='data2',
-            verbose=verbose)
+            request_id=request_id, client_id=client_id, dataframe_name='res',
+            verbose=verbose, staging=True)
         return data2
 
     def check_status(

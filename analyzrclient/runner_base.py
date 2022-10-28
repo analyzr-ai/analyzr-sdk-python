@@ -398,7 +398,7 @@ class BaseRunner:
 
         return df2
 
-    def _poll(self, payload={}, timeout=60, step=1, verbose=False):
+    def _poll(self, payload={}, timeout=600, step=1, verbose=False):
         """
         :param payload:
         :param timeout:

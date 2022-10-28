@@ -245,10 +245,14 @@ class PropensityRunner(BaseRunner):
         run is complete
 
         :param model_id: UUID for a specific model object
+        :type model_id: str, required
         :param client_id: Short name for account being used. Used for reporting
             purposes only
+        :type client_id: string, required
         :param verbose: Set to true for verbose output
+        :type verbose: boolean, optional
         :param encoding: Decode results with homomorphic encryption
+        :type encoding: boolean, optional
         :return: JSON object with the following attributes, as applicable:
                     `status` (can be Pending, Complete, or Failed),
                     `features` (table of feature importances),

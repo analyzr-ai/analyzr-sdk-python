@@ -23,14 +23,19 @@ class ClusterRunner(BaseRunner):
         self.__uri = '{}/analytics/'.format(self._base_url)
         return
 
-    def check_status(self, request_id=None, client_id=None, verbose=False, data=None):
+    def check_status(
+            self, request_id=None, client_id=None, verbose=False,
+            data=None):
         """
-        Check the status of a specific model run. Data is homomorphically encoded by default
+        Check the status of a specific model run. Data is homomorphically
+        encoded by default
 
         :param request_id: UUID for a specific model object
-        :param client_id: Short name for account being used. Used for reporting purposes only
+        :param client_id: Short name for account being used. Used for reporting
+            purposes only
         :param verbose: Set to true for verbose output
-        :param data: if data is not None, cluster IDs will be appended and stats compiled
+        :param data: if data is not None, cluster IDs will be appended and stats
+            compiled
         :return: JSON object with the following attributes:
                     `status` (can be Pending, Complete, or Failed),
                     `request_id` (UUID provided with initial request),
@@ -38,7 +43,9 @@ class ClusterRunner(BaseRunner):
         """
         res1 = {}
         res1['request_id'] = request_id
-        res2 = self._status(request_id=request_id, client_id=client_id, verbose=verbose)
+        res2 = self._status(
+            request_id=request_id, client_id=client_id,
+            verbose=verbose)
         if res2!={} and 'status' in res2.keys():
             res1['status'] = res2['status']
             if res2['status']=='Complete':
@@ -47,24 +54,26 @@ class ClusterRunner(BaseRunner):
                 if keys is None:
                     print('ERROR! Keys not found. ')
                     return None
-                df2 = self.__retrieve_train_results(request_id=request_id, client_id=client_id,
-                                                categorical_vars=list(keys['xref'].keys()),
-                                                numerical_vars=list(keys['zref'].keys()),
-                                                idx_var=keys['idx_var'],
-                                                xref=keys['xref'],
-                                                zref=keys['zref'],
-                                                rref=keys['rref'],
-                                                fref=keys['fref'],
-                                                verbose=verbose)
+                df2 = self.__retrieve_train_results(
+                    request_id=request_id, client_id=client_id,
+                    categorical_vars=list(keys['xref'].keys()),
+                    numerical_vars=list(keys['zref'].keys()),
+                    idx_var=keys['idx_var'], xref=keys['xref'],
+                    zref=keys['zref'], rref=keys['rref'],
+                    fref=keys['fref'], verbose=verbose)
                 res1['data'] = df2
                 if data is not None:
                     if DEBUG: print('Compiling stats...')
-                    res3 = self.__post_process_results(data, df2, keys['idx_var'], list(keys['xref'].keys()))
+                    res3 = self.__post_process_results(
+                        data, df2, keys['idx_var'],
+                        list(keys['xref'].keys()))
                     res3['status'] = res1['status']
                     res3['request_id'] = request_id
                     res1 = res3
             if res2['status'] in ['Complete', 'Failed']:
-                self._buffer_clear(request_id=request_id, client_id=client_id, verbose=verbose)
+                self._buffer_clear(
+                    request_id=request_id, client_id=client_id,
+                    verbose=verbose)
 
         return res1
 
@@ -83,88 +92,153 @@ class ClusterRunner(BaseRunner):
         res['distances'] = compute_cluster_distances(df3, categorical_vars)
         return res
 
-    def run(self, df, client_id=None, idx_var=None, categorical_vars=[], numerical_vars=[],
-            algorithm='pca-kmeans', n_components=5, buffer_batch_size=1000, cluster_batch_size=None,
+    def run(
+            self, df, client_id=None, idx_var=None, categorical_vars=[],
+            numerical_vars=[], algorithm='pca-kmeans', n_components=5,
+            buffer_batch_size=1000, cluster_batch_size=None,
             verbose=False, poll=True, compressed=False, staging=True):
         """
         Run clustering algorithm on user-provided dataset
 
-        :param df: dataframe containing dataset to be clustered. The data is homomorphically encrypted by the client prior to being transferred to the API buffer
-        :param client_id: Short name for account being used. Used for reporting purposes only
-        :param idx_var: name of index field identifying unique record IDs in `df` for audit purposes
-        :param categorical_vars: array of field names identifying categorical fields in the dataframe `df`
-        :param numerical_vars: array of field names identifying categorical fields in the dataframe `df`
-        :param algorithm: can be any of the following: `pca-kmeans`, `incremental-pca-kmeans`, `pca-kmeans-simple`, `kmeans`, `minibatch-kmeans`, `gaussian-mixture`, `birch`, `dbscan`, `optics`, `mean-shift`, `spectral-clustering`, `hierarchical-agglomerative`. Algorithms are sourced from Scikit-Learn unless otherwise indicated.
+        :param df: dataframe containing dataset to be clustered. The data is
+            homomorphically encrypted by the client prior to being transferred
+            to the API buffer
+        :param client_id: Short name for account being used. Used for reporting
+            purposes only
+        :param idx_var: name of index field identifying unique record IDs in
+            `df` for audit purposes
+        :param categorical_vars: array of field names identifying categorical
+            fields in the dataframe `df`
+        :param numerical_vars: array of field names identifying categorical
+            fields in the dataframe `df`
+        :param algorithm: can be any of the following: `pca-kmeans`,
+            `incremental-pca-kmeans`, `pca-kmeans-simple`, `kmeans`,
+            `minibatch-kmeans`, `gaussian-mixture`, `birch`, `dbscan`, `optics`,
+            `mean-shift`, `spectral-clustering`, `hierarchical-agglomerative`.
+            Algorithms are sourced from Scikit-Learn unless otherwise indicated.
         :param n_components: number of clustering components
-        :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer
-        :param cluster_batch_size: batch size for the purpose of clustering the data provided in the dataframe `df`
+        :param buffer_batch_size: batch size for the purpose of uploading data
+            from the client to the server's buffer :param buffer_batch_size:
+            batch size for the purpose of uploading data from the client to the
+            server's buffer
+        :param cluster_batch_size: batch size for the purpose of clustering the
+            data provided in the dataframe `df`
         :param verbose: Set to true for verbose output
-        :param poll: keep polling API while the job is being run (default is `True`)
-        :param compressed: perform additional compression when uploading data to buffer
-        :param staging: when set to True the API will use temporay secure cloud storage to buffer the data rather than a relational database (default is `True`)
+        :param poll: keep polling API while the job is being run (default is
+            `True`)
+        :param compressed: perform additional compression when uploading data
+            to buffer
+        :param staging: when set to True the API will use temporay secure cloud
+            storage to buffer the data rather than a relational database
+            (default is `True`)
         :return: JSON object with the following attributes:
                     `request_id` (UUID provided with initial request),
                     `data`: original dataset with cluster IDs appended
-                    `distances`: distance matrix showing inter-cluster distances (centroid to centroid)
-                    `stats`: count, frequency, and attribute averages by cluster ID
+                    `distances`: distance matrix showing inter-cluster distances
+                    (centroid to centroid)
+                    `stats`: count, frequency, and attribute averages by cluster
+                    ID
         """
         request_id = self._get_request_id()
         return self.__train(
-            df,
-            categorical_vars=categorical_vars, numerical_vars=numerical_vars, idx_var=idx_var,
-            buffer_batch_size=buffer_batch_size, cluster_batch_size=cluster_batch_size,
-            algorithm=algorithm, n_components=n_components,
-            request_id=request_id, client_id=client_id,
+            df, categorical_vars=categorical_vars, numerical_vars=numerical_vars,
+            idx_var=idx_var, buffer_batch_size=buffer_batch_size,
+            cluster_batch_size=cluster_batch_size, algorithm=algorithm,
+            n_components=n_components, request_id=request_id, client_id=client_id,
             verbose=verbose, compressed=compressed, poll=poll, staging=staging,
         )
 
-    def __train(self, df, categorical_vars=[], numerical_vars=[], bool_vars=[], idx_var=None, verbose=False,
-                buffer_batch_size=1000, algorithm='pca-kmeans', n_components=5, cluster_batch_size=None,
-                request_id=None, client_id=None, timeout=600, step=2, compressed=False, poll=True, staging=False):
+    def __train(
+            self, df, categorical_vars=[], numerical_vars=[], bool_vars=[],
+            idx_var=None, verbose=False, buffer_batch_size=1000,
+            algorithm='pca-kmeans', n_components=5, cluster_batch_size=None,
+            request_id=None, client_id=None, timeout=600, step=2,
+            compressed=False, poll=True, staging=False):
         """
         """
         # Encode data and save it to buffer
         df3 = None
         if verbose: print('Request ID: {}'.format(request_id))
-        data, xref, zref, rref, fref, fref_exp, bref = self._encode(df, categorical_vars=categorical_vars, numerical_vars=numerical_vars, bool_vars=bool_vars, record_id_var=idx_var, verbose=verbose)
+        data, xref, zref, rref, fref, fref_exp, bref = self._encode(
+            df, categorical_vars=categorical_vars, numerical_vars=numerical_vars,
+            bool_vars=bool_vars, record_id_var=idx_var, verbose=verbose)
 
         # Save encoding keys locally
-        self._keys_save(model_id=request_id, keys={'xref': xref, 'zref': zref, 'rref': rref, 'fref': fref, 'fref_exp': fref_exp, 'bref': bref, 'idx_var': idx_var}, verbose=verbose)
+        self._keys_save(
+            model_id=request_id,
+            keys={
+                'xref': xref,
+                'zref': zref,
+                'rref': rref,
+                'fref': fref,
+                'fref_exp': fref_exp,
+                'bref': bref,
+                'idx_var': idx_var
+            },
+            verbose=verbose)
 
         # Save encoded data to buffer
-        res = self._buffer_save(data, client_id=client_id, request_id=request_id, verbose=verbose, batch_size=buffer_batch_size, compressed=compressed, staging=staging)
+        res = self._buffer_save(
+            data, client_id=client_id, request_id=request_id, verbose=verbose,
+            batch_size=buffer_batch_size, compressed=compressed, staging=staging)
 
         # Identify clusters and retrieve results
         if res['batches_saved']==res['total_batches']:
             self.__cluster_train(
-                request_id=res['request_id'], client_id=client_id, idx_field=fref['forward'][idx_var],
+                request_id=res['request_id'],
+                client_id=client_id,
+                idx_field=fref['forward'][idx_var],
                 categorical_fields=[ fref['forward'][var] for var in categorical_vars ],
-                algorithm=algorithm, n_components=n_components, batch_size=cluster_batch_size,
-                verbose=verbose, staging=staging,
+                algorithm=algorithm,
+                n_components=n_components,
+                batch_size=cluster_batch_size,
+                verbose=verbose,
+                staging=staging,
             )
             if poll:
-                res2 = self._poll(payload={'request_id': res['request_id'], 'client_id': client_id, 'command': 'task-status'}, timeout=timeout, step=step, verbose=verbose)
+                res2 = self._poll(
+                    payload={
+                        'request_id': res['request_id'],
+                        'client_id': client_id,
+                        'command': 'task-status'
+                    },
+                    timeout=timeout,
+                    step=step,
+                    verbose=verbose)
                 if res2['response']['status'] in ['Complete']:
-                    df2 = self.__retrieve_train_results(request_id=res['request_id'], client_id=client_id, categorical_vars=categorical_vars, numerical_vars=numerical_vars, idx_var=idx_var, xref=xref, zref=zref, rref=rref, fref=fref, verbose=verbose)
+                    df2 = self.__retrieve_train_results(
+                        request_id=res['request_id'], client_id=client_id,
+                        categorical_vars=categorical_vars,
+                        numerical_vars=numerical_vars, idx_var=idx_var,
+                        xref=xref, zref=zref, rref=rref, fref=fref,
+                        verbose=verbose)
                 else:
                     print('WARNING! Training request came back with status: {}'.format(res2['response']['status']))
         else:
             print('ERROR! Buffer save failed: {}'.format(res))
 
         # Clear buffer
-        if poll: res3 = self._buffer_clear(request_id=res['request_id'], client_id=client_id, verbose=verbose)
+        if poll: res3 = self._buffer_clear(
+            request_id=res['request_id'], client_id=client_id,
+            verbose=verbose)
 
         #  Compile results
         if verbose and not poll: print('Clustering job started with polling disabled. You will need to request results for this request ID.')
-        res5 = self.__post_process_results(df, df2, idx_var, categorical_vars) if poll else {}
+        res5 = self.__post_process_results(
+            df, df2, idx_var, categorical_vars) if poll else {}
         res5['request_id'] = request_id # append request ID for future reference
         return res5
 
-    def __cluster_train(self, request_id=None, client_id=None, idx_field=None, categorical_fields=[], algorithm='pca-kmeans', n_components=5, batch_size=None, verbose=False, staging=False):
+    def __cluster_train(
+            self, request_id=None, client_id=None, idx_field=None,
+            categorical_fields=[], algorithm='pca-kmeans', n_components=5,
+            batch_size=None, verbose=False, staging=False):
         """
         :param request_id:
-        :param client_id: Short name for account being used. Used for reporting purposes only
-        :param idx_field: name of index field identifying unique record IDs for audit purposes
+        :param client_id: Short name for account being used. Used for reporting
+            purposes only
+        :param idx_field: name of index field identifying unique record IDs for
+            audit purposes
         :param categorical_fields:
         :param algorithm:
         :param n_components:
@@ -191,50 +265,76 @@ class ClusterRunner(BaseRunner):
         })
         return res
 
-    def __retrieve_train_results(self, request_id=None, client_id=None, categorical_vars=[], numerical_vars=[], idx_var=None, xref=None, zref=None, rref=None, fref=None, verbose=False):
+    def __retrieve_train_results(
+            self, request_id=None, client_id=None, categorical_vars=[],
+            numerical_vars=[], idx_var=None, xref=None, zref=None, rref=None,
+            fref=None, verbose=False):
         """
         :return df2:
         """
         df2 = None
-        res = self._buffer_read(request_id=request_id, client_id=client_id, dataframe_name='res', verbose=verbose, staging=True)
+        res = self._buffer_read(
+            request_id=request_id, client_id=client_id, dataframe_name='res',
+            verbose=verbose, staging=True)
         if not res.empty:
-            df2 = self._decode(res, categorical_vars=categorical_vars, numerical_vars=numerical_vars, record_id_var=idx_var,xref=xref, zref=zref, rref=rref, fref=fref, verbose=verbose)
+            df2 = self._decode(
+                res, categorical_vars=categorical_vars,
+                numerical_vars=numerical_vars, record_id_var=idx_var,xref=xref,
+                zref=zref, rref=rref, fref=fref, verbose=verbose)
 
         return df2
 
-    def predict(self, df, model_id=None, client_id=None, idx_var=None, categorical_vars=[], numerical_vars=[],
-            buffer_batch_size=1000, cluster_batch_size=None, timeout=600,
-            verbose=False, compressed=False, staging=True):
+    def predict(
+            self, df, model_id=None, client_id=None, idx_var=None,
+            categorical_vars=[], numerical_vars=[], buffer_batch_size=1000,
+            cluster_batch_size=None, timeout=600, verbose=False,
+            compressed=False, staging=True):
         """
         Assign cluster IDs to dataset using a pre-trained model
 
-        :param df: dataframe containing dataset to be clustered. The data is homomorphically encrypted by the client prior to being transferred to the API buffer
+        :param df: dataframe containing dataset to be clustered. The data is
+            homomorphically encrypted by the client prior to being transferred
+            to the API buffer
         :param model_id: UUID for a specific model object
-        :param client_id: Short name for account being used. Used for reporting purposes only
-        :param idx_var: name of index field identifying unique record IDs in `df` for audit purposes
-        :param categorical_vars: array of field names identifying categorical fields in the dataframe `df`
-        :param numerical_vars: array of field names identifying categorical fields in the dataframe `df`
-        :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer :param buffer_batch_size: batch size for the purpose of uploading data from the client to the server's buffer
-        :param cluster_batch_size: batch size for the purpose of clustering the data provided in the dataframe `df`
-        :param timeout: client will keep polling API for a period of `timeout` seconds
+        :param client_id: Short name for account being used. Used for reporting
+            purposes only
+        :param idx_var: name of index field identifying unique record IDs in
+            `df` for audit purposes
+        :param categorical_vars: array of field names identifying categorical
+            fields in the dataframe `df`
+        :param numerical_vars: array of field names identifying categorical
+            fields in the dataframe `df`
+        :param buffer_batch_size: batch size for the purpose of uploading data
+            from the client to the server's buffer :param buffer_batch_size:
+            batch size for the purpose of uploading data from the client to the
+            server's buffer
+        :param cluster_batch_size: batch size for the purpose of clustering the
+            data provided in the dataframe `df`
+        :param timeout: client will keep polling API for a period of `timeout`
+            seconds
         :param verbose: Set to true for verbose output
-        :param compressed: perform additional compression when uploading data to buffer
-        :param staging: when set to True the API will use temporay secure cloud storage to buffer the data rather than a relational database (default is `True`)
+        :param compressed: perform additional compression when uploading data to
+            buffer
+        :param staging: when set to True the API will use temporay secure cloud
+            storage to buffer the data rather than a relational database
+            (default is `True`)
         :return: JSON object with the following attributes:
                     `model_id` (UUID provided with initial request),
                     `data2`: original dataset with cluster IDs appended
         """
         return self.__predict(
-            df,
-            categorical_vars=categorical_vars, numerical_vars=numerical_vars, idx_var=idx_var,
-            buffer_batch_size=buffer_batch_size, cluster_batch_size=cluster_batch_size,
-            model_id=model_id, client_id=client_id, timeout=timeout,
-            verbose=verbose, compressed=compressed, staging=staging,
+            df, categorical_vars=categorical_vars, numerical_vars=numerical_vars,
+            idx_var=idx_var, buffer_batch_size=buffer_batch_size,
+            cluster_batch_size=cluster_batch_size, model_id=model_id,
+            client_id=client_id, timeout=timeout, verbose=verbose,
+            compressed=compressed, staging=staging,
         )
 
-    def __predict(self, df, categorical_vars=[], numerical_vars=[], bool_vars=[], idx_var=None, verbose=False,
-                buffer_batch_size=1000, cluster_batch_size=None,
-                model_id=None, client_id=None, timeout=600, step=2, compressed=False, staging=False, encoding=True):
+    def __predict(
+            self, df, categorical_vars=[], numerical_vars=[], bool_vars=[],
+            idx_var=None, verbose=False, buffer_batch_size=1000,
+            cluster_batch_size=None, model_id=None, client_id=None, timeout=600,
+            step=2, compressed=False, staging=False, encoding=True):
         """
         """
         request_id = self._get_request_id()
@@ -244,7 +344,10 @@ class ClusterRunner(BaseRunner):
             if keys is None:
                 print('ERROR! Keys not found. ')
                 return None
-            data, xref, zref, rref, fref, fref_exp, bref = self._encode(df, keys=keys, categorical_vars=categorical_vars, numerical_vars=numerical_vars, bool_vars=bool_vars, record_id_var=idx_var, verbose=verbose)
+            data, xref, zref, rref, fref, fref_exp, bref = self._encode(
+                df, keys=keys, categorical_vars=categorical_vars,
+                numerical_vars=numerical_vars, bool_vars=bool_vars,
+                record_id_var=idx_var, verbose=verbose)
             if verbose: print('Total rows encoded: {:,}'.format(len(data)))
         else:
             data = df
@@ -272,7 +375,15 @@ class ClusterRunner(BaseRunner):
                 verbose=verbose,
                 staging=staging,
             )
-            self._poll(payload={'request_id': res['request_id'], 'client_id': client_id, 'command': 'task-status'}, timeout=timeout, step=step, verbose=verbose)
+            self._poll(
+                payload={
+                    'request_id': res['request_id'],
+                    'client_id': client_id,
+                    'command': 'task-status'
+                },
+                timeout=timeout,
+                step=step,
+                verbose=verbose)
             data2 = self.__retrieve_predict_results(
                 request_id=request_id,
                 client_id=client_id,
@@ -281,7 +392,9 @@ class ClusterRunner(BaseRunner):
             print('ERROR! Buffer save failed: {}'.format(res))
 
         # Clear buffer
-        res4 = self._buffer_clear(request_id=res['request_id'], client_id=client_id, verbose=verbose)
+        res4 = self._buffer_clear(
+            request_id=res['request_id'], client_id=client_id,
+            verbose=verbose)
 
         # Decode data
         if encoding:
@@ -304,12 +417,16 @@ class ClusterRunner(BaseRunner):
         res5['model_id'] = model_id
         return res5
 
-    def __cluster_predict(self, request_id=None, model_id=None, client_id=None, idx_field=None, categorical_fields=[], batch_size=None, verbose=False, staging=False):
+    def __cluster_predict(
+            self, request_id=None, model_id=None, client_id=None, idx_field=None,
+            categorical_fields=[], batch_size=None, verbose=False, staging=False):
         """
         :param request_id:
-        :param client_id: Short name for account being used. Used for reporting purposes only
+        :param client_id: Short name for account being used. Used for reporting
+            purposes only
         :param model_id:
-        :param idx_field: name of index field identifying unique record IDs for audit purposes
+        :param idx_field: name of index field identifying unique record IDs for
+            audit purposes
         :param categorical_fields:
         :param batch_size:
         :param verbose: Set to true for verbose output
@@ -329,9 +446,13 @@ class ClusterRunner(BaseRunner):
         })
         return res
 
-    def __retrieve_predict_results(self, request_id=None, client_id=None, verbose=False):
+    def __retrieve_predict_results(
+            self, request_id=None, client_id=None,
+            verbose=False):
         """
         :return data2:
         """
-        data2 = self._buffer_read(request_id=request_id, client_id=client_id, dataframe_name='res', verbose=verbose, staging=True)
+        data2 = self._buffer_read(
+            request_id=request_id, client_id=client_id, dataframe_name='res',
+            verbose=verbose, staging=True)
         return data2

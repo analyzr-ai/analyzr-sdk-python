@@ -331,12 +331,17 @@ class PropensityRunner(BaseRunner):
         :param poll: Keep polling API while the job is being run (default is
             `True`)
         :param smote: Apply SMOTE pre-processing
-        :param param_grid: TBD
+        :param param_grid: Parameter grid to be used during the cross-validation
+            grid search (hypertuning). The default is algorithm-specific and set
+            by the API.
+        :type param_grid: JOSN object, optional
         :param scoring: Scoring methodology to evaluate the performance of the
             cross-validated model. Common methodologies include `roc_auc`,
             `accuracy`, and `f1`. Default is algorithm-specific and set by the
             API
-        :param n_splits: Number of folds. Must be at least 2, default to 10
+        :type scoring: string, optional
+        :param n_splits: Number of folds. Must be at least 2, defaults to 10
+        :type n_splits: int, optional
         :param compressed: Perform additional compression when uploading data to
             buffer
         :param staging: When set to True the API will use temporay secure cloud

@@ -29,20 +29,34 @@ class PropensityRunner(BaseRunner):
         Predict probabilities of outcome (propensities) for user-specified
         dataset using a pre-trained model
 
-        :param df: Dataframe containing dataset to be used for training. The data is homomorphically encrypted by the client prior to being transferred to the API buffer when `encoding` is set to `True`
-        :param model_id: UUID for a specific model object. Refers to a model that was previously trained
-        :param client_id: Short name for account being used. Used for reporting purposes only
-        :param idx_var: Name of index field identifying unique record IDs in `df` for audit purposes
-        :param categorical_vars: Array of field names identifying categorical fields in the dataframe `df`
-        :param numerical_vars: Array of field names identifying categorical fields in the dataframe `df`
-        :param bool_vars: Array of field names identifying boolean fields in the dataframe `df`
-        :param buffer_batch_size: Batch size for the purpose of uploading data from the client to the server's buffer
-        :param api_batch_size: Batch size for the purpose of processing data in the API
+        :param df: Dataframe containing dataset to be used for training. The
+            data is homomorphically encrypted by the client prior to being
+            transferred to the API buffer when `encoding` is set to `True`
+        :param model_id: UUID for a specific model object. Refers to a model
+            that was previously trained
+        :param client_id: Short name for account being used. Used for reporting
+            purposes only
+        :param idx_var: Name of index field identifying unique record IDs in
+            `df` for audit purposes
+        :param categorical_vars: Array of field names identifying categorical
+            fields in the dataframe `df`
+        :param numerical_vars: Array of field names identifying categorical
+            fields in the dataframe `df`
+        :param bool_vars: Array of field names identifying boolean fields in the
+            dataframe `df`
+        :param buffer_batch_size: Batch size for the purpose of uploading data
+            from the client to the server's buffer
+        :param api_batch_size: Batch size for the purpose of processing data in
+            the API
         :param verbose: Set to true for verbose output
-        :param timeout: Client will keep polling API for a period of `timeout` seconds
+        :param timeout: Client will keep polling API for a period of `timeout`
+            seconds
         :param step: Polling interval, in seconds
-        :param compressed: Perform additional compression when uploading data to buffer
-        :param staging: When set to True the API will use temporay secure cloud storage to buffer the data rather than a relational database (default is `True`)
+        :param compressed: Perform additional compression when uploading data to
+            buffer
+        :param staging: When set to True the API will use temporay secure cloud
+            storage to buffer the data rather than a relational database
+            (default is `True`)
         :param encoding: Encode and decode data with homomorphic encryption
         :return: JSON object with the following attributes:
                     `model_id` (UUID provided with initial request),
@@ -86,11 +100,13 @@ class PropensityRunner(BaseRunner):
         :param df:
         :param model_id:
         :param request_id:
-        :param client_id: Short name for account being used. Used for reporting purposes only
+        :param client_id: Short name for account being used. Used for reporting
+            purposes only
         :param idx_var:
         :param categorical_vars:
         :param numerical_vars:
-        :param buffer_batch_size: Batch size for the purpose of uploading data from the client to the server's buffer
+        :param buffer_batch_size: Batch size for the purpose of uploading data
+            from the client to the server's buffer
         :param verbose: Set to true for verbose output
         :param compressed:
         :param staging:
@@ -185,8 +201,10 @@ class PropensityRunner(BaseRunner):
         """
         :param request_id:
         :param model_id:
-        :param client_id: Short name for account being used. Used for reporting purposes only
-        :param idx_field: Name of index field identifying unique record IDs for audit purposes
+        :param client_id: Short name for account being used. Used for reporting
+            purposes only
+        :param idx_field: Name of index field identifying unique record IDs for
+            audit purposes
         :param categorical_fields:
         :param verbose: Set to true for verbose output
         :param staging:
@@ -209,7 +227,8 @@ class PropensityRunner(BaseRunner):
             verbose=False):
         """
         :param request_id:
-        :param client_id: Short name for account being used. Used for reporting purposes only
+        :param client_id: Short name for account being used. Used for reporting
+            purposes only
         :param verbose: Set to true for verbose output
         :return data2:
         """
@@ -226,14 +245,16 @@ class PropensityRunner(BaseRunner):
         run is complete
 
         :param model_id: UUID for a specific model object
-        :param client_id: Short name for account being used. Used for reporting purposes only
+        :param client_id: Short name for account being used. Used for reporting
+            purposes only
         :param verbose: Set to true for verbose output
         :param encoding: Decode results with homomorphic encryption
         :return: JSON object with the following attributes, as applicable:
                     `status` (can be Pending, Complete, or Failed),
                     `features` (table of feature importances),
                     `confusion_matrix` (confusion matrix using test dataset),
-                    `stats` (error stats including accuracy, precision, recall, F1, AUC, Gini),
+                    `stats` (error stats including accuracy, precision, recall,
+                    F1, AUC, Gini),
                     `roc` (receiver operating characteristic curve)
         """
         res1 = {}
@@ -420,8 +441,10 @@ class PropensityRunner(BaseRunner):
             verbose=False, staging=False):
         """
         :param request_id:
-        :param client_id: Short name for account being used. Used for reporting purposes only
-        :param idx_field: Name of index field identifying unique record IDs for audit purposes
+        :param client_id: Short name for account being used. Used for reporting
+            purposes only
+        :param idx_field: Name of index field identifying unique record IDs for
+            audit purposes
         :param outcome_var:
         :param categorical_fields:
         :param algorithm:
@@ -458,7 +481,8 @@ class PropensityRunner(BaseRunner):
             encoding=True):
         """
         :param request_id:
-        :param client_id: Short name for account being used. Used for reporting purposes only
+        :param client_id: Short name for account being used. Used for reporting
+            purposes only
         :param fref:
         :param verbose: Set to true for verbose output
         :param encoding:

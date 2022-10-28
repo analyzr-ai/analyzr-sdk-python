@@ -305,37 +305,52 @@ class PropensityRunner(BaseRunner):
         :param df: Dataframe containing dataset to be used for training. The data
             is homomorphically encrypted by the client prior to being transferred
             to the API buffer when `encoding` is set to `True`
+        :type df: DataFrame, required
         :param client_id: Short name for account being used. Used for reporting
             purposes only
+        :type client_id: string, required
         :param idx_var: Name of index field identifying unique record IDs in
             `df` for audit purposes
+        :type idx_var: string, required
         :param outcome_var: Name of dependent variable, usually a boolean
             variable set to `0` or `1`
+        :type outcome_var: string, required
         :param categorical_vars: Array of field names identifying categorical
             fields in the dataframe `df`
+        :type categorical_vars: string[], required
         :param numerical_vars: Array of field names identifying categorical
             fields in the dataframe `df`
+        :type numerical_vars: string[], required
         :param bool_vars: Array of field names identifying boolean fields in
             the dataframe `df`
+        :type bool_vars: string[], optional
         :param algorithm: Can be any of the following:
             `random-forest-classifier`, `gradient-boosting-classifier`,
             `xgboost-classifier`, `ada-boost-classifier`,
             `extra-trees-classifier`, `logistic-regression-classifier`.
             Algorithms are sourced from Scikit-Learn unless otherwise indicated.
             Additional algorithms may be available
+        :type algorithm: string, required
         :param train_size: Share of training dataset assigned to training vs.
             testing, e.g. if train_size is set to 0.8 80% of the dataset will be
             assigned to training and 20% will be randomly set aside for testing
             and validation
+        :type train_size: float, optional
         :param buffer_batch_size: Batch size for the purpose of uploading data
             from the client to the server's buffer
+        :type buffer_batch_size: int, optional
         :param verbose: Set to true for verbose output
+        :type verbose: boolean, optional
         :param timeout: Client will keep polling API for a period of `timeout`
             seconds
+        :type timeout: int, optional
         :param step: Polling interval, in seconds
+        :type step: int, optional
         :param poll: Keep polling API while the job is being run (default is
             `True`)
+        :type poll: boolean, optional
         :param smote: Apply SMOTE pre-processing
+        :type smote: boolean, optional
         :param param_grid: Parameter grid to be used during the cross-validation
             grid search (hypertuning). The default is algorithm-specific and set
             by the API.
@@ -348,11 +363,15 @@ class PropensityRunner(BaseRunner):
         :param n_splits: Number of folds. Must be at least 2, defaults to 10
         :type n_splits: int, optional
         :param compressed: Perform additional compression when uploading data to
-            buffer
+            buffer. Defaults to `False`
+        :type compressed: boolean, optional
         :param staging: When set to True the API will use temporay secure cloud
-            storage to buffer the data rather than a relational database (default
-            is `True`)
-        :param encoding: encode and decode data with homomorphic encryption
+            storage to buffer the data rather than a relational database.
+            Defaults to `True`
+        :type staging: boolean, optional
+        :param encoding: encode and decode data with homomorphic encryption.
+            Defaults to `True`
+        :type encoding: boolean, optional
         :return: JSON object with the following attributes, as applicable:
                     `model_id` (UUID provided with initial request),
                     `features` (table of feature importances),

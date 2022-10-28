@@ -17,7 +17,9 @@ class Analyzer:
     by the client. For detailed methods, see the appropriate runner class.
 
     :param host: the FQDN for your API tenant
+    :type host: str, required
     :verbose: Set to true for verbose output
+    :type verbose: boolean, optional
     """
 
     def __init__(self, host=None, verbose=False):
@@ -48,6 +50,7 @@ class Analyzer:
         Log in to Analyzr API
 
         :param verbose: Set to true for verbose output Set to True for verbose screen output
+        :type verbose: boolean, optional
         :rtype: None
         """
         status_code = self.__client._login(verbose=verbose)
@@ -63,6 +66,7 @@ class Analyzer:
         Log out of Analyzr API
 
         :param verbose: Set to true for verbose output Set to True for verbose screen output
+        :type verbose: boolean, optional
         :rtype: None
         """
         return self.__client._logout(verbose=verbose)

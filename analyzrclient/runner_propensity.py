@@ -317,7 +317,8 @@ class PropensityRunner(BaseRunner):
             `random-forest-classifier`, `gradient-boosting-classifier`,
             `xgboost-classifier`, `ada-boost-classifier`,
             `extra-trees-classifier`, `logistic-regression-classifier`.
-            Algorithms are sourced from Scikit-Learn unless otherwise indicated
+            Algorithms are sourced from Scikit-Learn unless otherwise indicated.
+            Additional algorithms may be available
         :param train_size: Share of training dataset assigned to training vs.
             testing, e.g. if train_size is set to 0.8 80% of the dataset will be
             assigned to training and 20% will be randomly set aside for testing
@@ -334,7 +335,7 @@ class PropensityRunner(BaseRunner):
         :param param_grid: Parameter grid to be used during the cross-validation
             grid search (hypertuning). The default is algorithm-specific and set
             by the API.
-        :type param_grid: JOSN object, optional
+        :type param_grid: JSON object, optional
         :param scoring: Scoring methodology to evaluate the performance of the
             cross-validated model. Common methodologies include `roc_auc`,
             `accuracy`, and `f1`. Default is algorithm-specific and set by the

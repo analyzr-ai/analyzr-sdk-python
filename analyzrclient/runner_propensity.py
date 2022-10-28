@@ -326,7 +326,8 @@ class PropensityRunner(BaseRunner):
                     `model_id` (UUID provided with initial request),
                     `features` (table of feature importances),
                     `confusion_matrix` (confusion matrix using test dataset),
-                    `stats` (error stats including accuracy, precision, recall, F1, AUC, Gini),
+                    `stats` (error stats including accuracy, precision, recall,
+                    F1, AUC, Gini),
                     `roc` (receiver operating characteristic curve)
         """
 

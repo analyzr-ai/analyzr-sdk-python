@@ -277,13 +277,21 @@ class PropensityRunner(BaseRunner):
         """
         Train propensity model on user-provided dataset
 
-        :param df: Dataframe containing dataset to be used for training. The data is homomorphically encrypted by the client prior to being transferred to the API buffer when `encoding` is set to `True`
-        :param client_id: Short name for account being used. Used for reporting purposes only
-        :param idx_var: Name of index field identifying unique record IDs in `df` for audit purposes
-        :param outcome_var: Name of dependent variable, usually a boolean variable set to `0` or `1`
-        :param categorical_vars: Array of field names identifying categorical fields in the dataframe `df`
-        :param numerical_vars: Array of field names identifying categorical fields in the dataframe `df`
-        :param bool_vars: Array of field names identifying boolean fields in the dataframe `df`
+        :param df: Dataframe containing dataset to be used for training. The data
+            is homomorphically encrypted by the client prior to being transferred
+            to the API buffer when `encoding` is set to `True`
+        :param client_id: Short name for account being used. Used for reporting
+            purposes only
+        :param idx_var: Name of index field identifying unique record IDs in
+            `df` for audit purposes
+        :param outcome_var: Name of dependent variable, usually a boolean
+            variable set to `0` or `1`
+        :param categorical_vars: Array of field names identifying categorical
+            fields in the dataframe `df`
+        :param numerical_vars: Array of field names identifying categorical
+            fields in the dataframe `df`
+        :param bool_vars: Array of field names identifying boolean fields in
+            the dataframe `df`
         :param algorithm: Can be any of the following: `random-forest-classifier`, `gradient-boosting-classifier`, `xgboost-classifier`, `ada-boost-classifier`, `extra-trees-classifier`, `logistic-regression-classifier`. Algorithms are sourced from Scikit-Learn unless otherwise indicated
         :param train_size: Share of training dataset assigned to training vs. testing, e.g. if train_size is set to 0.8 80% of the dataset will be assigned to training and 20% will be randomly set aside for testing and validation
         :param buffer_batch_size: Batch size for the purpose of uploading data from the client to the server's buffer
@@ -293,8 +301,8 @@ class PropensityRunner(BaseRunner):
         :param poll: Keep polling API while the job is being run (default is `True`)
         :param smote: Apply SMOTE pre-processing
         :param param_grid: TBD
-        :param scoring: Scoring methodology to evaluate the performance of the cross-validated model. Common methodologies include `roc_auc`, `accuracy`, and `f1`
-        :param n_splits: Number of folds (must be at least 2)
+        :param scoring: Scoring methodology to evaluate the performance of the cross-validated model. Common methodologies include `roc_auc`, `accuracy`, and `f1`. Default is algorithm-specific and set by the API
+        :param n_splits: Number of folds. Must be at least 2, default to 10
         :param compressed: Perform additional compression when uploading data to buffer
         :param staging: When set to True the API will use temporay secure cloud storage to buffer the data rather than a relational database (default is `True`)
         :param encoding: encode and decode data with homomorphic encryption

@@ -30,29 +30,42 @@ class RegressionRunner(BaseRunner):
         transferred to the API buffer by default
 
         :param df: dataframe containing dataset to be used for training.
+        :type df: DataFrame, required
         :param model_id: UUID for a specific model object. Refers to a model
             that was previously trained
+        :type model_id: str, required
         :param client_id: Short name for account being used. Used for reporting
             purposes only
+        :type client_id: string, required
         :param idx_var: name of index field identifying unique record IDs in
             `df` for audit purposes
+        :type idx_var: string, required
         :param categorical_vars: array of field names identifying categorical
             fields in the dataframe `df`
+        :type categorical_vars: string[], required
         :param numerical_vars: array of field names identifying categorical
             fields in the dataframe `df`
+        :type numerical_vars: string[], required
         :param bool_vars: array of field names identifying boolean fields in the
             dataframe `df`
+        :type bool_vars: string[], optional
         :param buffer_batch_size: batch size for the purpose of uploading data
             from the client to the server's buffer
+        :type buffer_batch_size: int, optional
         :param verbose: Set to true for verbose output
+        :type verbose: boolean, optional
         :param timeout: client will keep polling API for a period of `timeout`
             seconds
+        :type timeout: int, optional
         :param step: polling interval, in seconds
+        :type step: int, optional
         :param compressed: perform additional compression when uploading data
             to buffer
+        :type compressed: boolean, optional
         :param staging: when set to True the API will use temporay secure cloud
             storage to buffer the data rather than a relational database
             (default is `True`)
+        :type staging: boolean, optional
         :return: JSON object with the following attributes:
                     `model_id` (UUID provided with initial request),
                     `data2`: original dataset with cluster IDs appended
@@ -163,9 +176,12 @@ class RegressionRunner(BaseRunner):
         run is complete. Data is homomorphically encoded by default
 
         :param model_id: UUID for a specific model object
+        :type model_id: str, required
         :param client_id: Short name for account being used. Used for reporting
             purposes only
+        :type client_id: string, required
         :param verbose: Set to true for verbose output
+        :type verbose: boolean, optional
         :return: JSON object with the following attributes, as applicable:
                     `status` (can be Pending, Complete, or Failed),
                     `features` (table of feature importances),
@@ -209,44 +225,60 @@ class RegressionRunner(BaseRunner):
         :param df: dataframe containing dataset to be used for training. The
             data is homomorphically encrypted by the client prior to being
             transferred to the API by default
+        :type df: DataFrame, required
         :param client_id: Short name for account being used. Used for reporting
             purposes only
+        :type client_id: string, required
         :param idx_var: name of index field identifying unique record IDs in
             `df` for audit purposes
-        :param outcome_var: name of dependent variable, usually a boolean
-            variable set to `0` or `1`
+        :type idx_var: string, required
+        :param outcome_var: name of dependent variable, usually a numerical
+            variable
+        :type outcome_var: string, required
         :param categorical_vars: array of field names identifying categorical
             fields in the dataframe `df`
+        :type categorical_vars: string[], required
         :param numerical_vars: array of field names identifying categorical
             fields in the dataframe `df`
+        :type numerical_vars: string[], required
         :param bool_vars: array of field names identifying boolean fields in
             the dataframe `df`
+        :type bool_vars: string[], optional
         :param algorithm: can be any of the following:
             `random-forest-regression`, `gradient-boosting-regression`,
             `xgboost-regression`, `linear-regression-classifier`. Algorithms are
             sourced from Scikit-Learn unless otherwise indicated. Additional
             algorithms may be available
+        :type algorithm: string, required
         :param train_size: Share of training dataset assigned to training vs.
             testing, e.g. if train_size is set to 0.8 80% of the dataset will
             be assigned to training and 20% will be randomly set aside for
             testing and validation
+        :type train_size: float, optional
         :param buffer_batch_size: batch size for the purpose of uploading data
             from the client to the server's buffer
+        :type buffer_batch_size: int, optional
         :param param_grid: Parameter grid to be used during the cross-validation
             grid search (hypertuning). The default is algorithm-specific and set
             by the API.
         :type param_grid: JSON object, optional
         :param verbose: Set to true for verbose output
+        :type verbose: boolean, optional
         :param timeout: client will keep polling API for a period of `timeout`
             seconds
+        :type timeout: int, optional
         :param poll: keep polling API while the job is being run (default is
             `True`)
+        :type poll: boolean, optional
         :param step: polling interval, in seconds
+        :type step: int, optional
         :param compressed: perform additional compression when uploading data
             to buffer
+        :type compressed: boolean, optional
         :param staging: when set to True the API will use temporay secure cloud
             storage to buffer the data rather than a relational database
             (default is `True`)
+        :type staging: boolean, optional
         :return: JSON object with the following attributes, as applicable:
                     `model_id` (UUID provided with initial request),
                     `features` (table of feature importances),

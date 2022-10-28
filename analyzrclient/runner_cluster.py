@@ -31,11 +31,15 @@ class ClusterRunner(BaseRunner):
         encoded by default
 
         :param request_id: UUID for a specific model object
+        :type request_id: str, required
         :param client_id: Short name for account being used. Used for reporting
             purposes only
+        :type client_id: string, required
         :param verbose: Set to true for verbose output
+        :type verbose: boolean, optional
         :param data: if data is not None, cluster IDs will be appended and stats
             compiled
+        :type data: DataFrame, optional
         :return: JSON object with the following attributes:
                     `status` (can be Pending, Complete, or Failed),
                     `request_id` (UUID provided with initial request),
@@ -103,34 +107,47 @@ class ClusterRunner(BaseRunner):
         :param df: dataframe containing dataset to be clustered. The data is
             homomorphically encrypted by the client prior to being transferred
             to the API buffer
+        :type df: DataFrame, required
         :param client_id: Short name for account being used. Used for reporting
             purposes only
+        :type client_id: string, required
         :param idx_var: name of index field identifying unique record IDs in
             `df` for audit purposes
+        :type idx_var: string, required
         :param categorical_vars: array of field names identifying categorical
             fields in the dataframe `df`
+        :type categorical_vars: string[], required
         :param numerical_vars: array of field names identifying categorical
             fields in the dataframe `df`
+        :type numerical_vars: string[], required
         :param algorithm: can be any of the following: `pca-kmeans`,
             `incremental-pca-kmeans`, `pca-kmeans-simple`, `kmeans`,
             `minibatch-kmeans`, `gaussian-mixture`, `birch`, `dbscan`, `optics`,
             `mean-shift`, `spectral-clustering`, `hierarchical-agglomerative`.
             Algorithms are sourced from Scikit-Learn unless otherwise indicated.
+        :type algorithm: string, required
         :param n_components: number of clustering components
+        :type n_components: int, optional
         :param buffer_batch_size: batch size for the purpose of uploading data
             from the client to the server's buffer :param buffer_batch_size:
             batch size for the purpose of uploading data from the client to the
             server's buffer
+        :type buffer_batch_size: int, optional
         :param cluster_batch_size: batch size for the purpose of clustering the
             data provided in the dataframe `df`
+        :type cluster_batch_size: int, optional
         :param verbose: Set to true for verbose output
+        :type verbose: boolean, optional
         :param poll: keep polling API while the job is being run (default is
             `True`)
+        :type poll: boolean, optional
         :param compressed: perform additional compression when uploading data
             to buffer
+        :type compressed: boolean, optional
         :param staging: when set to True the API will use temporay secure cloud
             storage to buffer the data rather than a relational database
             (default is `True`)
+        :type staging: boolean, optional
         :return: JSON object with the following attributes:
                     `request_id` (UUID provided with initial request),
                     `data`: original dataset with cluster IDs appended
@@ -295,29 +312,41 @@ class ClusterRunner(BaseRunner):
         :param df: dataframe containing dataset to be clustered. The data is
             homomorphically encrypted by the client prior to being transferred
             to the API buffer
+        :type df: DataFrame, required
         :param model_id: UUID for a specific model object
+        :type model_id: str, required
         :param client_id: Short name for account being used. Used for reporting
             purposes only
+        :type client_id: string, required
         :param idx_var: name of index field identifying unique record IDs in
             `df` for audit purposes
+        :type idx_var: string, required
         :param categorical_vars: array of field names identifying categorical
             fields in the dataframe `df`
+        :type categorical_vars: string[], required
         :param numerical_vars: array of field names identifying categorical
             fields in the dataframe `df`
+        :type numerical_vars: string[], required
         :param buffer_batch_size: batch size for the purpose of uploading data
             from the client to the server's buffer :param buffer_batch_size:
             batch size for the purpose of uploading data from the client to the
             server's buffer
+        :type buffer_batch_size: int, optional
         :param cluster_batch_size: batch size for the purpose of clustering the
             data provided in the dataframe `df`
+        :type cluster_batch_size: int, optional
         :param timeout: client will keep polling API for a period of `timeout`
             seconds
+        :type timeout: int, optional
         :param verbose: Set to true for verbose output
+        :type verbose: boolean, optional
         :param compressed: perform additional compression when uploading data to
             buffer
+        :type compressed: boolean, optional
         :param staging: when set to True the API will use temporay secure cloud
             storage to buffer the data rather than a relational database
             (default is `True`)
+        :type staging: boolean, optional
         :return: JSON object with the following attributes:
                     `model_id` (UUID provided with initial request),
                     `data2`: original dataset with cluster IDs appended

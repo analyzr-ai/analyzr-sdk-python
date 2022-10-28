@@ -32,32 +32,47 @@ class PropensityRunner(BaseRunner):
         :param df: Dataframe containing dataset to be used for training. The
             data is homomorphically encrypted by the client prior to being
             transferred to the API buffer when `encoding` is set to `True`
+        :type df: DataFrame, required
         :param model_id: UUID for a specific model object. Refers to a model
             that was previously trained
+        :type model_id: str, required
         :param client_id: Short name for account being used. Used for reporting
             purposes only
+        :type client_id: string, required
         :param idx_var: Name of index field identifying unique record IDs in
             `df` for audit purposes
+        :type idx_var: string, required
         :param categorical_vars: Array of field names identifying categorical
             fields in the dataframe `df`
+        :type categorical_vars: string[], required
         :param numerical_vars: Array of field names identifying categorical
             fields in the dataframe `df`
+        :type numerical_vars: string[], required
         :param bool_vars: Array of field names identifying boolean fields in the
             dataframe `df`
+        :type bool_vars: string[], optional
         :param buffer_batch_size: Batch size for the purpose of uploading data
             from the client to the server's buffer
+        :type buffer_batch_size: int, optional
         :param api_batch_size: Batch size for the purpose of processing data in
             the API
+        :type api_batch_size: int, optional
         :param verbose: Set to true for verbose output
+        :type verbose: boolean, optional
         :param timeout: Client will keep polling API for a period of `timeout`
             seconds
+        :type timeout: int, optional
         :param step: Polling interval, in seconds
+        :type step: int, optional
         :param compressed: Perform additional compression when uploading data to
             buffer
+        :type compressed: boolean, optional
         :param staging: When set to True the API will use temporay secure cloud
             storage to buffer the data rather than a relational database
             (default is `True`)
+        :type staging: boolean, optional
         :param encoding: Encode and decode data with homomorphic encryption
+        :type encoding: boolean, optional
         :return: JSON object with the following attributes:
                     `model_id` (UUID provided with initial request),
                     `data2`: original dataset with cluster IDs appended

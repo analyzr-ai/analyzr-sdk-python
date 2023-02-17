@@ -25,5 +25,17 @@ as follows from a Python session:
 >>> analyzer.login()
 Login successful
 >>> Analyzer().version()
-{'status': 200, 'response': {'version': 'x.x.xxx', 'tenant': <your tenant name>, 'copyright': '2022 (c) Go2Market Insights LLC. All rights reserved.'}}
+{'status': 200, 'response': {'version': 'x.x.xxx', 'tenant': <your tenant name>, 'copyright': '2023 (c) Go2Market Insights LLC. All rights reserved.'}}
+```
+
+## Testing instructions
+If you are developing the SDK and would like to test the repo, clone it locally using git then 
+run the following from the root directory:
+```
+python -m unittest -v
+```
+Make sure you update the `config.json` file first to include the name of your API tenant. 
+To run a single test case do:
+```
+python -m unittest tests.test_all.PropensityTest.test_logistic_regression_classifier -v
 ```

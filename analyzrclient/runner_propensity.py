@@ -88,7 +88,7 @@ class PropensityRunner(BaseRunner):
         batched_df = [ df[i:i+api_batch_size] for i in range(0, len(df), api_batch_size) ]
         idx = 1
         for batch in batched_df:
-            print('Processing API request {} of {}'.format(idx, len(batched_df)))
+            if verbose: print('Processing API request {} of {}'.format(idx, len(batched_df)))
             res5 = self.__predict_api_batch(
                 batch, model_id=model_id,
                 client_id=client_id,

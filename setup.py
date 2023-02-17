@@ -1,12 +1,14 @@
 import pathlib
 from setuptools import setup
 
+from analyzrclient import CLIENT_VERSION
+
 HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text()
 
 setup(
     name='analyzr-sdk-python',
-    version='1.2.45',
+    version=CLIENT_VERSION,
     description='Python SDK for Analyzr API',
     long_description=README,
     long_description_content_type="text/markdown",

@@ -151,7 +151,8 @@ class ClusterRunner(BaseRunner):
             (default is `True`)
         :type staging: boolean, optional
         :return: JSON object with the following attributes:
-                    `request_id` (UUID provided with initial request),
+                    `model_id` (UUID provided with initial request),
+                    `request_id`: same as `model_id` (provided for backward compatibility),
                     `data`: original dataset with cluster IDs appended
                     `distances`: distance matrix showing inter-cluster distances
                     (centroid to centroid)
@@ -246,6 +247,7 @@ class ClusterRunner(BaseRunner):
         res5 = self.__post_process_results(
             df, df2, idx_var, categorical_vars) if poll else {}
         res5['request_id'] = request_id # append request ID for future reference
+        res5['model_id'] = request_id # append request ID for future reference
         return res5
 
     def __cluster_train(

@@ -1,6 +1,7 @@
 import os, sys, time, json
 import pandas as pd
 from copy import deepcopy
+import datetime
 
 from .client_saml_sso import SamlSsoAuthClient
 from .constants import *
@@ -44,6 +45,14 @@ class Analyzer:
         :return: JSON object with API version and other metadata
         """
         return self.__client._post(self.__uri, {'command': 'version'})
+
+    def client_version(self):
+        """
+        Provide client version info
+
+        :return: JSON object with API version and other metadata
+        """
+        return ({'version': f'{CLIENT_VERSION}', 'copyright': f'{datetime.date.today().year} (c) Go2Market Insights LLC. All rights reserved.'})
 
     def login(self, verbose=False):
         """

@@ -87,10 +87,10 @@ class SamlSsoAuthClient:
                 params=self._token,
             )
         else:
+            # Deprecated /compressed endpoint
             r = requests.post(
-                '{}/compressed/'.format(uri),
-                gzip.compress(data.encode('utf-8')),
-                headers={'Content-Encoding': 'gzip'},
+                uri,
+                json=data,
                 params=self._token,
             )
         return self._response(r)

@@ -25,7 +25,7 @@ as follows from a Python session:
 >>> analyzer.login()
 Login successful
 >>> Analyzer().version()
-{'status': 200, 'response': {'version': 'x.x.xxx', 'tenant': <your tenant name>, 'copyright': '2023 (c) Go2Market Insights LLC. All rights reserved.'}}
+{'status': 200, 'response': {'version': 'x.x.xxx', 'tenant': <your tenant name>, 'copyright': '2023 (c) Go2Market Insights Inc. All rights reserved.'}}
 ```
 
 ## Testing instructions

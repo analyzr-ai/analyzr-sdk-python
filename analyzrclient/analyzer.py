@@ -52,7 +52,7 @@ class Analyzer:
 
         :return: JSON object with API version and other metadata
         """
-        return ({'version': f'{CLIENT_VERSION}', 'copyright': f'{datetime.date.today().year} (c) Go2Market Insights LLC. All rights reserved.'})
+        return ({'version': f'{CLIENT_VERSION}', 'copyright': f'{datetime.date.today().year} (c) Go2Market Insights Inc. All rights reserved. Patent pending. '})
 
     def login(self, verbose=False):
         """

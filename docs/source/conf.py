@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath('../analyzrclient'))
 # -- Project information -----------------------------------------------------
 
 project = 'Analyzr Python SDK'
-copyright = '2022, Go2Market Insights. All rights reserved. Patent pending'
+copyright = 'Go2Market Insights. All rights reserved. Patent pending'
 author = 'Analyzr Team'
 
 

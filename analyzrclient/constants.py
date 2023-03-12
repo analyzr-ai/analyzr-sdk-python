@@ -1,5 +1,5 @@
 """
-Copyright (c) 2020-2022 Go2Market Insights, LLC d/b/a Analyzr
+Copyright (c) 2020-2023 Go2Market Insights, Inc d/b/a Analyzr
 All rights reserved.
 https://analyzr.ai
 
@@ -18,7 +18,7 @@ from pathlib import Path
 #                          GENERAL PARAMETERS                                  #
 #==============================================================================#
 VERBOSE = True
-CLIENT_VERSION = '1.2.51'
+CLIENT_VERSION = '1.2.52'
 HOME = str(Path.home())
 TEMP_DIR = '{}/.analyzr'.format(HOME)
 

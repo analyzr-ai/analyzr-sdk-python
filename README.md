@@ -32,7 +32,7 @@ Login successful
 If you are developing the SDK and would like to test the repo, clone it locally using git then 
 run the following from the root directory:
 ```
-python -m unittest -v
+python -m unittest tests.test_all -v
 ```
 Make sure you update the `config.json` file first to include the name of your API tenant. 
 To run a single test case do:

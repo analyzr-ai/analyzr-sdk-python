@@ -1,5 +1,5 @@
 """
-Copyright (c) 2020-2022 Go2Market Insights, LLC d/b/a Analyzr
+Copyright (c) 2020-2023 Go2Market Insights, Inc d/b/a Analyzr
 All rights reserved.
 https://analyzr.ai
 

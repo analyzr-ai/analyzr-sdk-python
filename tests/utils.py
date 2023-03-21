@@ -22,6 +22,15 @@ def load_titanic_dataset():
     df['PassengerId'] = df['PassengerId'].astype('string')
     return df
 
+def load_banking_dataset():
+    """
+    :return df:
+    """
+    df = pd.read_csv('https://g2mstaticfiles.blob.core.windows.net/$web/bank_full_with_index.csv', encoding = "ISO-8859-1", low_memory=False)
+    df = df[['index', 'campaign', 'duration', 'balance', 'y', 'housing', 'education', 'marital', 'job', 'loan', 'default', 'age']].dropna()
+    df['index'] = df['index'].astype('string')
+    return df
+
 def generate_synthetic_dataset(n_features=2, n_samples=1000):
     """
     :param n_features:

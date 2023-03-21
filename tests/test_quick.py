@@ -123,6 +123,26 @@ class ClusteringTest(unittest.TestCase):
         self.assertEqual(len(df3), 712)
         self.assertEqual(df3.columns[0], 'PC_ID')
 
+    def test_larger_dataset(self):
+        df = load_banking_dataset()
+        res = analyzer.cluster.run(df, client_id=CLIENT_ID, idx_var='index',
+            categorical_vars=['y', 'housing', 'education', 'marital', 'job'], 
+            numerical_vars=['campaign', 'duration', 'balance', 'loan', 'default', 'age'],
+            algorithm='pca-kmeans-simple', buffer_batch_size=100000, verbose=VERBOSE)
+        df2 = res['data']
+        model_id = res['request_id']
+        res = analyzer.cluster.buffer_usage(client_id=CLIENT_ID)
+        self.assertEqual(df2.iloc[0]['duration'], 261)
+        self.assertEqual(df2.iloc[45210]['job'], 'entrepreneur')
+        self.assertEqual(res['response']['n_rows'], 0)
+        res = analyzer.cluster.predict(df, model_id=model_id, client_id=CLIENT_ID, idx_var='index',
+            categorical_vars=['y', 'housing', 'education', 'marital', 'job'], 
+            numerical_vars=['campaign', 'duration', 'balance', 'loan', 'default', 'age'],
+            buffer_batch_size=100000, verbose=VERBOSE)
+        df3 = res['data2']
+        self.assertEqual(len(df3), 45211)
+        self.assertEqual(df3.columns[0], 'PC_ID')
+
 class PropensityTest(unittest.TestCase):
 
     def test_logistic_regression_classifier(self):

@@ -1,3 +1,8 @@
 {
-  "host": "<insert your host here>"
+  "host": "analyzr3.api.g2m.ai", 
+  "sample_model": {
+    "model_id": "93956e3d-b75b-49d4-9cc7-f84b17cc26b2", 
+    "client_id": "test", 
+    "model_type": "propensity" 
+  }
 }

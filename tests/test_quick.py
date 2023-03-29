@@ -181,3 +181,4 @@ class RegressionTest(unittest.TestCase):
         self.assertEqual(len(df3), 712)
         self.assertEqual(df3.columns[len(df3.columns)-1], 'y_pred')
         self.assertEqual(res2['response']['n_rows'], 0)
+

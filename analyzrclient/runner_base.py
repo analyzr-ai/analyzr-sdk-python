@@ -477,3 +477,28 @@ class BaseRunner:
             keys = None
 
         return keys
+
+    def to_onnx(self, model_id=None, client_id=None, model_type=None, verbose=False):
+        """
+        :param model_id:
+        :param client_id:
+        :param verbose:
+        """
+        if verbose: print('Exporting model to ONNX object...')
+        uri = '{}/analytics/'.format(self._base_url)
+        res = self._client._post(uri, {
+            'command': 'model-export-onnx',
+            'model_id': model_id,
+            'client_id': client_id, 
+            "model_type": model_type, 
+        })
+        onx = None
+        if res['status']==200:
+            res = res['response']
+            if res['status']!='Successful':
+                if verbose: print('[to_onnx] ERROR! ONNX export returned status: {}'.format(res['status']))
+            onx = res['data']
+        else:
+            if verbose: print('[to_onnx] ERROR! ONNX export returned status: {}'.format(res['status']))
+        return onx
+    

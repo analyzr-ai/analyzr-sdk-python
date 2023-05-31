@@ -33,6 +33,14 @@ analyzrclient.runner\_regression module
   :undoc-members:
   :show-inheritance:
 
+analyzrclient.runner\_psm module
+---------------------------------------
+
+.. automodule:: analyzrclient.runner_psm
+  :members:
+  :undoc-members:
+  :show-inheritance:
+
 Module contents
 ---------------
 

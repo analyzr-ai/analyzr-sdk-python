@@ -40,3 +40,14 @@ def generate_synthetic_dataset(n_features=2, n_samples=1000):
     df = pd.read_csv('https://g2mstaticfiles.blob.core.windows.net/$web/synthetic_data_2_1000.csv', encoding = "ISO-8859-1", low_memory=False)
     vars = df.columns[1:]
     return df, vars
+
+def load_churn_dataset():
+    """
+    :return df:
+    """
+    df = pd.read_csv('https://g2mstaticfiles.blob.core.windows.net/$web/public_datasets/telco-churn-v2.csv', encoding = "ISO-8859-1", low_memory=False)
+    df['treatment'] = df['OnlineBackup']=='Yes'
+    df = df[['customerID', 'Churn', 'treatment', 'SeniorCitizen', 'tenure', 'MonthlyCharges']].dropna().reset_index(drop=True)
+    df['customerID'] = df['customerID'].astype('string')
+    return df
+

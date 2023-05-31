@@ -558,3 +558,16 @@ class RegressionTest(unittest.TestCase):
         self.assertEqual(len(df3), 712)
         self.assertEqual(df3.columns[len(df3.columns)-1], 'y_pred')
         self.assertEqual(res2['response']['n_rows'], 0)
+
+class PropensityScoreMatchingTest(unittest.TestCase):
+
+    def test_psm(self):
+        df = load_churn_dataset()
+        res = analyzer.psm.train(df, client_id=CLIENT_ID,
+            idx_var='customerID', outcome_var='Churn', treatment_var='treatment', categorical_vars=[], numerical_vars=['SeniorCitizen', 'tenure', 'MonthlyCharges'],
+            buffer_batch_size=1000, verbose=VERBOSE)
+        model_id = res['model_id']
+        self.assertEqual(len(res['atx']), 6) 
+        self.assertEqual(len(res['raw']), 4)
+        self.assertEqual(len(res['misc']), 10)
+

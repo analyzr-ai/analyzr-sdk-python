@@ -6,7 +6,7 @@ README = (HERE / "README.md").read_text()
 
 setup(
     name='analyzr-sdk-python',
-    version='1.2.53',
+    version='1.2.54',
     description='Python SDK for Analyzr API',
     long_description=README,
     long_description_content_type="text/markdown",

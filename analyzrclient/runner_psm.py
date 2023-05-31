@@ -40,7 +40,7 @@ class PropensityScoreMatchingRunner(BaseRunner):
         :type encoding: boolean, optional
         :return: JSON object with the following attributes, as applicable:
                     `status` (can be Pending, Complete, or Failed),
-                    `atx` (averafe treatmentr effects),
+                    `atx` (average treatment effects),
                     `raw` (dataset stats prior to matching),
                     `misc` (miscellaneous error stats including accuracy, precision, recall,
                     F1, AUC, Gini),
@@ -82,7 +82,7 @@ class PropensityScoreMatchingRunner(BaseRunner):
             buffer_batch_size=1000, verbose=False, timeout=600, step=2, poll=True,
             compressed=False, staging=True, encoding=True):
         """
-        Train propensity model on user-provided dataset
+        Train propensity score matching model on user-provided dataset
 
         :param df: Dataframe containing dataset to be used for training. The data
             is homomorphically encrypted by the client prior to being transferred
@@ -134,11 +134,10 @@ class PropensityScoreMatchingRunner(BaseRunner):
         :type encoding: boolean, optional
         :return: JSON object with the following attributes, as applicable:
                     `model_id` (UUID provided with initial request),
-                    `features` (table of feature importances),
-                    `confusion_matrix` (confusion matrix using test dataset),
-                    `stats` (error stats including accuracy, precision, recall,
+                    `atx` (average treatment effects),
+                    `raw` (dataset stats prior to matching),
+                    `misc` (miscellaneous error stats including accuracy, precision, recall,
                     F1, AUC, Gini),
-                    `roc` (receiver operating characteristic curve)
         """
 
         # Encode data

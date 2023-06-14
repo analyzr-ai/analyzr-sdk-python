@@ -61,7 +61,7 @@ class PropensityScoreMatchingRunner(BaseRunner):
                         return None
                 else:
                     keys = {}
-                atx, raw, misc = self.__retrieve_train_results(
+                atx, raw, misc, bins = self.__retrieve_train_results(
                         request_id=model_id,
                         client_id=client_id,
                         fref=keys['fref_exp'] if encoding else {},
@@ -71,6 +71,7 @@ class PropensityScoreMatchingRunner(BaseRunner):
                 res1['atx'] = atx
                 res1['raw'] = raw
                 res1['misc'] = misc
+                res1['bins'] = bins
             if res2['status'] in ['Complete', 'Failed']:
                 self._buffer_clear(
                     request_id=model_id, client_id=client_id,
@@ -138,6 +139,7 @@ class PropensityScoreMatchingRunner(BaseRunner):
                     `raw` (dataset stats prior to matching),
                     `misc` (miscellaneous error stats including accuracy, precision, recall,
                     F1, AUC, Gini),
+                    `bins` (histogram of matched propensity scores)
         """
 
         # Encode data
@@ -190,7 +192,7 @@ class PropensityScoreMatchingRunner(BaseRunner):
                     step=step,
                     verbose=verbose)
                 if res2['response']['status'] in ['Complete']:
-                    atx, raw, misc = self.__retrieve_train_results(
+                    atx, raw, misc, bins = self.__retrieve_train_results(
                         request_id=request_id,
                         client_id=client_id,
                         fref=fref_exp if encoding else {},
@@ -216,6 +218,7 @@ class PropensityScoreMatchingRunner(BaseRunner):
             res5['atx'] = atx
             res5['raw'] = raw
             res5['misc'] = misc
+            res5['bins'] = bins
         return res5
 
     def __train(self, request_id=None, client_id=None,
@@ -236,7 +239,7 @@ class PropensityScoreMatchingRunner(BaseRunner):
         """
         if verbose: print('Training propensity score matching model using data in buffer...')
         res = self._client._post(self.__uri, {
-            'command': 'psm-train',
+            'command': 'matching-train',
             'request_id': request_id,
             'client_id': client_id,
             'idx_field': idx_field,
@@ -298,9 +301,20 @@ class PropensityScoreMatchingRunner(BaseRunner):
         if not misc.empty:
             misc['Value'] = misc['Value'].astype('float')
         else:
-            if verbose: print('WARNING! Raw stats dataframe is empty')
+            if verbose: print('WARNING! Miscellaneous stats dataframe is empty')
 
-        return atx, raw, misc 
+        # Binned stats
+        if verbose: print('    Retrieving binned stats...')
+        bins = self._buffer_read(
+            request_id=request_id, client_id=client_id, dataframe_name='bins',
+            verbose=verbose)
+        if not bins.empty:
+            bins['count_treated'] = bins['count_treated'].astype('int')
+            bins['count_untreated'] = bins['count_untreated'].astype('int')
+        else:
+            if verbose: print('WARNING! Binned stats dataframe is empty')
+
+        return atx, raw, misc, bins 
 
     def __decode_raw_stats(self, raw, fref={}, zref={}, outcome_var=None, verbose=False):
         """

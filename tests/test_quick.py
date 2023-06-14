@@ -190,7 +190,7 @@ class PropensityScoreMatchingTest(unittest.TestCase):
             idx_var='customerID', outcome_var='Churn', treatment_var='treatment', categorical_vars=[], numerical_vars=['SeniorCitizen', 'tenure', 'MonthlyCharges'],
             buffer_batch_size=1000, verbose=VERBOSE, encoding=True)
         model_id = res['model_id']
-        self.assertEqual(len(res['atx']), 6) 
+        self.assertEqual(len(res['atx']), 9) 
         self.assertEqual(len(res['raw']), 4)
         self.assertEqual(len(res['misc']), 10)
-
+        self.assertEqual(len(res['bins']), 10)

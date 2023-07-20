@@ -51,3 +51,12 @@ def load_churn_dataset():
     df['customerID'] = df['customerID'].astype('string')
     return df
 
+def load_causal_dataset_v5():
+    """
+    :return df:
+    """
+    df = pd.read_csv('https://g2mstaticfiles.blob.core.windows.net/$web/public_datasets/synthetic_dataset_nonlinear_refactored_v5_20230719D2.csv', encoding = "ISO-8859-1", low_memory=False)
+    df = df[['RecordId', 'Outcome', 'Treatment', 'w0', 'w1', 's']].dropna().reset_index(drop=True)
+    df['RecordId'] = df['RecordId'].astype('string')
+    df['Treatment'] = df['Treatment'].astype('bool')
+    return df

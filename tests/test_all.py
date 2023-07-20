@@ -19,6 +19,7 @@ from .utils import *
 CLIENT_ID = 'test'
 N_FEATURES = 2
 N_SAMPLES = 1000
+EPSILON = 1e-6
 VERBOSE = False
 
 with open('tests/config.json') as json_file: config = json.load(json_file)
@@ -559,15 +560,95 @@ class RegressionTest(unittest.TestCase):
         self.assertEqual(df3.columns[len(df3.columns)-1], 'y_pred')
         self.assertEqual(res2['response']['n_rows'], 0)
 
-class PropensityScoreMatchingTest(unittest.TestCase):
+class CausalTest(unittest.TestCase):
 
-    def test_psm(self):
-        df = load_churn_dataset()
-        res = analyzer.psm.train(df, client_id=CLIENT_ID,
-            idx_var='customerID', outcome_var='Churn', treatment_var='treatment', categorical_vars=[], numerical_vars=['SeniorCitizen', 'tenure', 'MonthlyCharges'],
-            buffer_batch_size=1000, verbose=VERBOSE)
+    def test_propensity_score_matching_ci(self):
+        df = load_causal_dataset_v5()
+        res = analyzer.causal.train(df, client_id=CLIENT_ID,
+            idx_var='RecordId', outcome_var='Outcome', treatment_var='Treatment', categorical_vars=[], numerical_vars=['w0', 'w1', 's'],
+            algorithm='propensity-score-matching-ci', 
+            buffer_batch_size=1000, verbose=VERBOSE, encoding=True)
         model_id = res['model_id']
         self.assertEqual(len(res['atx']), 9) 
         self.assertEqual(len(res['raw']), 4)
         self.assertEqual(len(res['misc']), 10)
+        self.assertEqual(len(res['bins']), 10)
+        self.assertTrue(abs(res['atx'].loc['1']['Value']-0.2)/0.2 <= EPSILON) # ATT = 0.2
 
+    def test_propensity_score_blocking_ci(self):
+        df = load_causal_dataset_v5()
+        res = analyzer.causal.train(df, client_id=CLIENT_ID,
+            idx_var='RecordId', outcome_var='Outcome', treatment_var='Treatment', categorical_vars=[], numerical_vars=['w0', 'w1', 's'],
+            algorithm='propensity-score-blocking-ci', 
+            buffer_batch_size=1000, verbose=VERBOSE, encoding=True)
+        model_id = res['model_id']
+        self.assertEqual(len(res['atx']), 9) 
+        self.assertEqual(len(res['raw']), 4)
+        self.assertEqual(len(res['misc']), 10)
+        self.assertEqual(len(res['bins']), 0)
+        self.assertTrue(abs(res['atx'].loc['1']['Value']-0.234055)/0.234055 <= EPSILON*10) # ATT = 0.234055
+
+    def test_propensity_score_weighting_ci(self):
+        df = load_causal_dataset_v5()
+        res = analyzer.causal.train(df, client_id=CLIENT_ID,
+            idx_var='RecordId', outcome_var='Outcome', treatment_var='Treatment', categorical_vars=[], numerical_vars=['w0', 'w1', 's'],
+            algorithm='propensity-score-weighting-ci', 
+            buffer_batch_size=1000, verbose=VERBOSE, encoding=True)
+        model_id = res['model_id']
+        self.assertEqual(len(res['atx']), 9) 
+        self.assertEqual(len(res['raw']), 4)
+        self.assertEqual(len(res['misc']), 10)
+        self.assertEqual(len(res['bins']), 0)
+        self.assertTrue(abs(res['atx'].loc['2']['Value']-0.180893)/0.180893 <= EPSILON) # ATE = 0.180893
+
+    def test_ols_ci(self):
+        df = load_causal_dataset_v5()
+        res = analyzer.causal.train(df, client_id=CLIENT_ID,
+            idx_var='RecordId', outcome_var='Outcome', treatment_var='Treatment', categorical_vars=[], numerical_vars=['w0', 'w1', 's'],
+            algorithm='ols-ci', 
+            buffer_batch_size=1000, verbose=VERBOSE, encoding=True)
+        model_id = res['model_id']
+        self.assertEqual(len(res['atx']), 9) 
+        self.assertEqual(len(res['raw']), 4)
+        self.assertEqual(len(res['misc']), 10)
+        self.assertEqual(len(res['bins']), 0)
+        self.assertTrue(abs(res['atx'].loc['1']['Value']-0.270463)/0.270463 <= EPSILON*10) # ATT = 0.270463
+
+    def test_propensity_score_matching_dw(self):
+        df = load_causal_dataset_v5()
+        res = analyzer.causal.train(df, client_id=CLIENT_ID,
+            idx_var='RecordId', outcome_var='Outcome', treatment_var='Treatment', categorical_vars=[], numerical_vars=['w0', 'w1', 's'],
+            algorithm='propensity-score-matching-dw', standard_error=False, 
+            buffer_batch_size=1000, verbose=VERBOSE, encoding=True)
+        model_id = res['model_id']
+        self.assertEqual(len(res['atx']), 9) 
+        self.assertEqual(len(res['raw']), 4)
+        self.assertEqual(len(res['misc']), 10)
+        self.assertEqual(len(res['bins']), 0)
+        self.assertTrue(abs(res['atx'].loc['1']['Value']-0.2)/0.2 <= EPSILON) # ATT = 0.2
+
+    def test_propensity_score_weighting_dw(self):
+        df = load_causal_dataset_v5()
+        res = analyzer.causal.train(df, client_id=CLIENT_ID,
+            idx_var='RecordId', outcome_var='Outcome', treatment_var='Treatment', categorical_vars=[], numerical_vars=['w0', 'w1', 's'],
+            algorithm='propensity-score-weighting-dw', standard_error=False, 
+            buffer_batch_size=1000, verbose=VERBOSE, encoding=True)
+        model_id = res['model_id']
+        self.assertEqual(len(res['atx']), 9) 
+        self.assertEqual(len(res['raw']), 4)
+        self.assertEqual(len(res['misc']), 10)
+        self.assertEqual(len(res['bins']), 0)
+        self.assertTrue(abs(res['atx'].loc['1']['Value']-0.710831)/0.710831 <= EPSILON*10) # ATT = 0.710831
+
+    def test_propensity_score_stratification_dw(self):
+        df = load_causal_dataset_v5()
+        res = analyzer.causal.train(df, client_id=CLIENT_ID,
+            idx_var='RecordId', outcome_var='Outcome', treatment_var='Treatment', categorical_vars=[], numerical_vars=['w0', 'w1', 's'],
+            algorithm='propensity-score-stratification-dw', standard_error=False, 
+            buffer_batch_size=1000, verbose=VERBOSE, encoding=True)
+        model_id = res['model_id']
+        self.assertEqual(len(res['atx']), 9) 
+        self.assertEqual(len(res['raw']), 4)
+        self.assertEqual(len(res['misc']), 10)
+        self.assertEqual(len(res['bins']), 0)
+        self.assertTrue(abs(res['atx'].loc['1']['Value']-0.212232)/0.212232 <= EPSILON*10) # ATT = 0.212232

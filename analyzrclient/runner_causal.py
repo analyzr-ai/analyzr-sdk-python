@@ -6,9 +6,9 @@ from .runner_base import BaseRunner
 from .constants import *
 from .utils import *
 
-class PropensityScoreMatchingRunner(BaseRunner):
+class CausalRunner(BaseRunner):
     """
-    Run the propensity score matching pipeline
+    Run the causal analysis pipeline
 
     :param client: SAML SSO client object
     :type client: SamlSsoAuthClient, required
@@ -80,6 +80,7 @@ class PropensityScoreMatchingRunner(BaseRunner):
 
     def train(self, df, client_id=None,
             idx_var=None, outcome_var=None, treatment_var=None, categorical_vars=[], numerical_vars=[], bool_vars=[], 
+            algorithm='propensity-score-matching-ci', standard_error=False, 
             buffer_batch_size=1000, verbose=False, timeout=600, step=2, poll=True,
             compressed=False, staging=True, encoding=True):
         """
@@ -113,6 +114,11 @@ class PropensityScoreMatchingRunner(BaseRunner):
         :param buffer_batch_size: Batch size for the purpose of uploading data
             from the client to the server's buffer
         :type buffer_batch_size: int, optional
+        :param algorithm: causal inference algorithm to be used
+        :type algorithm: string, optional
+        :param standard_error: provide standard error stats for treatment 
+            estimates (default is `False`)
+        :type standard_error: boolean, optional
         :param verbose: Set to true for verbose output
         :type verbose: boolean, optional
         :param timeout: Client will keep polling API for a period of `timeout`
@@ -178,6 +184,8 @@ class PropensityScoreMatchingRunner(BaseRunner):
                 outcome_var=fref['forward'][outcome_var] if encoding else outcome_var,
                 treatment_var=fref['forward'][treatment_var] if encoding else treatment_var,
                 categorical_fields=[ fref['forward'][var] for var in categorical_vars ] if encoding else categorical_vars,
+                algorithm=algorithm, 
+                standard_error=standard_error, 
                 verbose=verbose,
                 staging=staging,
             )
@@ -223,6 +231,7 @@ class PropensityScoreMatchingRunner(BaseRunner):
 
     def __train(self, request_id=None, client_id=None,
             idx_field=None, outcome_var=None, treatment_var=None, categorical_fields=[],
+            algorithm='propensity-score-matching-ci', standard_error=False, 
             verbose=False, staging=False):
         """
         :param request_id:
@@ -233,13 +242,15 @@ class PropensityScoreMatchingRunner(BaseRunner):
         :param outcome_var:
         :param treatment_var:
         :param categorical_fields:
+        :param algorithm:
+        :param standard_error:
         :param verbose: Set to true for verbose output
         :param staging:
         :return:
         """
         if verbose: print('Training propensity score matching model using data in buffer...')
         res = self._client._post(self.__uri, {
-            'command': 'matching-train',
+            'command': 'causal-train',
             'request_id': request_id,
             'client_id': client_id,
             'idx_field': idx_field,
@@ -247,6 +258,8 @@ class PropensityScoreMatchingRunner(BaseRunner):
             'treatment_var': treatment_var,
             'categorical_fields': categorical_fields,
             'staging': staging,
+            'algorithm': algorithm, 
+            'standard_error': standard_error, 
         })
         if verbose: print('Training request posted.')
         return res
@@ -347,7 +360,8 @@ class PropensityScoreMatchingRunner(BaseRunner):
             else:
                 for col in columns:
                     if col!='variable':
-                        raw2.iloc[i][col] = float(raw2.iloc[i][col])
+                        val = raw2.iloc[i][col]
+                        if val is not None: raw2.iloc[i][col] = float(val) 
         return raw2
     
     def __decode_atx_stats(self, atx, fref={}, zref={}, outcome_var=None, verbose=False):

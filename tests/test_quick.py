@@ -20,6 +20,7 @@ CLIENT_ID = 'test'
 N_FEATURES = 2
 N_SAMPLES = 1000
 VERBOSE = False
+EPSILON = 1e-6
 
 with open('tests/config.json') as json_file: config = json.load(json_file)
 analyzer = Analyzer(host=config['host'])
@@ -182,15 +183,18 @@ class RegressionTest(unittest.TestCase):
         self.assertEqual(df3.columns[len(df3.columns)-1], 'y_pred')
         self.assertEqual(res2['response']['n_rows'], 0)
 
-class PropensityScoreMatchingTest(unittest.TestCase):
+class CausalTest(unittest.TestCase):
 
-    def test_psm(self):
-        df = load_churn_dataset()
-        res = analyzer.psm.train(df, client_id=CLIENT_ID,
-            idx_var='customerID', outcome_var='Churn', treatment_var='treatment', categorical_vars=[], numerical_vars=['SeniorCitizen', 'tenure', 'MonthlyCharges'],
+    def test_propensity_score_matching_ci(self):
+        df = load_causal_dataset_v5()
+        res = analyzer.causal.train(df, client_id=CLIENT_ID,
+            idx_var='RecordId', outcome_var='Outcome', treatment_var='Treatment', categorical_vars=[], numerical_vars=['w0', 'w1', 's'],
+            algorithm='propensity-score-matching-ci', 
             buffer_batch_size=1000, verbose=VERBOSE, encoding=True)
         model_id = res['model_id']
         self.assertEqual(len(res['atx']), 9) 
         self.assertEqual(len(res['raw']), 4)
         self.assertEqual(len(res['misc']), 10)
         self.assertEqual(len(res['bins']), 10)
+        self.assertTrue(abs(res['atx'].loc['1']['Value']-0.2)/0.2 <= EPSILON) # ATT = 0.2
+

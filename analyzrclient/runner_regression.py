@@ -431,6 +431,10 @@ class RegressionRunner(BaseRunner):
                 request_id=request_id, client_id=client_id, dataframe_name='coefs',
                 verbose=verbose)
             coefs['Value'] = coefs['Value'].astype('float')
+            for idx, row in coefs.iterrows():
+                coefs.loc[idx, 'Parameter'] = fref_decode_value(
+                    coefs.loc[idx, 'Parameter'],
+                    fref)
         else:
             coefs = None
 

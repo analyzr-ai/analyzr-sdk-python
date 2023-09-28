@@ -166,11 +166,11 @@ class PropensityTest(unittest.TestCase):
 
 class RegressionTest(unittest.TestCase):
 
-    def test_linear_regression(self):
+    def test_lasso_regression(self):
         df = load_titanic_dataset()
         res = analyzer.regression.train(df, client_id=CLIENT_ID,
             idx_var='PassengerId', outcome_var='Age', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
-            algorithm='linear-regression', train_size=0.5, buffer_batch_size=1000, verbose=VERBOSE)
+            algorithm='lasso-regression', train_size=0.5, buffer_batch_size=1000, verbose=VERBOSE)
         model_id = res['model_id']
         self.assertEqual(len(res['features']), 10)
         self.assertEqual(len(res['stats']), 6)

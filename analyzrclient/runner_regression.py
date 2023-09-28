@@ -20,6 +20,7 @@ class RegressionRunner(BaseRunner):
         """
         super().__init__(client=client, base_url=base_url)
         self.__uri = '{}/analytics/'.format(self._base_url)
+        self.__algorithm = None
         return
 
     def predict(self, df, model_id=None, client_id=None,
@@ -202,7 +203,7 @@ class RegressionRunner(BaseRunner):
                 if keys is None:
                     print('ERROR! Keys not found. ')
                     return None
-                features, stats = self.__retrieve_train_results(
+                features, stats, coefs = self.__retrieve_train_results(
                     request_id=model_id,
                     client_id=client_id,
                     fref=keys['fref_exp'],
@@ -210,6 +211,7 @@ class RegressionRunner(BaseRunner):
                 )
                 res1['features'] = features
                 res1['stats'] = stats
+                res1['coefs'] = coefs
             if res2['status'] in ['Complete', 'Failed']:
                 self._buffer_clear(
                     request_id=model_id, client_id=client_id,
@@ -288,6 +290,8 @@ class RegressionRunner(BaseRunner):
                     F1, AUC, Gini),
         """
 
+        self.__algorithm = algorithm
+
         # Encode data
         request_id = self._get_request_id()
         if verbose: print('Model ID: {}'.format(request_id))
@@ -330,7 +334,7 @@ class RegressionRunner(BaseRunner):
                     step=step,
                     verbose=verbose)
                 if res2['response']['status'] in ['Complete']:
-                    features, stats = self.__retrieve_train_results(
+                    features, stats, coefs = self.__retrieve_train_results(
                         request_id=request_id, client_id=client_id,
                         fref=fref_exp, verbose=verbose)
                 else:
@@ -350,6 +354,7 @@ class RegressionRunner(BaseRunner):
         if poll:
             res5['features'] = features
             res5['stats'] = stats
+            res5['coefs'] = coefs
         return res5
 
     def __train(self, request_id=None, client_id=None,
@@ -419,4 +424,14 @@ class RegressionRunner(BaseRunner):
             verbose=verbose)
         stats['Value'] = stats['Value'].astype('float')
 
-        return features, stats
+        # Coefs
+        if self.__algorithm in ['linear-regression', 'bayesian-ridge-regression', 'lasso-regression', 'ridge-regression']: 
+            if verbose: print('    Retrieving coefficients...')
+            coefs = self._buffer_read(
+                request_id=request_id, client_id=client_id, dataframe_name='coefs',
+                verbose=verbose)
+            coefs['Value'] = coefs['Value'].astype('float')
+        else:
+            coefs = None
+
+        return features, stats, coefs

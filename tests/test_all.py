@@ -560,6 +560,57 @@ class RegressionTest(unittest.TestCase):
         self.assertEqual(df3.columns[len(df3.columns)-1], 'y_pred')
         self.assertEqual(res2['response']['n_rows'], 0)
 
+    def test_lasso_regression(self):
+        df = load_titanic_dataset()
+        res = analyzer.regression.train(df, client_id=CLIENT_ID,
+            idx_var='PassengerId', outcome_var='Age', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
+            algorithm='lasso-regression', train_size=0.5, buffer_batch_size=1000, verbose=VERBOSE)
+        model_id = res['model_id']
+        self.assertEqual(len(res['features']), 10)
+        self.assertEqual(len(res['stats']), 6)
+        res = analyzer.regression.predict(df, model_id=model_id, client_id=CLIENT_ID,
+            idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
+            buffer_batch_size=1000, verbose=VERBOSE)
+        res2 = analyzer.regression.buffer_usage(client_id=CLIENT_ID)
+        df3 = res['data2']
+        self.assertEqual(len(df3), 712)
+        self.assertEqual(df3.columns[len(df3.columns)-1], 'y_pred')
+        self.assertEqual(res2['response']['n_rows'], 0)
+
+    def test_ridge_regression(self):
+        df = load_titanic_dataset()
+        res = analyzer.regression.train(df, client_id=CLIENT_ID,
+            idx_var='PassengerId', outcome_var='Age', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
+            algorithm='ridge-regression', train_size=0.5, buffer_batch_size=1000, verbose=VERBOSE)
+        model_id = res['model_id']
+        self.assertEqual(len(res['features']), 10)
+        self.assertEqual(len(res['stats']), 6)
+        res = analyzer.regression.predict(df, model_id=model_id, client_id=CLIENT_ID,
+            idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
+            buffer_batch_size=1000, verbose=VERBOSE)
+        res2 = analyzer.regression.buffer_usage(client_id=CLIENT_ID)
+        df3 = res['data2']
+        self.assertEqual(len(df3), 712)
+        self.assertEqual(df3.columns[len(df3.columns)-1], 'y_pred')
+        self.assertEqual(res2['response']['n_rows'], 0)
+
+    def test_bayesian_ridge_regression(self):
+        df = load_titanic_dataset()
+        res = analyzer.regression.train(df, client_id=CLIENT_ID,
+            idx_var='PassengerId', outcome_var='Age', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
+            algorithm='bayesian-ridge-regression', train_size=0.5, buffer_batch_size=1000, verbose=VERBOSE)
+        model_id = res['model_id']
+        self.assertEqual(len(res['features']), 10)
+        self.assertEqual(len(res['stats']), 6)
+        res = analyzer.regression.predict(df, model_id=model_id, client_id=CLIENT_ID,
+            idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
+            buffer_batch_size=1000, verbose=VERBOSE)
+        res2 = analyzer.regression.buffer_usage(client_id=CLIENT_ID)
+        df3 = res['data2']
+        self.assertEqual(len(df3), 712)
+        self.assertEqual(df3.columns[len(df3.columns)-1], 'y_pred')
+        self.assertEqual(res2['response']['n_rows'], 0)
+
 class CausalTest(unittest.TestCase):
 
     def test_propensity_score_matching_ci(self):

@@ -50,7 +50,7 @@ class Analyzer:
         copy_api = self.api_version()
         return {
             'api': {
-                'status': copy_api['status']==200, 
+                'status': copy_api['status'], 
                 'version': copy_api['response']['version'] if copy_api['status']==200 else 'N/A',
                 'tenant': copy_api['response']['tenant'] if copy_api['status']==200 else 'N/A',
             }, 

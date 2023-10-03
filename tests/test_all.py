@@ -32,7 +32,7 @@ class CommonTest(unittest.TestCase):
 
     def test_version(self):
         res = analyzer.version()
-        self.assertEqual(res['status'], 200)
+        self.assertEqual(res['api']['status'], 200)
 
 class BufferTest(unittest.TestCase):
 
@@ -500,6 +500,7 @@ class RegressionTest(unittest.TestCase):
         model_id = res['model_id']
         self.assertEqual(len(res['features']), 10)
         self.assertEqual(len(res['stats']), 6)
+        self.assertEqual((res['elasticities']), None)
         res = analyzer.regression.predict(df, model_id=model_id, client_id=CLIENT_ID,
             idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
             buffer_batch_size=1000, verbose=VERBOSE)
@@ -517,6 +518,7 @@ class RegressionTest(unittest.TestCase):
         model_id = res['model_id']
         self.assertEqual(len(res['features']), 10)
         self.assertEqual(len(res['stats']), 6)
+        self.assertEqual((res['elasticities']), None)
         res = analyzer.regression.predict(df, model_id=model_id, client_id=CLIENT_ID,
             idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
             buffer_batch_size=1000, verbose=VERBOSE)
@@ -534,6 +536,7 @@ class RegressionTest(unittest.TestCase):
         model_id = res['model_id']
         self.assertEqual(len(res['features']), 10)
         self.assertEqual(len(res['stats']), 6)
+        self.assertEqual((res['elasticities']), None)
         res = analyzer.regression.predict(df, model_id=model_id, client_id=CLIENT_ID,
             idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
             buffer_batch_size=1000, verbose=VERBOSE)
@@ -551,6 +554,7 @@ class RegressionTest(unittest.TestCase):
         model_id = res['model_id']
         self.assertEqual(len(res['features']), 10)
         self.assertEqual(len(res['stats']), 6)
+        self.assertEqual(len(res['elasticities']), 20)
         res = analyzer.regression.predict(df, model_id=model_id, client_id=CLIENT_ID,
             idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
             buffer_batch_size=1000, verbose=VERBOSE)
@@ -564,10 +568,11 @@ class RegressionTest(unittest.TestCase):
         df = load_titanic_dataset()
         res = analyzer.regression.train(df, client_id=CLIENT_ID,
             idx_var='PassengerId', outcome_var='Age', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
-            algorithm='lasso-regression', train_size=0.5, buffer_batch_size=1000, verbose=VERBOSE)
+            algorithm='lasso-regression', train_size=0.7, buffer_batch_size=1000, verbose=VERBOSE)
         model_id = res['model_id']
         self.assertEqual(len(res['features']), 10)
         self.assertEqual(len(res['stats']), 6)
+        self.assertEqual(len(res['elasticities']), 20)
         res = analyzer.regression.predict(df, model_id=model_id, client_id=CLIENT_ID,
             idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
             buffer_batch_size=1000, verbose=VERBOSE)
@@ -581,10 +586,11 @@ class RegressionTest(unittest.TestCase):
         df = load_titanic_dataset()
         res = analyzer.regression.train(df, client_id=CLIENT_ID,
             idx_var='PassengerId', outcome_var='Age', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
-            algorithm='ridge-regression', train_size=0.5, buffer_batch_size=1000, verbose=VERBOSE)
+            algorithm='ridge-regression', train_size=0.7, buffer_batch_size=1000, verbose=VERBOSE)
         model_id = res['model_id']
         self.assertEqual(len(res['features']), 10)
         self.assertEqual(len(res['stats']), 6)
+        self.assertEqual(len(res['elasticities']), 20)
         res = analyzer.regression.predict(df, model_id=model_id, client_id=CLIENT_ID,
             idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
             buffer_batch_size=1000, verbose=VERBOSE)
@@ -598,10 +604,11 @@ class RegressionTest(unittest.TestCase):
         df = load_titanic_dataset()
         res = analyzer.regression.train(df, client_id=CLIENT_ID,
             idx_var='PassengerId', outcome_var='Age', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
-            algorithm='bayesian-ridge-regression', train_size=0.5, buffer_batch_size=1000, verbose=VERBOSE)
+            algorithm='bayesian-ridge-regression', train_size=0.7, buffer_batch_size=1000, verbose=VERBOSE)
         model_id = res['model_id']
         self.assertEqual(len(res['features']), 10)
         self.assertEqual(len(res['stats']), 6)
+        self.assertEqual(len(res['elasticities']), 20)
         res = analyzer.regression.predict(df, model_id=model_id, client_id=CLIENT_ID,
             idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
             buffer_batch_size=1000, verbose=VERBOSE)

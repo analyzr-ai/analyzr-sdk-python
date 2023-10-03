@@ -42,6 +42,26 @@ class Analyzer:
 
     def version(self):
         """
+        Provide version info
+
+        :return JSON object with version info and other metadata
+        """
+        copy_client = self.client_version()
+        copy_api = self.api_version()
+        return {
+            'api': {
+                'status': copy_api['status']==200, 
+                'version': copy_api['response']['version'] if copy_api['status']==200 else 'N/A',
+                'tenant': copy_api['response']['tenant'] if copy_api['status']==200 else 'N/A',
+            }, 
+            'client': {
+                'version': copy_client['version'],
+            }, 
+            'copyright': copy_client['copyright'], 
+        }
+
+    def api_version(self):
+        """
         Provide API version info
 
         :return: JSON object with API version and other metadata

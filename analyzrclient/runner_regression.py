@@ -6,6 +6,14 @@ from .runner_base import BaseRunner
 from .constants import *
 from .utils import *
 
+LINEAR_ALGORITHMS = [
+    'linear-regression', 
+    'bayesian-ridge-regression', 
+    'lasso-regression', 
+    'ridge-regression', 
+]
+
+
 class RegressionRunner(BaseRunner):
     """
     Run the regression pipeline
@@ -204,7 +212,7 @@ class RegressionRunner(BaseRunner):
                 if keys is None:
                     print('ERROR! Keys not found. ')
                     return None
-                features, stats, coefs, carrysats = self.__retrieve_train_results(
+                features, stats, coefs, carrysats, elasticities = self.__retrieve_train_results(
                     request_id=model_id,
                     client_id=client_id,
                     fref=keys['fref_exp'],
@@ -214,6 +222,7 @@ class RegressionRunner(BaseRunner):
                 res1['stats'] = stats
                 res1['coefs'] = coefs
                 res1['laggingsats'] = carrysats
+                res1['elasticities'] = elasticities
             if res2['status'] in ['Complete', 'Failed']:
                 self._buffer_clear(
                     request_id=model_id, client_id=client_id,
@@ -345,7 +354,7 @@ class RegressionRunner(BaseRunner):
                     step=step,
                     verbose=verbose)
                 if res2['response']['status'] in ['Complete']:
-                    features, stats, coefs, carrysats = self.__retrieve_train_results(
+                    features, stats, coefs, carrysats, elasticities = self.__retrieve_train_results(
                         request_id=request_id, client_id=client_id,
                         fref=fref_exp, verbose=verbose)
                 else:
@@ -367,6 +376,7 @@ class RegressionRunner(BaseRunner):
             res5['stats'] = stats
             res5['coefs'] = coefs
             res5['laggingsats'] = carrysats
+            res5['elasticities'] = elasticities
         return res5
 
     def __train(self, request_id=None, client_id=None,
@@ -445,7 +455,7 @@ class RegressionRunner(BaseRunner):
         stats['Value'] = stats['Value'].astype('float')
 
         # Coefs
-        if self.__algorithm in ['linear-regression', 'bayesian-ridge-regression', 'lasso-regression', 'ridge-regression']: 
+        if self.__algorithm in LINEAR_ALGORITHMS: 
             if verbose: print('    Retrieving coefficients...')
             coefs = self._buffer_read(
                 request_id=request_id, client_id=client_id, dataframe_name='coefs',
@@ -459,12 +469,7 @@ class RegressionRunner(BaseRunner):
             coefs = None
 
         # Saturation and lagging parameters
-        if self.__algorithm in [
-            'linear-regression', 
-            'bayesian-ridge-regression', 
-            'lasso-regression', 
-            'ridge-regression', 
-        ] and self.__includes_carryover_saturation is True: 
+        if self.__algorithm in LINEAR_ALGORITHMS and self.__includes_carryover_saturation is True: 
             if verbose: print('    Retrieving saturation and lagging parameters...')
             carrysats = self._buffer_read(
                 request_id=request_id, client_id=client_id, dataframe_name='carrysats',
@@ -477,4 +482,19 @@ class RegressionRunner(BaseRunner):
         else:
             carrysats = None
 
-        return features, stats, coefs, carrysats
+        # Elasticities
+        if self.__algorithm in LINEAR_ALGORITHMS: 
+            if verbose: print('    Retrieving elasticities...')
+            elasticities = self._buffer_read(
+                request_id=request_id, client_id=client_id, dataframe_name='elasticities',
+                verbose=verbose)
+            elasticities['Value'] = coefs['Value'].astype('float')
+            for idx, row in elasticities.iterrows():
+                elasticities.loc[idx, 'Parameter'] = fref_decode_value(
+                    elasticities.loc[idx, 'Parameter'],
+                    fref)
+        else:
+            elasticities = None
+
+
+        return features, stats, coefs, carrysats, elasticities

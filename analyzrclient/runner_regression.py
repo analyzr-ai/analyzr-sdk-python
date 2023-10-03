@@ -21,6 +21,7 @@ class RegressionRunner(BaseRunner):
         super().__init__(client=client, base_url=base_url)
         self.__uri = '{}/analytics/'.format(self._base_url)
         self.__algorithm = None
+        self.__includes_carryover_saturation = False
         return
 
     def predict(self, df, model_id=None, client_id=None,
@@ -203,7 +204,7 @@ class RegressionRunner(BaseRunner):
                 if keys is None:
                     print('ERROR! Keys not found. ')
                     return None
-                features, stats, coefs = self.__retrieve_train_results(
+                features, stats, coefs, carrysats = self.__retrieve_train_results(
                     request_id=model_id,
                     client_id=client_id,
                     fref=keys['fref_exp'],
@@ -212,6 +213,7 @@ class RegressionRunner(BaseRunner):
                 res1['features'] = features
                 res1['stats'] = stats
                 res1['coefs'] = coefs
+                res1['laggingsats'] = carrysats
             if res2['status'] in ['Complete', 'Failed']:
                 self._buffer_clear(
                     request_id=model_id, client_id=client_id,
@@ -219,8 +221,9 @@ class RegressionRunner(BaseRunner):
         return res1
 
     def train(self, df, client_id=None,
-            idx_var=None, outcome_var=None, categorical_vars=[], numerical_vars=[],
-            bool_vars=[], algorithm=REGRESSION_DEFAULT_ALGO, train_size=0.5,
+            idx_var=None, outcome_var=None, categorical_vars=[], numerical_vars=[], 
+            bool_vars=[], saturation_vars=[], lagging_vars=[], 
+            algorithm=REGRESSION_DEFAULT_ALGO, train_size=0.5,
             buffer_batch_size=1000, param_grid=None, verbose=False, timeout=600,
             poll=True, step=2, compressed=False, staging=True):
         """
@@ -247,6 +250,12 @@ class RegressionRunner(BaseRunner):
         :type numerical_vars: string[], required
         :param bool_vars: array of field names identifying boolean fields in
             the dataframe `df`
+        :type bool_vars: string[], optional
+        :param saturation_vars: array of field names identifying fields requiring 
+            saturation analysis in the dataframe `df`
+        :type bool_vars: string[], optional
+        :param lagging_vars: array of field names identifying fields requiring 
+            lagging analysis in the dataframe `df`
         :type bool_vars: string[], optional
         :param algorithm: can be any of the following:
             `random-forest-regression`, `gradient-boosting-regression`,
@@ -316,7 +325,9 @@ class RegressionRunner(BaseRunner):
                 client_id=client_id,
                 idx_field=fref['forward'][idx_var],
                 outcome_var=fref['forward'][outcome_var],
-                categorical_fields=[ fref['forward'][var] for var in categorical_vars ],
+                categorical_fields=[ fref['forward'][var] for var in categorical_vars ], 
+                saturation_fields=[ fref['forward'][var] for var in saturation_vars ],
+                lagging_fields=[ fref['forward'][var] for var in lagging_vars ],
                 algorithm=algorithm,
                 train_size=train_size,
                 verbose=verbose,
@@ -334,7 +345,7 @@ class RegressionRunner(BaseRunner):
                     step=step,
                     verbose=verbose)
                 if res2['response']['status'] in ['Complete']:
-                    features, stats, coefs = self.__retrieve_train_results(
+                    features, stats, coefs, carrysats = self.__retrieve_train_results(
                         request_id=request_id, client_id=client_id,
                         fref=fref_exp, verbose=verbose)
                 else:
@@ -355,10 +366,12 @@ class RegressionRunner(BaseRunner):
             res5['features'] = features
             res5['stats'] = stats
             res5['coefs'] = coefs
+            res5['laggingsats'] = carrysats
         return res5
 
     def __train(self, request_id=None, client_id=None,
             idx_field=None, outcome_var=None, categorical_fields=[],
+            saturation_fields=[], lagging_fields=[], 
             algorithm=REGRESSION_DEFAULT_ALGO, train_size=0.5,
             param_grid=None, verbose=False, staging=False):
         """
@@ -369,6 +382,8 @@ class RegressionRunner(BaseRunner):
             audit purposes
         :param outcome_var:
         :param categorical_fields:
+        :param saturation_fields:
+        :param lagging_fields:
         :param algorithm:
         :param param_grid:
         :param verbose: Set to true for verbose output
@@ -376,6 +391,7 @@ class RegressionRunner(BaseRunner):
         :return:
         """
         if verbose: print('Training regression model using data in buffer...')
+        self.__includes_carryover_saturation = ( len(saturation_fields)>0 or len(lagging_fields)>0 )
         res = self._client._post(self.__uri, {
             'command': 'regression-train',
             'request_id': request_id,
@@ -385,6 +401,8 @@ class RegressionRunner(BaseRunner):
             'idx_field': idx_field,
             'outcome_var': outcome_var,
             'categorical_fields': categorical_fields,
+            'saturation_fields': saturation_fields, 
+            'carryover_fields': lagging_fields, 
             'staging': staging,
             'param_grid': param_grid,
         })
@@ -402,6 +420,8 @@ class RegressionRunner(BaseRunner):
         :param verbose: Set to true for verbose output
         :return features:
         :return stats:
+        :return coefs:
+        :return carrysats:
         """
         if verbose: print('Retrieving training results...')
 
@@ -438,4 +458,23 @@ class RegressionRunner(BaseRunner):
         else:
             coefs = None
 
-        return features, stats, coefs
+        # Saturation and lagging parameters
+        if self.__algorithm in [
+            'linear-regression', 
+            'bayesian-ridge-regression', 
+            'lasso-regression', 
+            'ridge-regression', 
+        ] and self.__includes_carryover_saturation is True: 
+            if verbose: print('    Retrieving saturation and lagging parameters...')
+            carrysats = self._buffer_read(
+                request_id=request_id, client_id=client_id, dataframe_name='carrysats',
+                verbose=verbose)
+            carrysats['Value'] = carrysats['Value'].astype('float')
+            for idx, row in carrysats.iterrows():
+                carrysats.loc[idx, 'Variable'] = fref_decode_value(
+                    carrysats.loc[idx, 'Variable'],
+                    fref)
+        else:
+            carrysats = None
+
+        return features, stats, coefs, carrysats

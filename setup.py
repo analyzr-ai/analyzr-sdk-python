@@ -6,7 +6,7 @@ README = (HERE / "README.md").read_text()
 
 setup(
     name='analyzr-sdk-python',
-    version='1.2.61',
+    version='1.3.6',
     description='Python SDK for Analyzr API',
     long_description=README,
     long_description_content_type="text/markdown",
@@ -19,6 +19,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
     packages=['analyzrclient'],
     install_requires=[

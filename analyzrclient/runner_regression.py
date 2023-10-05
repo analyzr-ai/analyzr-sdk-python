@@ -212,7 +212,7 @@ class RegressionRunner(BaseRunner):
                 if keys is None:
                     print('ERROR! Keys not found. ')
                     return None
-                features, stats, coefs, carrysats, elasticities = self.__retrieve_train_results(
+                features, stats, coefs, carrysats = self.__retrieve_train_results(
                     request_id=model_id,
                     client_id=client_id,
                     fref=keys['fref_exp'],
@@ -222,7 +222,6 @@ class RegressionRunner(BaseRunner):
                 res1['stats'] = stats
                 res1['coefs'] = coefs
                 res1['laggingsats'] = carrysats
-                res1['elasticities'] = elasticities
             if res2['status'] in ['Complete', 'Failed']:
                 self._buffer_clear(
                     request_id=model_id, client_id=client_id,
@@ -354,7 +353,7 @@ class RegressionRunner(BaseRunner):
                     step=step,
                     verbose=verbose)
                 if res2['response']['status'] in ['Complete']:
-                    features, stats, coefs, carrysats, elasticities = self.__retrieve_train_results(
+                    features, stats, coefs, carrysats = self.__retrieve_train_results(
                         request_id=request_id, client_id=client_id,
                         fref=fref_exp, verbose=verbose)
                 else:
@@ -376,7 +375,6 @@ class RegressionRunner(BaseRunner):
             res5['stats'] = stats
             res5['coefs'] = coefs
             res5['laggingsats'] = carrysats
-            res5['elasticities'] = elasticities
         return res5
 
     def __train(self, request_id=None, client_id=None,
@@ -482,19 +480,4 @@ class RegressionRunner(BaseRunner):
         else:
             carrysats = None
 
-        # Elasticities
-        if self.__algorithm in LINEAR_ALGORITHMS: 
-            if verbose: print('    Retrieving elasticities...')
-            elasticities = self._buffer_read(
-                request_id=request_id, client_id=client_id, dataframe_name='elasticities',
-                verbose=verbose)
-            elasticities['Value'] = coefs['Value'].astype('float')
-            for idx, row in elasticities.iterrows():
-                elasticities.loc[idx, 'Parameter'] = fref_decode_value(
-                    elasticities.loc[idx, 'Parameter'],
-                    fref)
-        else:
-            elasticities = None
-
-
-        return features, stats, coefs, carrysats, elasticities
+        return features, stats, coefs, carrysats

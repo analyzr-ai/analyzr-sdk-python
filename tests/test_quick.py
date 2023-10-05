@@ -175,7 +175,6 @@ class RegressionTest(unittest.TestCase):
         self.assertEqual(len(res['features']), 10)
         self.assertEqual(len(res['stats']), 6)
         self.assertEqual(len(res['coefs']), 10)
-        self.assertEqual(len(res['elasticities']), 20)
         res = analyzer.regression.predict(df, model_id=model_id, client_id=CLIENT_ID,
             idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
             buffer_batch_size=1000, verbose=VERBOSE)

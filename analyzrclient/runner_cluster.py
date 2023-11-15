@@ -102,7 +102,7 @@ class ClusterRunner(BaseRunner):
             self, df, client_id=None, idx_var=None, categorical_vars=[],
             numerical_vars=[], algorithm='pca-kmeans', n_components=5,
             buffer_batch_size=1000, cluster_batch_size=None,
-            verbose=False, poll=True, compressed=False, staging=True):
+            verbose=False, poll=True, compressed=False, staging=True, out_of_core=False):
         """
         Run clustering algorithm on user-provided dataset
 
@@ -166,6 +166,7 @@ class ClusterRunner(BaseRunner):
             cluster_batch_size=cluster_batch_size, algorithm=algorithm,
             n_components=n_components, request_id=request_id, client_id=client_id,
             verbose=verbose, compressed=compressed, poll=poll, staging=staging,
+            out_of_core=out_of_core
         )
 
     def __train(
@@ -173,7 +174,7 @@ class ClusterRunner(BaseRunner):
             idx_var=None, verbose=False, buffer_batch_size=1000,
             algorithm='pca-kmeans', n_components=5, cluster_batch_size=None,
             request_id=None, client_id=None, timeout=600, step=2,
-            compressed=False, poll=True, staging=False):
+            compressed=False, poll=True, staging=False, out_of_core=False):
         """
         """
         # Encode data and save it to buffer
@@ -214,6 +215,7 @@ class ClusterRunner(BaseRunner):
                 batch_size=cluster_batch_size,
                 verbose=verbose,
                 staging=staging,
+                out_of_core=out_of_core,
             )
             if poll:
                 res2 = self._poll(
@@ -253,7 +255,7 @@ class ClusterRunner(BaseRunner):
     def __cluster_train(
             self, request_id=None, client_id=None, idx_field=None,
             categorical_fields=[], algorithm='pca-kmeans', n_components=5,
-            batch_size=None, verbose=False, staging=False):
+            batch_size=None, verbose=False, staging=False, out_of_core=False):
         """
         :param request_id:
         :param client_id: Short name for account being used. Used for reporting
@@ -283,6 +285,7 @@ class ClusterRunner(BaseRunner):
             'idx_field': idx_field,
             'categorical_fields': categorical_fields,
             'staging': staging,
+            'out_of_core': out_of_core, 
         })
         return res
 

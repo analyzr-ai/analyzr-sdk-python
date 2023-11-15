@@ -166,7 +166,7 @@ class ClusterRunner(BaseRunner):
             cluster_batch_size=cluster_batch_size, algorithm=algorithm,
             n_components=n_components, request_id=request_id, client_id=client_id,
             verbose=verbose, compressed=compressed, poll=poll, staging=staging,
-            out_of_core=out_of_core, original_df_length=original_df_length
+            out_of_core=out_of_core
         )
 
     def __train(

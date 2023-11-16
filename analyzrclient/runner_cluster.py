@@ -99,7 +99,7 @@ class ClusterRunner(BaseRunner):
         return res
 
     def run(
-            self, df, client_id=None, idx_var=None, categorical_vars=[],
+            self, df, client_id=None, request_id=None, idx_var=None, categorical_vars=[],
             numerical_vars=[], algorithm='pca-kmeans', n_components=5,
             buffer_batch_size=1000, cluster_batch_size=None,
             verbose=False, poll=True, compressed=False, staging=True, out_of_core=False):
@@ -159,7 +159,7 @@ class ClusterRunner(BaseRunner):
                     `stats`: count, frequency, and attribute averages by cluster
                     ID
         """
-        request_id = self._get_request_id()
+        request_id = request_id if request_id is not None else self._get_request_id()
         return self.__train(
             df, categorical_vars=categorical_vars, numerical_vars=numerical_vars,
             idx_var=idx_var, buffer_batch_size=buffer_batch_size,

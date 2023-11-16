@@ -159,10 +159,7 @@ class ClusterRunner(BaseRunner):
                     `stats`: count, frequency, and attribute averages by cluster
                     ID
         """
-        if request_id is not None: 
-            request_id = request_id
-        else:
-            request_id = self._get_request_id()
+        request_id = request_id if request_id is not None else self._get_request_id()
         return self.__train(
             df, categorical_vars=categorical_vars, numerical_vars=numerical_vars,
             idx_var=idx_var, buffer_batch_size=buffer_batch_size,

@@ -309,7 +309,7 @@ class ClusterRunner(BaseRunner):
                 numerical_vars=numerical_vars, record_id_var=idx_var,xref=xref,
                 zref=zref, rref=rref, fref=fref, verbose=verbose)
 
-        return df2, res
+        return df2
 
     def predict(
             self, df, model_id=None, client_id=None, idx_var=None,

@@ -169,14 +169,14 @@ class RegressionTest(unittest.TestCase):
     def test_lasso_regression(self):
         df = load_titanic_dataset()
         res = analyzer.regression.train(df, client_id=CLIENT_ID,
-            idx_var='PassengerId', outcome_var='Age', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
-            algorithm='lasso-regression', train_size=0.5, buffer_batch_size=1000, verbose=VERBOSE)
+            idx_var='PassengerId', outcome_var='Age', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare', 'Age'],
+            algorithm='lasso-regression', train_size=0.7, buffer_batch_size=1000, verbose=VERBOSE)
         model_id = res['model_id']
         self.assertEqual(len(res['features']), 10)
         self.assertEqual(len(res['stats']), 6)
         self.assertEqual(len(res['coefs']), 10)
         res = analyzer.regression.predict(df, model_id=model_id, client_id=CLIENT_ID,
-            idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
+            idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare', 'Age'],
             buffer_batch_size=1000, verbose=VERBOSE)
         res2 = analyzer.regression.buffer_usage(client_id=CLIENT_ID)
         df3 = res['data2']

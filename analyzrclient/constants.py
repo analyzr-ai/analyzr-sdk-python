@@ -18,11 +18,11 @@ from pathlib import Path
 #                          GENERAL PARAMETERS                                  #
 #==============================================================================#
 VERBOSE = True
-CLIENT_VERSION = '1.2.61'
+CLIENT_VERSION = '1.3.17'
 HOME = str(Path.home())
 TEMP_DIR = '{}/.analyzr'.format(HOME)
 
 #==============================================================================#
 #                          REGRESSION PARAMETERS                               #
 #==============================================================================#
-REGRESSION_DEFAULT_ALGO = 'random-forest-regression'
+REGRESSION_DEFAULT_ALGO = 'linear-regression'

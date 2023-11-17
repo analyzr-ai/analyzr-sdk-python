@@ -125,6 +125,22 @@ def zref_decode(series, zref):
 
     return series2
 
+def zref_decode_first_derivative_value(val, zref_x, zref_y):
+    """
+    Replaces z scores in a Series with denormalized numerical values. 
+    Applies to first derivative of variable y with respect to variable 
+    x, such as coefficients for linear regression. 
+
+    :param val:
+    :param zref_x:
+    :param zref_y:
+    :return series2:
+    """
+    new_val = val
+    if np.isnan(zref_y['stdev'])==False and zref_y['stdev']>0.0 and np.isnan(zref_x['stdev'])==False and zref_x['stdev']>0.0:
+        new_val *= (zref_y['stdev'] / zref_x['stdev'])
+    return new_val
+
 def bref_encode(series):
     """
     Boolean variables are not encoded at this stage

@@ -495,13 +495,13 @@ class RegressionTest(unittest.TestCase):
     def test_random_forest_regression(self):
         df = load_titanic_dataset()
         res = analyzer.regression.train(df, client_id=CLIENT_ID,
-            idx_var='PassengerId', outcome_var='Age', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
+            idx_var='PassengerId', outcome_var='Age', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare', 'Age'],
             algorithm='random-forest-regression', train_size=0.5, buffer_batch_size=1000, verbose=VERBOSE)
         model_id = res['model_id']
         self.assertEqual(len(res['features']), 10)
         self.assertEqual(len(res['stats']), 6)
         res = analyzer.regression.predict(df, model_id=model_id, client_id=CLIENT_ID,
-            idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
+            idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare', 'Age'],
             buffer_batch_size=1000, verbose=VERBOSE)
         res2 = analyzer.regression.buffer_usage(client_id=CLIENT_ID)
         df3 = res['data2']
@@ -512,13 +512,13 @@ class RegressionTest(unittest.TestCase):
     def test_gradient_boosting_regression(self):
         df = load_titanic_dataset()
         res = analyzer.regression.train(df, client_id=CLIENT_ID,
-            idx_var='PassengerId', outcome_var='Age', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
+            idx_var='PassengerId', outcome_var='Age', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare', 'Age'],
             algorithm='gradient-boosting-regression', train_size=0.5, buffer_batch_size=1000, verbose=VERBOSE)
         model_id = res['model_id']
         self.assertEqual(len(res['features']), 10)
         self.assertEqual(len(res['stats']), 6)
         res = analyzer.regression.predict(df, model_id=model_id, client_id=CLIENT_ID,
-            idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
+            idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare', 'Age'],
             buffer_batch_size=1000, verbose=VERBOSE)
         res2 = analyzer.regression.buffer_usage(client_id=CLIENT_ID)
         df3 = res['data2']
@@ -529,13 +529,13 @@ class RegressionTest(unittest.TestCase):
     def test_xgboost_regression(self):
         df = load_titanic_dataset()
         res = analyzer.regression.train(df, client_id=CLIENT_ID,
-            idx_var='PassengerId', outcome_var='Age', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
+            idx_var='PassengerId', outcome_var='Age', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare', 'Age'],
             algorithm='xgboost-regression', train_size=0.5, buffer_batch_size=1000, verbose=VERBOSE)
         model_id = res['model_id']
         self.assertEqual(len(res['features']), 10)
         self.assertEqual(len(res['stats']), 6)
         res = analyzer.regression.predict(df, model_id=model_id, client_id=CLIENT_ID,
-            idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
+            idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare', 'Age'],
             buffer_batch_size=1000, verbose=VERBOSE)
         res2 = analyzer.regression.buffer_usage(client_id=CLIENT_ID)
         df3 = res['data2']
@@ -546,13 +546,13 @@ class RegressionTest(unittest.TestCase):
     def test_linear_regression(self):
         df = load_titanic_dataset()
         res = analyzer.regression.train(df, client_id=CLIENT_ID,
-            idx_var='PassengerId', outcome_var='Age', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
+            idx_var='PassengerId', outcome_var='Age', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare', 'Age'],
             algorithm='linear-regression', train_size=0.5, buffer_batch_size=1000, verbose=VERBOSE)
         model_id = res['model_id']
         self.assertEqual(len(res['features']), 10)
         self.assertEqual(len(res['stats']), 6)
         res = analyzer.regression.predict(df, model_id=model_id, client_id=CLIENT_ID,
-            idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
+            idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare', 'Age'],
             buffer_batch_size=1000, verbose=VERBOSE)
         res2 = analyzer.regression.buffer_usage(client_id=CLIENT_ID)
         df3 = res['data2']
@@ -563,13 +563,13 @@ class RegressionTest(unittest.TestCase):
     def test_lasso_regression(self):
         df = load_titanic_dataset()
         res = analyzer.regression.train(df, client_id=CLIENT_ID,
-            idx_var='PassengerId', outcome_var='Age', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
+            idx_var='PassengerId', outcome_var='Age', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare', 'Age'],
             algorithm='lasso-regression', train_size=0.7, buffer_batch_size=1000, verbose=VERBOSE)
         model_id = res['model_id']
         self.assertEqual(len(res['features']), 10)
         self.assertEqual(len(res['stats']), 6)
         res = analyzer.regression.predict(df, model_id=model_id, client_id=CLIENT_ID,
-            idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
+            idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare', 'Age'],
             buffer_batch_size=1000, verbose=VERBOSE)
         res2 = analyzer.regression.buffer_usage(client_id=CLIENT_ID)
         df3 = res['data2']
@@ -580,13 +580,13 @@ class RegressionTest(unittest.TestCase):
     def test_ridge_regression(self):
         df = load_titanic_dataset()
         res = analyzer.regression.train(df, client_id=CLIENT_ID,
-            idx_var='PassengerId', outcome_var='Age', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
+            idx_var='PassengerId', outcome_var='Age', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare', 'Age'],
             algorithm='ridge-regression', train_size=0.7, buffer_batch_size=1000, verbose=VERBOSE)
         model_id = res['model_id']
         self.assertEqual(len(res['features']), 10)
         self.assertEqual(len(res['stats']), 6)
         res = analyzer.regression.predict(df, model_id=model_id, client_id=CLIENT_ID,
-            idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
+            idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare', 'Age'],
             buffer_batch_size=1000, verbose=VERBOSE)
         res2 = analyzer.regression.buffer_usage(client_id=CLIENT_ID)
         df3 = res['data2']
@@ -597,13 +597,13 @@ class RegressionTest(unittest.TestCase):
     def test_bayesian_ridge_regression(self):
         df = load_titanic_dataset()
         res = analyzer.regression.train(df, client_id=CLIENT_ID,
-            idx_var='PassengerId', outcome_var='Age', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
+            idx_var='PassengerId', outcome_var='Age', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare', 'Age'],
             algorithm='bayesian-ridge-regression', train_size=0.7, buffer_batch_size=1000, verbose=VERBOSE)
         model_id = res['model_id']
         self.assertEqual(len(res['features']), 10)
         self.assertEqual(len(res['stats']), 6)
         res = analyzer.regression.predict(df, model_id=model_id, client_id=CLIENT_ID,
-            idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
+            idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare', 'Age'],
             buffer_batch_size=1000, verbose=VERBOSE)
         res2 = analyzer.regression.buffer_usage(client_id=CLIENT_ID)
         df3 = res['data2']

@@ -180,23 +180,25 @@ class ClusterRunner(BaseRunner):
         # Encode data and save it to buffer
         df3 = None
         if verbose: print('Request ID: {}'.format(request_id))
+        keys = self._keys_load(model_id=request_id, verbose=True)
         data, xref, zref, rref, fref, fref_exp, bref = self._encode(
             df, categorical_vars=categorical_vars, numerical_vars=numerical_vars,
-            bool_vars=bool_vars, record_id_var=idx_var, verbose=verbose)
+            bool_vars=bool_vars, record_id_var=idx_var, verbose=verbose, keys=keys)
 
         # Save encoding keys locally
-        self._keys_save(
-            model_id=request_id,
-            keys={
-                'xref': xref,
-                'zref': zref,
-                'rref': rref,
-                'fref': fref,
-                'fref_exp': fref_exp,
-                'bref': bref,
-                'idx_var': idx_var
-            },
-            verbose=verbose)
+        if keys is None: 
+            self._keys_save(
+                model_id=request_id,
+                keys={
+                    'xref': xref,
+                    'zref': zref,
+                    'rref': rref,
+                    'fref': fref,
+                    'fref_exp': fref_exp,
+                    'bref': bref,
+                    'idx_var': idx_var
+                },
+                verbose=verbose)
 
         # Save encoded data to buffer
         res = self._buffer_save(

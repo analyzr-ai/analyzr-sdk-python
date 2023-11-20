@@ -185,20 +185,19 @@ class ClusterRunner(BaseRunner):
             df, categorical_vars=categorical_vars, numerical_vars=numerical_vars,
             bool_vars=bool_vars, record_id_var=idx_var, verbose=verbose, keys=keys)
 
-        # Save encoding keys locally
-        if keys is None: 
-            self._keys_save(
-                model_id=request_id,
-                keys={
-                    'xref': xref,
-                    'zref': zref,
-                    'rref': rref,
-                    'fref': fref,
-                    'fref_exp': fref_exp,
-                    'bref': bref,
-                    'idx_var': idx_var
-                },
-                verbose=verbose)
+        # Save encoding keys locally 
+        self._keys_save(
+            model_id=request_id,
+            keys={
+                'xref': xref,
+                'zref': zref,
+                'rref': rref,
+                'fref': fref,
+                'fref_exp': fref_exp,
+                'bref': bref,
+                'idx_var': idx_var
+            },
+            verbose=verbose)
 
         # Save encoded data to buffer
         res = self._buffer_save(

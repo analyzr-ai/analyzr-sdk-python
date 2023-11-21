@@ -18,7 +18,7 @@ from pathlib import Path
 #                          GENERAL PARAMETERS                                  #
 #==============================================================================#
 VERBOSE = True
-CLIENT_VERSION = '1.3.24'
+CLIENT_VERSION = '1.3.25'
 HOME = str(Path.home())
 TEMP_DIR = '{}/.analyzr'.format(HOME)
 

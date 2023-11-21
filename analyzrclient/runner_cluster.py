@@ -83,7 +83,7 @@ class ClusterRunner(BaseRunner):
 
         return res1
 
-    def __post_process_results(self, df, pc_id, idx_var, categorical_vars):
+    def __post_process_results(self, df, pc_id, idx_var, categorical_vars, verbose=False):
         """
         :param df:
         :param pc_id:
@@ -92,6 +92,7 @@ class ClusterRunner(BaseRunner):
         :return res:
         """
         res = {}
+        if verbose: print(df, pc_id, idx_var)
         df3 = merge_cluster_ids(df, pc_id, idx_var)
         res['data'] = df3
         res['stats'] = compute_cluster_stats(df3, categorical_vars)
@@ -181,6 +182,7 @@ class ClusterRunner(BaseRunner):
         df3 = None
         if verbose: print('Request ID: {}'.format(request_id))
         keys = self._keys_load(model_id=request_id, verbose=True)
+        if verbose: print('Keys...', keys)
         data, xref, zref, rref, fref, fref_exp, bref = self._encode(
             df, categorical_vars=categorical_vars, numerical_vars=numerical_vars,
             bool_vars=bool_vars, record_id_var=idx_var, verbose=verbose, keys=keys)
@@ -248,7 +250,7 @@ class ClusterRunner(BaseRunner):
         #  Compile results
         if verbose and not poll: print('Clustering job started with polling disabled. You will need to request results for this request ID.')
         res5 = self.__post_process_results(
-            df, df2, idx_var, categorical_vars) if poll else {}
+            df, df2, idx_var, categorical_vars, verbose) if poll else {}
         res5['request_id'] = request_id # append request ID for future reference
         res5['model_id'] = request_id # append request ID for future reference
         return res5

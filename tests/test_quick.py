@@ -201,7 +201,7 @@ class CausalTest(unittest.TestCase):
 
 class RunnerBaseTest(unittest.TestCase):
 
-    def test_load_keys(self):
+    def test_load_keys_and_encode(self):
         request_id = str(uuid.uuid4())
         categorical_vars = ['Sex', 'Embarked'] 
         numerical_vars = ['Pclass', 'Age', 'SibSp', 'Parch', 'Fare']   
@@ -222,3 +222,29 @@ class RunnerBaseTest(unittest.TestCase):
         self.assertEqual(zref['Fare']['mean'], 34.567251404494385)
         self.assertEqual(zref['Fare']['stdev'], 52.93864817471089)
 
+    def test_load_keys_and_decode(self):
+        request_id = str(uuid.uuid4())
+        categorical_vars = ['Sex', 'Embarked'] 
+        numerical_vars = ['Pclass', 'Age', 'SibSp', 'Parch', 'Fare']   
+        idx_var = ['PassengerId']
+        bool_vars = []
+        verbose = True     
+        df = load_titanic_dataset()
+        keys = analyzer.cluster._keys_load(model_id=request_id, verbose=True)
+        data, xref, zref, rref, fref, fref_exp, bref = analyzer.cluster._encode(
+            df, categorical_vars=categorical_vars, numerical_vars=numerical_vars,
+            bool_vars=bool_vars, record_id_var=idx_var, verbose=verbose, keys=keys)
+        self.assertEqual(len(data), len(df))
+        self.assertEqual(fref['forward']['Embarked'], 'X_8')
+        self.assertEqual(fref['reverse']['X_8'], 'Embarked')
+        self.assertEqual(zref['Parch']['mean'], 0.43258426966292135)
+        self.assertEqual(zref['Pclass']['mean'], 2.240168539325843)
+        self.assertEqual(zref['SibSp']['stdev'], 0.9306921267673428)
+        self.assertEqual(zref['Fare']['mean'], 34.567251404494385)
+        self.assertEqual(zref['Fare']['stdev'], 52.93864817471089)
+        df2 = analyzer.cluster._decode(
+                data, categorical_vars=categorical_vars,
+                numerical_vars=numerical_vars, record_id_var=idx_var[0],xref=xref,
+                zref=zref, rref=rref, fref=fref, verbose=verbose)
+        self.assertEqual(len(df2), len(data))
+        self.assertEqual(len(df2), len(df))

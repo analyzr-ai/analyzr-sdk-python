@@ -199,3 +199,26 @@ class CausalTest(unittest.TestCase):
         self.assertEqual(len(res['bins']), 10)
         self.assertTrue(abs(res['atx'].loc['1']['Value']-0.2)/0.2 <= EPSILON) # ATT = 0.2
 
+class RunnerBaseTest(unittest.TestCase):
+
+    def test_load_keys(self):
+        request_id = str(uuid.uuid4())
+        categorical_vars = ['Sex', 'Embarked'] 
+        numerical_vars = ['Pclass', 'Age', 'SibSp', 'Parch', 'Fare']   
+        idx_var = ['PassengerId']
+        bool_vars = []
+        verbose = True     
+        df = load_titanic_dataset()
+        keys = analyzer.cluster._keys_load(model_id=request_id, verbose=True)
+        data, xref, zref, rref, fref, fref_exp, bref = analyzer.cluster._encode(
+            df, categorical_vars=categorical_vars, numerical_vars=numerical_vars,
+            bool_vars=bool_vars, record_id_var=idx_var, verbose=verbose, keys=keys)
+        self.assertEqual(len(data), len(df))
+        self.assertEqual(fref['forward']['Embarked'], 'X_8')
+        self.assertEqual(fref['reverse']['X_8'], 'Embarked')
+        self.assertEqual(zref['Parch']['mean'], 0.43258426966292135)
+        self.assertEqual(zref['Pclass']['mean'], 2.240168539325843)
+        self.assertEqual(zref['SibSp']['stdev'], 0.9306921267673428)
+        self.assertEqual(zref['Fare']['mean'], 34.567251404494385)
+        self.assertEqual(zref['Fare']['stdev'], 52.93864817471089)
+

@@ -169,7 +169,8 @@ def rref_encode(df, record_id_var):
     :return rref:
     """
     df2 = deepcopy(df)
-    df2[record_id_var], rref = xref_encode(df[record_id_var])
+    series = df[record_id_var].squeeze() if isinstance(df[record_id_var], pd.DataFrame) else df[record_id_var]
+    df2[record_id_var], rref = xref_encode(series)
     return df2, rref
 
 def rref_encode_with_keys(df, record_id_var, rref):
@@ -182,7 +183,8 @@ def rref_encode_with_keys(df, record_id_var, rref):
     :return df2:
     """
     df2 = deepcopy(df)
-    df2[record_id_var] = xref_encode_with_keys(df[record_id_var], rref)
+    series = df[record_id_var].squeeze() if isinstance(df[record_id_var], pd.DataFrame()) else df[record_id_var]
+    df2[record_id_var] = xref_encode_with_keys(series, rref)
     return df2
 
 def rref_decode(df, record_id_var, rref):

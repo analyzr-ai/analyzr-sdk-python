@@ -57,7 +57,7 @@ def xref_encode_with_keys(series, xref):
         print('        WARNING! The following values were not present in the training encoding set and will be skipped: ', skipped_vals)
     return series2
 
-def xref_decode(series, xref):
+def xref_decode(series, xref, verbose=False):
     """
     Replaces UUIDs in a Series with matching categorical values
 
@@ -67,6 +67,7 @@ def xref_decode(series, xref):
     """
     series2 = deepcopy(series)
     for idx, val in series.iteritems():
+        if verbose: print(idx, val)
         series2[idx] = xref['reverse'][val]
     return series2
 
@@ -187,7 +188,7 @@ def rref_encode_with_keys(df, record_id_var, rref):
     df2[record_id_var] = xref_encode_with_keys(series, rref)
     return df2
 
-def rref_decode(df, record_id_var, rref):
+def rref_decode(df, record_id_var, rref, verbose=False):
     """
     :param df:
     :param record_id_var:
@@ -199,6 +200,7 @@ def rref_decode(df, record_id_var, rref):
     if record_id_var not in df2.columns:
         df2[record_id_var] = df2.index
     series = df[record_id_var].squeeze() if isinstance(df[record_id_var], pd.DataFrame) else df[record_id_var]
+    if verbose: print(series, rref)
     df2[record_id_var] = xref_decode(series, rref)
     df2 = df2.set_index(record_id_var)
     return df2

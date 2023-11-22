@@ -394,7 +394,7 @@ class BaseRunner:
         # Decode record ID
         if record_id_var is not None and record_id_var in df2.columns:
             if verbose: print('Decoding record IDs...')
-            df2 = rref_decode(df2, record_id_var, rref)
+            df2 = rref_decode(df2, record_id_var, rref, verbose=True)
 
         return df2
 

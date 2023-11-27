@@ -253,7 +253,7 @@ class ClusterRunner(BaseRunner):
         #  Compile results
         if verbose and not poll: print('Clustering job started with polling disabled. You will need to request results for this request ID.')
         res5 = self.__post_process_results(
-            df, df2, idx_var, categorical_vars, verbose) if poll else {}
+            df, df2, idx_var, categorical_vars, verbose, out_of_core=out_of_core) if poll else {}
         res5['request_id'] = request_id # append request ID for future reference
         res5['model_id'] = request_id # append request ID for future reference
         return res5

@@ -350,9 +350,9 @@ def merge_cluster_ids(df, pc_id, idx_var):
     print(df)
     print(pc_id)
     for column in df.columns:
-        print(column, column.dtype)
+        print(column, df[column].dtype)
     for column in pc_id.columns: 
-        print(column, column.dtype)
+        print(column, pc_id[column].dtype)
     return pd.merge(df, pc_id, left_on=idx_var, right_on=idx_var, how='left')
 
 def get_test_data():

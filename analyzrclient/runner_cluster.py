@@ -99,7 +99,8 @@ class ClusterRunner(BaseRunner):
             df3 = merge_cluster_ids(df, pc_id, idx_var)
         else: 
             pc_id = pc_id.reset_index(inplace=True)
-            pc_id = pc_id[[idx_var,'PC_ID']]
+            print(pc_id)
+            pc_id = pc_id['PC_ID']
             df3 = merge_cluster_ids(df, pc_id, idx_var)
         if verbose: print('Merged data with pc_ids...', df3)
         res['data'] = df3

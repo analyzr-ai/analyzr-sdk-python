@@ -92,9 +92,6 @@ class ClusterRunner(BaseRunner):
         :return res:
         """
         res = {}
-        if verbose: 
-            print('df', df)
-            print('pc_id', pc_id)
         if not out_of_core:
             df3 = merge_cluster_ids(df, pc_id, idx_var)
         else: 

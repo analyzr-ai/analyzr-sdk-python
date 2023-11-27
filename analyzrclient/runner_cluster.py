@@ -79,7 +79,7 @@ class ClusterRunner(BaseRunner):
             if res2['status'] in ['Complete', 'Failed']:
                 self._buffer_clear(
                     request_id=request_id, client_id=client_id,
-                    verbose=verbose)
+                    verbose=verbose, out_of_core=False)
 
         return res1
 
@@ -244,7 +244,7 @@ class ClusterRunner(BaseRunner):
         # Clear buffer
         if poll: res3 = self._buffer_clear(
             request_id=res['request_id'], client_id=client_id,
-            verbose=verbose)
+            verbose=verbose, out_of_core=out_of_core)
 
         #  Compile results
         if verbose and not poll: print('Clustering job started with polling disabled. You will need to request results for this request ID.')
@@ -432,7 +432,7 @@ class ClusterRunner(BaseRunner):
         # Clear buffer
         res4 = self._buffer_clear(
             request_id=res['request_id'], client_id=client_id,
-            verbose=verbose)
+            verbose=verbose, out_of_core=False)
 
         # Decode data
         if encoding:

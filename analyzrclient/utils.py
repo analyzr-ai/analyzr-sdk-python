@@ -48,8 +48,14 @@ def xref_encode_with_keys(series, xref):
     series2 = deepcopy(series)
     skipped_vals = []
     for idx, val in series2.iteritems():
-        if val in xref['forward'].keys():
-            series2[idx] = xref['forward'][val]
+        if val is not None and val is not np.nan:
+            if str(val) not in xref['forward'].keys():
+                # Adding missing value to keys
+                key = str(uuid.uuid4())
+                xref['forward'][str(val)] = key
+                xref['reverse'][key] = str(val)
+                if str(val) not in skipped_vals: skipped_vals.append(str(val))
+            series2[idx] = xref['forward'][str(val)]
         else:
             series2[idx] = None
             if val not in skipped_vals: skipped_vals.append(val)

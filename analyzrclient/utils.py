@@ -347,6 +347,7 @@ def merge_cluster_ids(df, pc_id, idx_var):
     :param idx_var: name of record ID field
     :return df2:
     """
+    df.set_index(idx_var)
     print('df...', df)
     print('pc_id...', pc_id)
     print(idx_var)

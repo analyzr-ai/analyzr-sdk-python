@@ -347,11 +347,6 @@ def merge_cluster_ids(df, pc_id, idx_var):
     :param idx_var: name of record ID field
     :return df2:
     """
-    print('df...', df)
-    print('type of df[idx_var]...', df[idx_var].dtype)
-    print('pc_id...', pc_id)
-    print('type of pc_id is...', pc_id.dtype)
-    print(idx_var)
     return pd.merge(df, pc_id, left_on=idx_var, right_on=idx_var, how='left')
 
 def get_test_data():

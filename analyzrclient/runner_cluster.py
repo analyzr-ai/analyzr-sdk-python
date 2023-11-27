@@ -98,7 +98,7 @@ class ClusterRunner(BaseRunner):
         if not out_of_core:
             df3 = merge_cluster_ids(df, pc_id, idx_var)
         else: 
-            pc_id = pc_id.reset_index(inplace=True)
+            pc_id.reset_index(inplace=True)
             print(pc_id)
             pc_id = pc_id['PC_ID']
             df3 = merge_cluster_ids(df, pc_id, idx_var)

@@ -71,6 +71,8 @@ def xref_decode(series, xref, verbose=False):
     :return series2:
     """
     series2 = deepcopy(series)
+    print('Series...', series)
+    print('rref...', xref)
     for idx, val in series.iteritems():
         series2[idx] = xref['reverse'][val]
     return series2

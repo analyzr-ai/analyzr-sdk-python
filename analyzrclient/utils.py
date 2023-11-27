@@ -58,7 +58,6 @@ def xref_encode_with_keys(series, xref):
             series2[idx] = xref['forward'][str(val)]
         else:
             series2[idx] = None
-            if val not in skipped_vals: skipped_vals.append(val)
     if len(skipped_vals)>0:
         print('        WARNING! The following values were not present in the training encoding set and will be skipped: ', skipped_vals)
     return series2
@@ -72,9 +71,7 @@ def xref_decode(series, xref, verbose=False):
     :return series2:
     """
     series2 = deepcopy(series)
-    if verbose: print(series2)
     for idx, val in series.iteritems():
-        if verbose: print(xref['reverse'][val])
         series2[idx] = xref['reverse'][val]
     return series2
 
@@ -207,8 +204,6 @@ def rref_decode(df, record_id_var, rref, verbose=False):
     if record_id_var not in df2.columns:
         df2[record_id_var] = df2.index
     series = df[record_id_var].squeeze() if isinstance(df[record_id_var], pd.DataFrame) else df[record_id_var]
-    if verbose: print('Series...', series)
-    if verbose: print('rref...', rref)
     df2[record_id_var] = xref_decode(series, rref, True)
     df2 = df2.set_index(record_id_var)
     return df2

@@ -92,8 +92,8 @@ class ClusterRunner(BaseRunner):
         :return res:
         """
         res = {}
-        if verbose: print(df, pc_id, idx_var)
         df3 = merge_cluster_ids(df, pc_id, idx_var)
+        if verbose: print('Merged data with pc_ids...', df3)
         res['data'] = df3
         res['stats'] = compute_cluster_stats(df3, categorical_vars)
         res['distances'] = compute_cluster_distances(df3, categorical_vars)

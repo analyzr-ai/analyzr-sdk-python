@@ -187,7 +187,7 @@ class BaseRunner:
         :param staging:
         :return res:
         """
-        if verbose: print('Clearing buffer...')
+        if verbose: print('Clearing buffer with out_of_core...', out_of_core)
         uri = '{}/buffer/'.format(self._base_url)
         res = self._client._post(uri, {
             'command': 'clear',

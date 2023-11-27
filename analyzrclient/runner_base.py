@@ -179,7 +179,7 @@ class BaseRunner:
         if res['status']!=200: print('WARNING! Checking buffer usage failed: {}'.format(res))
         return res
 
-    def _buffer_clear(self, client_id=None, request_id=None, verbose=False):
+    def _buffer_clear(self, client_id=None, request_id=None, verbose=False, out_of_core=False):
         """
         :param client_id: Short name for account being used. Used for reporting purposes only
         :param request_id:
@@ -193,6 +193,7 @@ class BaseRunner:
             'command': 'clear',
             'request_id': request_id,
             'client_id': client_id,
+            'out_of_core': out_of_core, 
         })
         if res['status']!=200: print('WARNING! Buffer clear failed: {}'.format(res))
         return res

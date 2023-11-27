@@ -83,7 +83,7 @@ class ClusterRunner(BaseRunner):
 
         return res1
 
-    def __post_process_results(self, df, pc_id, idx_var, categorical_vars, verbose=False):
+    def __post_process_results(self, df, pc_id, idx_var, categorical_vars, verbose=False, out_of_core=False):
         """
         :param df:
         :param pc_id:
@@ -92,7 +92,11 @@ class ClusterRunner(BaseRunner):
         :return res:
         """
         res = {}
-        df3 = pc_id
+        if not out_of_core:
+            df3 = merge_cluster_ids(df, pc_id, idx_var)
+        else: 
+            pc_id = pc_id['PC_ID']
+            df3 = merge_cluster_ids(df, pc_id, idx_var)
         if verbose: print('Merged data with pc_ids...', df3)
         res['data'] = df3
         res['stats'] = compute_cluster_stats(df3, categorical_vars)

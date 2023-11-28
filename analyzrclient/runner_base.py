@@ -310,7 +310,7 @@ class BaseRunner:
         xref = keys['xref']
         for col in categorical_vars:
             if verbose: print('\t{}'.format(col))
-            df2[col] = xref_encode_with_keys(df[col], xref[col])
+            df2[col], xref = xref_encode_with_keys(df[col], xref[col])
 
         # Encode numerical variables
         if verbose: print('Encoding numerical variables:')

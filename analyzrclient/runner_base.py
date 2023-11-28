@@ -331,7 +331,7 @@ class BaseRunner:
             if verbose: print('Encoding record IDs...')
             # rref = keys['rref']
             # df2 = rref_encode_with_keys(df2, record_id_var, rref)
-            df2 = rref_encode(df2, record_id_var)
+            df2, rref = rref_encode(df2, record_id_var)
             xref[record_id_var] = rref # record IDs are always categorical
         else:
             rref = {}

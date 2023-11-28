@@ -101,14 +101,6 @@ class ClusterRunner(BaseRunner):
                 res, categorical_vars=categorical_vars,
                 numerical_vars=numerical_vars, record_id_var=idx_var,xref=xref,
                 zref=zref, rref=rref, fref=fref, verbose=verbose)
-            stats_mean = self._decode(
-                stats_mean, categorical_vars=categorical_vars,
-                numerical_vars=numerical_vars, record_id_var=idx_var,xref=xref,
-                zref=zref, rref=rref, fref=fref, verbose=verbose)
-            stats_features = self._decode(
-                stats_features, categorical_vars=categorical_vars,
-                numerical_vars=numerical_vars, record_id_var=idx_var,xref=xref,
-                zref=zref, rref=rref, fref=fref, verbose=verbose)
             if df2 is not None and not stats_mean.empty and not stats_features.empty: 
                 return {'data': df2, 'stats_mean' : stats_mean, 'stats_features' : stats_features}
             elif df2 is not None and not stats_mean.empty and stats_features.empty: 

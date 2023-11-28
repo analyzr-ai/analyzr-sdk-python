@@ -82,6 +82,34 @@ class ClusterRunner(BaseRunner):
                     verbose=verbose, out_of_core=False)
 
         return res1
+    
+    def __get_stats(self, request_id=None, client_id=None, categorical_vars=[],
+            numerical_vars=[], idx_var=None, xref=None, zref=None, rref=None,
+            fref=None, verbose=False):
+        
+        res = self._buffer_read(
+            request_id=request_id, client_id=client_id, dataframe_name='res',
+            verbose=verbose, staging=True)
+        stats_mean = self._buffer_read(
+            request_id=request_id, client_id=client_id, dataframe_name='stats_mean',
+            verbose=verbose, staging=True)
+        stats_features = self._buffer_read(
+            request_id=request_id, client_id=client_id, dataframe_name='stats_features',
+            verbose=verbose, staging=True)
+        if not res.empty:
+            df2 = self._decode(
+                res, categorical_vars=categorical_vars,
+                numerical_vars=numerical_vars, record_id_var=idx_var,xref=xref,
+                zref=zref, rref=rref, fref=fref, verbose=verbose)
+            if df2 is not None and not stats_mean.empty and not stats_features.empty: 
+                return {'data': df2, 'stats_mean' : stats_mean, 'stats_features' : stats_features}
+            elif df2 is not None and not stats_mean.empty and stats_features.empty: 
+                return {'data': df2, 'stats_mean' : stats_mean, 'stats_features' : None}
+            elif df2 is not None: 
+                return {'data': df2, 'stats_mean' : None, 'stats_features' : None}
+            else: 
+                return {'data': None, 'stats_mean' : None, 'stats_features' : None}
+
 
     def __post_process_results(self, df, pc_id, idx_var, categorical_vars, verbose=False, out_of_core=False):
         """
@@ -93,8 +121,6 @@ class ClusterRunner(BaseRunner):
         """
         res = {}
         if not out_of_core:
-            print(df)
-            print(pc_id)
             pc_id.reset_index(inplace=True)
             df3 = merge_cluster_ids(df, pc_id, idx_var)
         else: 
@@ -190,11 +216,9 @@ class ClusterRunner(BaseRunner):
         df3 = None
         if verbose: print('Request ID: {}'.format(request_id))
         keys = self._keys_load(model_id=request_id, verbose=True)
-        if verbose: print('Keys before encoding...', keys)
         data, xref, zref, rref, fref, fref_exp, bref = self._encode(
             df, categorical_vars=categorical_vars, numerical_vars=numerical_vars,
             bool_vars=bool_vars, record_id_var=idx_var, verbose=verbose, keys=keys)
-        if verbose: print('Keys after encoding and before saving...', keys)
         # Save encoding keys locally 
         self._keys_save(
             model_id=request_id,
@@ -257,8 +281,13 @@ class ClusterRunner(BaseRunner):
 
         #  Compile results
         if verbose and not poll: print('Clustering job started with polling disabled. You will need to request results for this request ID.')
-        res5 = self.__post_process_results(
-            df, df2, idx_var, categorical_vars, verbose, out_of_core=out_of_core) if poll else {}
+        if not out_of_core: 
+            res5 = self.__post_process_results(
+                df, df2, idx_var, categorical_vars, verbose, out_of_core=out_of_core) if poll else {}
+        else: 
+            res5 = self.__get_stats(request_id=res['request_id'], client_id=client_id, categorical_vars=categorical_vars, numerical_vars=numerical_vars, idx_var=idx_var,
+                        xref=xref, zref=zref, rref=rref, fref=fref, verbose=verbose) if poll else {}
+            
         res5['request_id'] = request_id # append request ID for future reference
         res5['model_id'] = request_id # append request ID for future reference
         return res5
@@ -308,7 +337,6 @@ class ClusterRunner(BaseRunner):
         :return df2:
         """
         df2 = None
-        if verbose: print(xref, rref)
         res = self._buffer_read(
             request_id=request_id, client_id=client_id, dataframe_name='res',
             verbose=verbose, staging=True)

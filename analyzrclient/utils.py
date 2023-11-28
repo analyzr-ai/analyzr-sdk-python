@@ -51,14 +51,13 @@ def xref_encode_with_keys(series, xref):
     for idx, val in series2.iteritems():
         if val is not None and val is not np.nan:
             if str(val) not in xref['forward'].keys():
-                print('Value is not in xref forward', str(val))
+                # print('Value is not in xref forward', str(val))
                 # Adding missing value to keys
                 key = str(uuid.uuid4())
                 xref['forward'][str(val)] = key
                 xref['reverse'][key] = str(val)
                 if str(val) not in skipped_vals: skipped_vals.append(str(val))
-            else: 
-                print('Value is in xref forward', str(val))
+                # print('Value is in xref forward', str(val))
             series2[idx] = xref['forward'][str(val)]
         else:
             series2[idx] = None
@@ -75,8 +74,6 @@ def xref_decode(series, xref, verbose=False):
     :return series2:
     """
     series2 = deepcopy(series)
-    print('Series...', series)
-    print('rref...', xref)
     for idx, val in series.iteritems():
         series2[idx] = xref['reverse'][str(val)]
     return series2
@@ -194,6 +191,8 @@ def rref_encode_with_keys(df, record_id_var, rref):
     :return df2:
     """
     df2 = deepcopy(df)
+    print(df2)
+    print('rref in rref_encode_with_keys...', rref)
     series = df[record_id_var].squeeze() if isinstance(df[record_id_var], pd.DataFrame) else df[record_id_var]
     df2[record_id_var] = xref_encode_with_keys(series, rref)
     return df2

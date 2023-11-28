@@ -26,14 +26,15 @@ def xref_encode(series):
     """
     # generate xref
     values = series.value_counts().index
-    xref = {'forward': {np.nan: np.nan}, 'reverse': {np.nan: np.nan}}
+    xref = {'forward': {}, 'reverse': {}}
     for val in values:
-        key = str(uuid.uuid4())
-        xref['forward'][val] = key
-        xref['reverse'][key] = val
+        if val is not None and val is not np.nan: 
+            key = str(uuid.uuid4())
+            xref['forward'][str(val)] = key
+            xref['reverse'][key] = str(val)
 
     # convert series
-    series2 = xref_encode_with_keys(series, xref)
+    series2, xref = xref_encode_with_keys(series, xref)
     return series2, xref
 
 def xref_encode_with_keys(series, xref):
@@ -60,7 +61,7 @@ def xref_encode_with_keys(series, xref):
             series2[idx] = None
     if len(skipped_vals)>0:
         print('        WARNING! The following values were not present in the training encoding set and will be skipped: ', skipped_vals)
-    return series2
+    return series2, xref
 
 def xref_decode(series, xref, verbose=False):
     """
@@ -74,7 +75,7 @@ def xref_decode(series, xref, verbose=False):
     print('Series...', series)
     print('rref...', xref)
     for idx, val in series.iteritems():
-        series2[idx] = xref['reverse'][val]
+        series2[idx] = xref['reverse'][str(val)]
     return series2
 
 def zref_encode(series):

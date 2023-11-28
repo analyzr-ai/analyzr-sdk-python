@@ -305,6 +305,7 @@ class ClusterRunner(BaseRunner):
         :return df2:
         """
         df2 = None
+        if verbose: print(xref, rref)
         res = self._buffer_read(
             request_id=request_id, client_id=client_id, dataframe_name='res',
             verbose=verbose, staging=True)

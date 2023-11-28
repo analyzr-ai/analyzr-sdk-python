@@ -187,10 +187,11 @@ class ClusterRunner(BaseRunner):
         df3 = None
         if verbose: print('Request ID: {}'.format(request_id))
         keys = self._keys_load(model_id=request_id, verbose=True)
+        if verbose: print('Keys before encoding...', keys)
         data, xref, zref, rref, fref, fref_exp, bref = self._encode(
             df, categorical_vars=categorical_vars, numerical_vars=numerical_vars,
             bool_vars=bool_vars, record_id_var=idx_var, verbose=verbose, keys=keys)
-        
+        if verbose: print('Keys after encoding and before saving...', keys)
         # Save encoding keys locally 
         self._keys_save(
             model_id=request_id,

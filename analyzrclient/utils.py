@@ -196,7 +196,7 @@ def rref_encode_with_keys(df, record_id_var, rref):
     df2[record_id_var], rref = xref_encode_with_keys(series, rref)
     print(rref)
     print(df2[record_id_var])
-    return df2
+    return df2, rref
 
 def rref_decode(df, record_id_var, rref, verbose=False):
     """

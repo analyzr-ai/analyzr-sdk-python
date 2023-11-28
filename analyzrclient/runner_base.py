@@ -310,7 +310,7 @@ class BaseRunner:
         xref = keys['xref']
         for col in categorical_vars:
             if verbose: print('\t{}'.format(col))
-            df2[col], xref = xref_encode_with_keys(df[col], xref[col])
+            df2[col], xref[col] = xref_encode_with_keys(df[col], xref[col])
 
         # Encode numerical variables
         if verbose: print('Encoding numerical variables:')
@@ -329,9 +329,10 @@ class BaseRunner:
         # Encode record ID
         if record_id_var is not None:
             if verbose: print('Encoding record IDs...')
-            rref = keys['rref']
+            # rref = keys['rref']
             # df2 = rref_encode_with_keys(df2, record_id_var, rref)
-            df2, rref = rref_encode_with_keys(df2, record_id_var, rref)
+            df2 = rref_encode(df2, record_id_var)
+            xref[record_id_var] = rref # record IDs are always categorical
         else:
             rref = {}
 

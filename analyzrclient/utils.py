@@ -327,7 +327,6 @@ def compute_cluster_stats(df, categorical_fields):
     stats.sort_index(inplace=True)
     stats.index.rename('PC_ID', inplace=True)
     stats = stats.join(pd.get_dummies(df, columns=categorical_fields).groupby('PC_ID').mean(numeric_only=True), on='PC_ID')
-    print(stats)
     return stats.T
 
 def compute_cluster_distances(df, categorical_fields):

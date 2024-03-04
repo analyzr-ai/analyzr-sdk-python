@@ -1,5 +1,5 @@
 """
-Copyright (c) 2020-2021 Go2Market Insights, LLC
+Copyright (c) 2024 Go2Market Insights, Inc
 All rights reserved.
 https://g2m.ai
 

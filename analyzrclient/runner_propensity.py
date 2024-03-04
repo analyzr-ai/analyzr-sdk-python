@@ -104,7 +104,7 @@ class PropensityRunner(BaseRunner):
                 staging=staging,
                 encoding=encoding,
             )
-            res['data2'] = res['data2'].append(res5['data2'])
+            res['data2'] = pd.concat([res['data2'], res5['data2']])
             idx += 1
         return res
 

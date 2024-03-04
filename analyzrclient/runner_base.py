@@ -179,7 +179,7 @@ class BaseRunner:
         if res['status']!=200: print('WARNING! Checking buffer usage failed: {}'.format(res))
         return res
 
-    def _buffer_clear(self, client_id=None, request_id=None, verbose=False):
+    def _buffer_clear(self, client_id=None, request_id=None, verbose=False, out_of_core=False):
         """
         :param client_id: Short name for account being used. Used for reporting purposes only
         :param request_id:
@@ -187,12 +187,13 @@ class BaseRunner:
         :param staging:
         :return res:
         """
-        if verbose: print('Clearing buffer...')
+        if verbose: print('Clearing buffer with out_of_core...', out_of_core)
         uri = '{}/buffer/'.format(self._base_url)
         res = self._client._post(uri, {
             'command': 'clear',
             'request_id': request_id,
             'client_id': client_id,
+            'out_of_core': out_of_core, 
         })
         if res['status']!=200: print('WARNING! Buffer clear failed: {}'.format(res))
         return res
@@ -309,7 +310,7 @@ class BaseRunner:
         xref = keys['xref']
         for col in categorical_vars:
             if verbose: print('\t{}'.format(col))
-            df2[col] = xref_encode_with_keys(df[col], xref[col])
+            df2[col], xref[col] = xref_encode_with_keys(df[col], xref[col])
 
         # Encode numerical variables
         if verbose: print('Encoding numerical variables:')
@@ -328,9 +329,9 @@ class BaseRunner:
         # Encode record ID
         if record_id_var is not None:
             if verbose: print('Encoding record IDs...')
-            # rref = keys['rref']
+            rref = keys['rref']
             # df2 = rref_encode_with_keys(df2, record_id_var, rref)
-            df2, rref = rref_encode(df2, record_id_var)
+            df2, rref = rref_encode_with_keys(df2, record_id_var, rref)
         else:
             rref = {}
 
@@ -394,7 +395,7 @@ class BaseRunner:
         # Decode record ID
         if record_id_var is not None and record_id_var in df2.columns:
             if verbose: print('Decoding record IDs...')
-            df2 = rref_decode(df2, record_id_var, rref)
+            df2 = rref_decode(df2, record_id_var, rref, verbose=True)
 
         return df2
 

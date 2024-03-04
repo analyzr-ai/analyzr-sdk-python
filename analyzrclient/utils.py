@@ -26,14 +26,15 @@ def xref_encode(series):
     """
     # generate xref
     values = series.value_counts().index
-    xref = {'forward': {np.nan: np.nan}, 'reverse': {np.nan: np.nan}}
+    xref = {'forward': {}, 'reverse': {}}
     for val in values:
-        key = str(uuid.uuid4())
-        xref['forward'][val] = key
-        xref['reverse'][key] = val
+        if val is not None and val is not np.nan: 
+            key = str(uuid.uuid4())
+            xref['forward'][str(val)] = key
+            xref['reverse'][key] = str(val)
 
     # convert series
-    series2 = xref_encode_with_keys(series, xref)
+    series2, xref = xref_encode_with_keys(series, xref)
     return series2, xref
 
 def xref_encode_with_keys(series, xref):
@@ -48,16 +49,23 @@ def xref_encode_with_keys(series, xref):
     series2 = deepcopy(series)
     skipped_vals = []
     for idx, val in series2.iteritems():
-        if val in xref['forward'].keys():
-            series2[idx] = xref['forward'][val]
+        if val is not None and val is not np.nan:
+            if str(val) not in xref['forward'].keys():
+                # print('Value is not in xref forward', str(val))
+                # Adding missing value to keys
+                key = str(uuid.uuid4())
+                xref['forward'][str(val)] = key
+                xref['reverse'][key] = str(val)
+                if str(val) not in skipped_vals: skipped_vals.append(str(val))
+                # print('Value is in xref forward', str(val))
+            series2[idx] = xref['forward'][str(val)]
         else:
             series2[idx] = None
-            if val not in skipped_vals: skipped_vals.append(val)
     if len(skipped_vals)>0:
         print('        WARNING! The following values were not present in the training encoding set and will be skipped: ', skipped_vals)
-    return series2
+    return series2, xref
 
-def xref_decode(series, xref):
+def xref_decode(series, xref, verbose=False):
     """
     Replaces UUIDs in a Series with matching categorical values
 
@@ -67,7 +75,7 @@ def xref_decode(series, xref):
     """
     series2 = deepcopy(series)
     for idx, val in series.iteritems():
-        series2[idx] = xref['reverse'][val]
+        series2[idx] = xref['reverse'][str(val)]
     return series2
 
 def zref_encode(series):
@@ -184,6 +192,9 @@ def rref_encode(df, record_id_var):
     :return df2:
     :return rref:
     """
+    if isinstance(df, pd.DataFrame)==False:
+        print('rref_encode() requires a pandas DataFrame object as input', type=type(df))
+        return None, None
     df2 = deepcopy(df)
     df2[record_id_var], rref = xref_encode(df[record_id_var])
     return df2, rref
@@ -197,11 +208,16 @@ def rref_encode_with_keys(df, record_id_var, rref):
     :param rref:
     :return df2:
     """
+    if isinstance(df, pd.DataFrame)==False:
+        print('rref_encode() requires a pandas DataFrame object as input', type=type(df))
+        return None, None
     df2 = deepcopy(df)
-    df2[record_id_var] = xref_encode_with_keys(df[record_id_var], rref)
-    return df2
+    df2[record_id_var], rref = xref_encode_with_keys(df[record_id_var], rref)
+    print(rref)
+    print(df2[record_id_var])
+    return df2, rref
 
-def rref_decode(df, record_id_var, rref):
+def rref_decode(df, record_id_var, rref, verbose=False):
     """
     :param df:
     :param record_id_var:
@@ -212,7 +228,8 @@ def rref_decode(df, record_id_var, rref):
     df2 = deepcopy(df)
     if record_id_var not in df2.columns:
         df2[record_id_var] = df2.index
-    df2[record_id_var] = xref_decode(df2[record_id_var], rref)
+    series = df[record_id_var].squeeze() if isinstance(df[record_id_var], pd.DataFrame) else df[record_id_var]
+    df2[record_id_var] = xref_decode(series, rref, True)
     df2 = df2.set_index(record_id_var)
     return df2
 
@@ -355,6 +372,7 @@ def merge_cluster_ids(df, pc_id, idx_var):
     :param idx_var: name of record ID field
     :return df2:
     """
+    pc_id[idx_var] = pc_id[idx_var].astype(df[idx_var].dtype)
     return pd.merge(df, pc_id, left_on=idx_var, right_on=idx_var, how='left')
 
 def get_test_data():

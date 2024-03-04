@@ -1,5 +1,5 @@
 """
-Copyright (c) 2020-2021 Go2Market Insights, LLC
+Copyright (c) 2024 Go2Market Insights, Inc
 All rights reserved.
 https://g2m.ai
 
@@ -48,7 +48,7 @@ def xref_encode_with_keys(series, xref):
     """
     series2 = deepcopy(series)
     skipped_vals = []
-    for idx, val in series2.iteritems():
+    for idx, val in series2.items():
         if val is not None and val is not np.nan:
             if str(val) not in xref['forward'].keys():
                 # print('Value is not in xref forward', str(val))
@@ -74,7 +74,7 @@ def xref_decode(series, xref, verbose=False):
     :return series2:
     """
     series2 = deepcopy(series)
-    for idx, val in series.iteritems():
+    for idx, val in series.items():
         series2[idx] = xref['reverse'][str(val)]
     return series2
 
@@ -132,6 +132,22 @@ def zref_decode(series, zref):
         series2 += zref['mean']
 
     return series2
+
+def zref_decode_first_derivative_value(val, zref_x, zref_y):
+    """
+    Replaces z scores in a Series with denormalized numerical values. 
+    Applies to first derivative of variable y with respect to variable 
+    x, such as coefficients for linear regression. 
+
+    :param val:
+    :param zref_x:
+    :param zref_y:
+    :return series2:
+    """
+    new_val = val
+    if np.isnan(zref_y['stdev'])==False and zref_y['stdev']>0.0 and np.isnan(zref_x['stdev'])==False and zref_x['stdev']>0.0:
+        new_val *= (zref_y['stdev'] / zref_x['stdev'])
+    return new_val
 
 def bref_encode(series):
     """

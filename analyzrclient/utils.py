@@ -48,7 +48,7 @@ def xref_encode_with_keys(series, xref):
     """
     series2 = deepcopy(series)
     skipped_vals = []
-    for idx, val in series2.iteritems():
+    for idx, val in series2.items():
         if val is not None and val is not np.nan:
             if str(val) not in xref['forward'].keys():
                 # print('Value is not in xref forward', str(val))
@@ -74,7 +74,7 @@ def xref_decode(series, xref, verbose=False):
     :return series2:
     """
     series2 = deepcopy(series)
-    for idx, val in series.iteritems():
+    for idx, val in series.items():
         series2[idx] = xref['reverse'][str(val)]
     return series2
 

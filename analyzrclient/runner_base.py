@@ -474,7 +474,7 @@ class BaseRunner:
             keys = pickle.load(file)
             file.close()
         except FileNotFoundError:
-            print('ERROR! Keys not found for model_id: {}'.format(model_id))
+            print('WARNING! Keys not found for model_id: {}'.format(model_id))
             keys = None
 
         return keys

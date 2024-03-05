@@ -352,7 +352,7 @@ class CausalRunner(BaseRunner):
                     if col in ['control_mean', 'treatment_mean']: 
                         raw2.iloc[i][col] = zref_decode(float(raw2.iloc[i][col]), zref[variable])
                     elif col=='difference_raw':
-                        raw2.iloc[i][col] = raw2.iloc[i]['treatment_mean'] - raw2.iloc[i]['control_mean']
+                        raw2.iloc[i][col] = float(raw2.iloc[i]['treatment_mean']) - float(raw2.iloc[i]['control_mean'])
                     elif col!='variable':
                         raw2.iloc[i][col] = None
                     else:

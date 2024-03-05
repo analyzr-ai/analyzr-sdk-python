@@ -1,5 +1,5 @@
 """
-Copyright (c) 2020-2021 Go2Market Insights, LLC
+Copyright (c) 2024 Go2Market Insights, Inc
 All rights reserved.
 https://g2m.ai
 
@@ -164,19 +164,37 @@ class PropensityTest(unittest.TestCase):
         self.assertEqual(df3.columns[len(df3.columns)-1], 'y_pred')
         self.assertEqual(res2['response']['n_rows'], 0)
 
+    def test_lgbm_classifier(self):
+        df = load_titanic_dataset()
+        res = analyzer.propensity.train(df, client_id=CLIENT_ID,
+            idx_var='PassengerId', outcome_var='Survived', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Age', 'SibSp', 'Parch', 'Fare'],
+            algorithm='lgbm-classifier', train_size=0.5, buffer_batch_size=1000, verbose=VERBOSE)
+        model_id = res['model_id']
+        self.assertEqual(len(res['features']), 10)
+        self.assertEqual(res['confusion_matrix'].shape, (2, 2))
+        self.assertEqual(len(res['stats']), 7)
+        res = analyzer.propensity.predict(df, model_id=model_id, client_id=CLIENT_ID,
+            idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Age', 'SibSp', 'Parch', 'Fare'],
+            buffer_batch_size=1000, verbose=VERBOSE)
+        res2 = analyzer.propensity.buffer_usage(client_id=CLIENT_ID)
+        df3 = res['data2']
+        self.assertEqual(len(df3), 712)
+        self.assertEqual(df3.columns[len(df3.columns)-1], 'y_pred')
+        self.assertEqual(res2['response']['n_rows'], 0)
+
 class RegressionTest(unittest.TestCase):
 
     def test_lasso_regression(self):
         df = load_titanic_dataset()
         res = analyzer.regression.train(df, client_id=CLIENT_ID,
-            idx_var='PassengerId', outcome_var='Age', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
-            algorithm='lasso-regression', train_size=0.5, buffer_batch_size=1000, verbose=VERBOSE)
+            idx_var='PassengerId', outcome_var='Age', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare', 'Age'],
+            algorithm='lasso-regression', train_size=0.7, buffer_batch_size=1000, verbose=VERBOSE)
         model_id = res['model_id']
         self.assertEqual(len(res['features']), 10)
         self.assertEqual(len(res['stats']), 6)
         self.assertEqual(len(res['coefs']), 10)
         res = analyzer.regression.predict(df, model_id=model_id, client_id=CLIENT_ID,
-            idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare'],
+            idx_var='PassengerId', categorical_vars=['Sex', 'Embarked'], numerical_vars=['Pclass', 'Survived', 'SibSp', 'Parch', 'Fare', 'Age'],
             buffer_batch_size=1000, verbose=VERBOSE)
         res2 = analyzer.regression.buffer_usage(client_id=CLIENT_ID)
         df3 = res['data2']

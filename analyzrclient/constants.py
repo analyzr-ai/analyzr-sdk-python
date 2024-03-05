@@ -1,5 +1,5 @@
 """
-Copyright (c) 2020-2023 Go2Market Insights, Inc d/b/a Analyzr
+Copyright (c) 2024 Go2Market Insights, Inc
 All rights reserved.
 https://analyzr.ai
 
@@ -18,11 +18,11 @@ from pathlib import Path
 #                          GENERAL PARAMETERS                                  #
 #==============================================================================#
 VERBOSE = True
-CLIENT_VERSION = '1.3.70'
+CLIENT_VERSION = '1.3.72'
 HOME = str(Path.home())
 TEMP_DIR = '{}/.analyzr'.format(HOME)
 
 #==============================================================================#
 #                          REGRESSION PARAMETERS                               #
 #==============================================================================#
-REGRESSION_DEFAULT_ALGO = 'random-forest-regression'
+REGRESSION_DEFAULT_ALGO = 'linear-regression'

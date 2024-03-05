@@ -12,7 +12,7 @@ the `repo <https://github.com/analyzr-ai/analyzr-sdk-python/>`_
 for examples showing how to use the client. Note that a `client_id` should always
 be provided when querying the API; it is used for reporting purposes.
 
-For additional documentation and support see https://support.analyzr.ai.
+For additional documentation and support see https://help.analyzr.ai.
 
 .. toctree::
    :maxdepth: 2

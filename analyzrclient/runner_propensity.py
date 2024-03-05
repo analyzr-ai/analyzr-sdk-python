@@ -133,17 +133,23 @@ class PropensityRunner(BaseRunner):
         request_id = self._get_request_id()
 
         if encoding:
-            keys = self._keys_load(model_id=model_id, verbose=verbose) # Load encoding keys
+
+            # Load encoding keys
+            keys = self._keys_load(model_id=model_id, verbose=verbose) 
             if keys is None:
                 print('ERROR! Keys not found. ')
                 return None
+
+            # Encode data 
             data, xref, zref, rref, fref, fref_exp, bref = self._encode(
                 df, keys=keys, categorical_vars=categorical_vars,
                 numerical_vars=numerical_vars, bool_vars=bool_vars,
                 record_id_var=idx_var, verbose=verbose)
             if verbose: print('Total rows encoded: {:,}'.format(len(data)))
+
         else:
-            data = df
+
+            data = deepcopy(df)
 
         # Save data to buffer
         res = self._buffer_save(
@@ -175,21 +181,25 @@ class PropensityRunner(BaseRunner):
                     },
                 timeout=timeout,
                 step=step,
-                verbose=verbose)
+                verbose=verbose, 
+            )
             data2 = self.__retrieve_predict_results(
                 request_id=request_id,
                 client_id=client_id,
-                verbose=verbose)
+                verbose=verbose, 
+            )
         else:
             print('ERROR! Buffer save failed: {}'.format(res))
 
         # Clear buffer
         res4 = self._buffer_clear(
-            request_id=res['request_id'], client_id=client_id,
-            verbose=verbose)
+            request_id=res['request_id'], 
+            client_id=client_id,
+            verbose=verbose, 
+        )
 
         # Decode data
-        if encoding:
+        if encoding is True:
             data2 = self._decode(
                 data2,
                 categorical_vars=categorical_vars,
@@ -201,7 +211,7 @@ class PropensityRunner(BaseRunner):
                 rref=rref,
                 fref=fref,
                 bref=bref,
-                verbose=verbose
+                verbose=verbose, 
             )
 
         # Compile results
@@ -398,14 +408,18 @@ class PropensityRunner(BaseRunner):
                     `roc` (receiver operating characteristic curve)
         """
 
-        # Encode data
         request_id = self._get_request_id()
         if verbose: print('Model ID: {}'.format(request_id))
+
         if encoding:
+
+            # Encode data
             data, xref, zref, rref, fref, fref_exp, bref = self._encode(
                 df, categorical_vars=categorical_vars,
                 numerical_vars=numerical_vars, bool_vars=bool_vars,
                 record_id_var=idx_var, verbose=verbose)
+
+            # Save encoding keys locally
             self._keys_save(
                 model_id=request_id,
                 keys={
@@ -417,8 +431,10 @@ class PropensityRunner(BaseRunner):
                     'bref': bref
                 },
                 verbose=verbose) # Save encoding keys locally
+
         else:
-            data = df
+
+            data = deepcopy(df)
 
         # Save encoded data to buffer
         res = self._buffer_save(
@@ -546,7 +562,7 @@ class PropensityRunner(BaseRunner):
         if not features.empty:
             features['Importance'] = features['Importance'].astype('float')
             features.sort_values(by=['Importance'], ascending=False, inplace=True)
-            if encoding:
+            if encoding is True:
                 for idx, row in features.iterrows():
                     features.loc[idx, 'Feature'] = fref_decode_value(
                         features.loc[idx, 'Feature'],

@@ -35,7 +35,7 @@ class RegressionRunner(BaseRunner):
     def predict(self, df, model_id=None, client_id=None,
             idx_var=None, categorical_vars=[], numerical_vars=[], bool_vars=[],
             buffer_batch_size=1000, verbose=False, timeout=600, step=2,
-            compressed=False, staging=True):
+            compressed=False, staging=True, encoding=True):
         """
         Predict outcomes for user-specified dataset using a pre-trained model.
         The data is homomorphically encrypted by the client prior to being
@@ -78,23 +78,34 @@ class RegressionRunner(BaseRunner):
             storage to buffer the data rather than a relational database
             (default is `True`)
         :type staging: boolean, optional
+        :param encoding: Encode and decode data with homomorphic encryption
+        :type compressed: boolean, optional
         :return: JSON object with the following attributes:
                     `model_id` (UUID provided with initial request),
                     `data2`: original dataset with cluster IDs appended
         """
 
-        # Load encoding keys
-        keys = self._keys_load(model_id=model_id, verbose=verbose)
-        if keys is None:
-            print('ERROR! Keys not found. ')
-            return None
         request_id = self._get_request_id()
 
-        # Encode data and save it to buffer
-        data, xref, zref, rref, fref, fref_exp, bref = self._encode(
-            df, keys=keys, categorical_vars=categorical_vars,
-            numerical_vars=numerical_vars, bool_vars=bool_vars,
-            record_id_var=idx_var, verbose=verbose)
+        if encoding is True:
+
+            # Load encoding keys
+            keys = self._keys_load(model_id=model_id, verbose=verbose)
+            if keys is None:
+                print('ERROR! Keys not found. ')
+                return None
+
+            # Encode data 
+            data, xref, zref, rref, fref, fref_exp, bref = self._encode(
+                df, keys=keys, categorical_vars=categorical_vars,
+                numerical_vars=numerical_vars, bool_vars=bool_vars,
+                record_id_var=idx_var, verbose=verbose)
+            
+        else:
+
+            data = deepcopy(df)
+
+        # Save data to buffer
         res = self._buffer_save(
             data, client_id=client_id, request_id=request_id, verbose=verbose,
             batch_size=buffer_batch_size, compressed=compressed,
@@ -103,10 +114,13 @@ class RegressionRunner(BaseRunner):
         # Predict with regression model and retrieve results
         if res['batches_saved']==res['total_batches']:
             self.__predict(
-                request_id=res['request_id'], model_id=model_id,
-                client_id=client_id, idx_field=fref['forward'][idx_var],
-                categorical_fields=[ fref['forward'][var] for var in categorical_vars ],
-                verbose=verbose, staging=staging
+                request_id=res['request_id'], 
+                model_id=model_id,
+                client_id=client_id, 
+                idx_field=fref['forward'][idx_var] if encoding is True else idx_var,
+                categorical_fields=[ fref['forward'][var] for var in categorical_vars ] if encoding is True else categorical_vars,
+                verbose=verbose, 
+                staging=staging 
             )
             self._poll(
                 payload={
@@ -116,24 +130,39 @@ class RegressionRunner(BaseRunner):
                 },
                 timeout=timeout,
                 step=step,
-                verbose=verbose)
+                verbose=verbose
+            )
             data2 = self.__retrieve_predict_results(
-                request_id=request_id, client_id=client_id, rref=rref,
-                verbose=verbose)
+                request_id=request_id, 
+                client_id=client_id, 
+                rref=rref,
+                verbose=verbose, 
+            )
         else:
             print('ERROR! Buffer save failed: {}'.format(res))
 
         # Clear buffer
         res4 = self._buffer_clear(
-            request_id=res['request_id'], client_id=client_id,
-            verbose=verbose)
+            request_id=res['request_id'], 
+            client_id=client_id,
+            verbose=verbose, 
+        )
 
         # Decode data
-        data2 = self._decode(
-            data2, categorical_vars=categorical_vars,
-            numerical_vars=numerical_vars, bool_vars=bool_vars,
-            record_id_var=idx_var, xref=xref, zref=zref, rref=rref, fref=fref,
-            bref=bref, verbose=verbose)
+        if encoding is True:
+            data2 = self._decode(
+                data2, 
+                categorical_vars=categorical_vars,
+                numerical_vars=numerical_vars, 
+                bool_vars=bool_vars,
+                record_id_var=idx_var, 
+                xref=xref, 
+                zref=zref, 
+                rref=rref, 
+                fref=fref,
+                bref=bref, 
+                verbose=verbose, 
+            )
 
         # Compile results
         res5 = {}
@@ -182,7 +211,7 @@ class RegressionRunner(BaseRunner):
             verbose=verbose)
         return data2
 
-    def check_status(self, model_id=None, client_id=None, verbose=False):
+    def check_status(self, model_id=None, client_id=None, outcome_var=None, verbose=False, encoding=True):
         """
         Check the status of a specific model run, and retrieve results if model
         run is complete. Data is homomorphically encoded by default
@@ -192,8 +221,13 @@ class RegressionRunner(BaseRunner):
         :param client_id: Short name for account being used. Used for reporting
             purposes only
         :type client_id: string, required
+        :param outcome_var: name of dependent variable, usually a numerical
+            variable
+        :type outcome_var: string, required
         :param verbose: Set to true for verbose output
         :type verbose: boolean, optional
+        :param encoding: Encode and decode data with homomorphic encryption
+        :type compressed: boolean, optional
         :return: JSON object with the following attributes, as applicable:
                     `status` (can be Pending, Complete, or Failed),
                     `features` (table of feature importances),
@@ -207,15 +241,17 @@ class RegressionRunner(BaseRunner):
         if res2!={} and 'status' in res2.keys():
             res1['status'] = res2['status']
             if res2['status']=='Complete':
-                # Load encoding keys
-                keys = self._keys_load(model_id=model_id, verbose=verbose)
-                if keys is None:
-                    print('ERROR! Keys not found. ')
-                    return None
+                if encoding is True:
+                    keys = self._keys_load(model_id=model_id, verbose=verbose)
+                    if keys is None:
+                        print('ERROR! Keys not found. ')
+                        return None
                 features, stats, coefs, carrysats = self.__retrieve_train_results(
                     request_id=model_id,
                     client_id=client_id,
-                    fref=keys['fref_exp'],
+                    outcome_var=outcome_var, 
+                    fref=keys['fref_exp'] if encoding is True else {},
+                    zref=keys['zref'] if encoding is True else {}, 
                     verbose=verbose
                 )
                 res1['features'] = features
@@ -233,7 +269,7 @@ class RegressionRunner(BaseRunner):
             bool_vars=[], saturation_vars=[], lagging_vars=[], 
             algorithm=REGRESSION_DEFAULT_ALGO, train_size=0.5,
             buffer_batch_size=1000, param_grid=None, verbose=False, timeout=600,
-            poll=True, step=2, compressed=False, staging=True):
+            poll=True, step=2, compressed=False, staging=True, encoding=True):
         """
         Train regression model on user-provided dataset
 
@@ -300,6 +336,8 @@ class RegressionRunner(BaseRunner):
             storage to buffer the data rather than a relational database
             (default is `True`)
         :type staging: boolean, optional
+        :param encoding: Encode and decode data with homomorphic encryption
+        :type compressed: boolean, optional
         :return: JSON object with the following attributes, as applicable:
                     `model_id` (UUID provided with initial request),
                     `features` (table of feature importances),
@@ -308,20 +346,26 @@ class RegressionRunner(BaseRunner):
         """
 
         self.__algorithm = algorithm
-
-        # Encode data
         request_id = self._get_request_id()
         if verbose: print('Model ID: {}'.format(request_id))
-        data, xref, zref, rref, fref, fref_exp, bref = self._encode(
-            df, categorical_vars=categorical_vars, numerical_vars=numerical_vars,
-            bool_vars=bool_vars, record_id_var=idx_var, verbose=verbose)
 
-        # Save encoding keys locally
-        self._keys_save(
-            model_id=request_id, keys={'xref': xref, 'zref': zref, 'rref': rref,
-            'fref': fref, 'fref_exp': fref_exp, 'bref': bref}, verbose=verbose)
+        if encoding is True:
 
-        # Save encoded data to buffer
+            # Encode data
+            data, xref, zref, rref, fref, fref_exp, bref = self._encode(
+                df, categorical_vars=categorical_vars, numerical_vars=numerical_vars,
+                bool_vars=bool_vars, record_id_var=idx_var, verbose=verbose)
+
+            # Save encoding keys locally
+            self._keys_save(
+                model_id=request_id, keys={'xref': xref, 'zref': zref, 'rref': rref,
+                'fref': fref, 'fref_exp': fref_exp, 'bref': bref}, verbose=verbose)
+
+        else:
+
+            data = deepcopy(df)
+
+        # Save data to buffer
         res = self._buffer_save(
             data, client_id=client_id, request_id=request_id, verbose=verbose,
             batch_size=buffer_batch_size, compressed=compressed, staging=staging)
@@ -331,11 +375,11 @@ class RegressionRunner(BaseRunner):
             self.__train(
                 request_id=res['request_id'],
                 client_id=client_id,
-                idx_field=fref['forward'][idx_var],
-                outcome_var=fref['forward'][outcome_var],
-                categorical_fields=[ fref['forward'][var] for var in categorical_vars ], 
-                saturation_fields=[ fref['forward'][var] for var in saturation_vars ],
-                lagging_fields=[ fref['forward'][var] for var in lagging_vars ],
+                idx_field=fref['forward'][idx_var] if encoding is True else idx_var,
+                outcome_var=fref['forward'][outcome_var] if encoding is True else outcome_var,
+                categorical_fields=[ fref['forward'][var] for var in categorical_vars ] if encoding is True else categorical_vars, 
+                saturation_fields=[ fref['forward'][var] for var in saturation_vars ] if encoding is True else saturation_vars,
+                lagging_fields=[ fref['forward'][var] for var in lagging_vars ] if encoding is True else lagging_vars,
                 algorithm=algorithm,
                 train_size=train_size,
                 verbose=verbose,
@@ -354,8 +398,13 @@ class RegressionRunner(BaseRunner):
                     verbose=verbose)
                 if res2['response']['status'] in ['Complete']:
                     features, stats, coefs, carrysats = self.__retrieve_train_results(
-                        request_id=request_id, client_id=client_id,
-                        fref=fref_exp, verbose=verbose)
+                        request_id=request_id, 
+                        client_id=client_id,
+                        outcome_var=outcome_var, 
+                        fref=fref_exp if encoding is True else {}, 
+                        zref=zref if encoding is True else {}, 
+                        verbose=verbose, 
+                        encoding=encoding)
                 else:
                     print('WARNING! Training request came back with status: {}'.format(res2['response']['status']))
         else:
@@ -418,14 +467,18 @@ class RegressionRunner(BaseRunner):
         return res
 
     def __retrieve_train_results(
-            self, request_id=None, client_id=None, fref={},
-            verbose=False):
+            self, request_id=None, client_id=None, 
+            outcome_var=None, fref={}, zref={}, 
+            verbose=False, encoding=True):
         """
         :param request_id:
         :param client_id: Short name for account being used. Used for reporting
             purposes only
+        :param outcome_var:
         :param fref:
+        :param zref:
         :param verbose: Set to true for verbose output
+        :param encoding:
         :return features:
         :return stats:
         :return coefs:
@@ -440,10 +493,11 @@ class RegressionRunner(BaseRunner):
             dataframe_name='features', verbose=verbose)
         features['Importance'] = features['Importance'].astype('float')
         features.sort_values(by=['Importance'], ascending=False, inplace=True)
-        for idx, row in features.iterrows():
-            features.loc[idx, 'Feature'] = fref_decode_value(
-                features.loc[idx, 'Feature'],
-                fref)
+        if encoding is True:
+            for idx, row in features.iterrows():
+                features.loc[idx, 'Feature'] = fref_decode_value(
+                    features.loc[idx, 'Feature'],
+                    fref)
 
         # Stats
         if verbose: print('    Retrieving performance stats...')
@@ -459,10 +513,17 @@ class RegressionRunner(BaseRunner):
                 request_id=request_id, client_id=client_id, dataframe_name='coefs',
                 verbose=verbose)
             coefs['Value'] = coefs['Value'].astype('float')
-            for idx, row in coefs.iterrows():
-                coefs.loc[idx, 'Parameter'] = fref_decode_value(
-                    coefs.loc[idx, 'Parameter'],
-                    fref)
+            if encoding is True:
+                for idx, row in coefs.iterrows():
+                    clear_var = fref_decode_value(
+                        coefs.loc[idx, 'Parameter'],
+                        fref)
+                    coefs.loc[idx, 'Parameter'] = clear_var
+                    if clear_var in zref.keys():
+                        coefs.loc[idx, 'Value'] = zref_decode_first_derivative_value(
+                            coefs.loc[idx, 'Value'], 
+                            zref[clear_var], 
+                            zref[outcome_var])
         else:
             coefs = None
 
@@ -473,10 +534,11 @@ class RegressionRunner(BaseRunner):
                 request_id=request_id, client_id=client_id, dataframe_name='carrysats',
                 verbose=verbose)
             carrysats['Value'] = carrysats['Value'].astype('float')
-            for idx, row in carrysats.iterrows():
-                carrysats.loc[idx, 'Variable'] = fref_decode_value(
-                    carrysats.loc[idx, 'Variable'],
-                    fref)
+            if encoding is True:
+                for idx, row in carrysats.iterrows():
+                    carrysats.loc[idx, 'Variable'] = fref_decode_value(
+                        carrysats.loc[idx, 'Variable'],
+                        fref)
         else:
             carrysats = None
 

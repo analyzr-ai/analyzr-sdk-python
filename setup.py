@@ -1,6 +1,7 @@
 import pathlib
 from setuptools import setup
 
+
 HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text()
 
@@ -20,6 +21,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
     packages=['analyzrclient'],
     install_requires=[

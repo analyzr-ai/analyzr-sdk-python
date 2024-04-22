@@ -104,7 +104,7 @@ class PropensityRunner(BaseRunner):
                 staging=staging,
                 encoding=encoding,
             )
-            res['data2'] = res['data2'].append(res5['data2'])
+            res['data2'] = pd.concat([res['data2'], res5['data2']])
             idx += 1
         return res
 
@@ -325,7 +325,7 @@ class PropensityRunner(BaseRunner):
             bool_vars=[], algorithm='random-forest-classifier', train_size=0.5,
             buffer_batch_size=1000, verbose=False, timeout=600, step=2, poll=True,
             smote=False, param_grid=None, scoring=None, n_splits=None,
-            compressed=False, staging=True, encoding=True):
+            compressed=False, staging=True, encoding=True, out_of_core=False):
         """
         Train propensity model on user-provided dataset
 
@@ -399,6 +399,9 @@ class PropensityRunner(BaseRunner):
         :param encoding: encode and decode data with homomorphic encryption.
             Defaults to `True`
         :type encoding: boolean, optional
+        :param out_of_core: determines whether the model is going to be trained out of core or not. 
+            Defaults to `False`
+        :type out_of_core: boolean, optional
         :return: JSON object with the following attributes, as applicable:
                     `model_id` (UUID provided with initial request),
                     `features` (table of feature importances),
@@ -457,6 +460,7 @@ class PropensityRunner(BaseRunner):
                 param_grid=param_grid,
                 scoring=scoring,
                 n_splits=n_splits,
+                out_of_core=out_of_core, 
             )
             if poll:
                 res2 = self._poll(
@@ -500,7 +504,7 @@ class PropensityRunner(BaseRunner):
             idx_field=None, outcome_var=None, categorical_fields=[],
             algorithm='random-forest-classifier', train_size=0.5, smote=False,
             param_grid=None, scoring=None, n_splits=None,
-            verbose=False, staging=False):
+            verbose=False, staging=False, out_of_core=False):
         """
         :param request_id:
         :param client_id: Short name for account being used. Used for reporting
@@ -517,6 +521,7 @@ class PropensityRunner(BaseRunner):
         :param param_grid:
         :param scoring:
         :param n_splits:
+        :param out_of_core:
         :return:
         """
         if verbose: print('Training propensity model using data in buffer...')
@@ -534,6 +539,7 @@ class PropensityRunner(BaseRunner):
             'param_grid': param_grid,
             'scoring': scoring,
             'n_splits': n_splits,
+            'out_of_core': out_of_core, 
         })
         if verbose: print('Training request posted.')
         return res

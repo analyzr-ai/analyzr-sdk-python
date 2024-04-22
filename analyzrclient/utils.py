@@ -339,7 +339,7 @@ def compute_cluster_stats(df, categorical_fields):
     stats['frequency'] = stats['count']/len(df)
     stats.sort_index(inplace=True)
     stats.index.rename('PC_ID', inplace=True)
-    stats = stats.join(pd.get_dummies(df, columns=categorical_fields).groupby('PC_ID').mean(), on='PC_ID')
+    stats = stats.join(pd.get_dummies(df, columns=categorical_fields).groupby('PC_ID').mean(numeric_only=True), on='PC_ID')
     return stats.T
 
 def compute_cluster_distances(df, categorical_fields):
@@ -349,7 +349,7 @@ def compute_cluster_distances(df, categorical_fields):
     :return distances:
     """
     if df is None: return None
-    df2 = pd.get_dummies(df, columns=categorical_fields).groupby('PC_ID').mean()
+    df2 = pd.get_dummies(df, columns=categorical_fields).groupby('PC_ID').mean(numeric_only=True)
     recs = []
     for idx1, cluster1 in df2.iterrows():
         rec = []

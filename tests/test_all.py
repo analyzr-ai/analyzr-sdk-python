@@ -78,16 +78,12 @@ class BufferTest(unittest.TestCase):
 
     def test_staging_multi_batch_compressed_no_staging(self):
         df = pd.read_csv('https://g2mstaticfiles.blob.core.windows.net/$web/titanic.csv', encoding = "ISO-8859-1", low_memory=False)
-        # print('df: ', df)
         request_id = str(uuid.uuid4())
         res = analyzer.cluster._buffer_save(df, batch_size=500, client_id=CLIENT_ID, request_id=request_id, compressed=True, staging=False)
         self.assertEqual(res['batches_saved'], 2)
         df2 = analyzer.cluster._buffer_read(client_id=CLIENT_ID, request_id=request_id, staging=False, dataframe_name='df')
-        # print('df2: ', df2)
         self.assertEqual(df.shape==df2.shape, True)
         self.assertEqual(len(df.columns), len(df2.columns))
-        # for i in range(0, len(df.columns)): self.assertEqual(df.columns[i], df2.columns[i])
-        # self.assertEqual(df.loc[890, 'Name']==df2.loc['890', 'Name'], True)
         res = analyzer.cluster._buffer_clear(client_id=CLIENT_ID, request_id=request_id)
         self.assertEqual(res['status'], 200)
         self.assertEqual(res['response']['message'], 'Buffer cleared')

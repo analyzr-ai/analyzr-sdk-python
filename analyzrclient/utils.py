@@ -213,8 +213,6 @@ def rref_encode_with_keys(df, record_id_var, rref):
         return None, None
     df2 = deepcopy(df)
     df2[record_id_var], rref = xref_encode_with_keys(df[record_id_var], rref)
-    print(rref)
-    print(df2[record_id_var])
     return df2, rref
 
 def rref_decode(df, record_id_var, rref, verbose=False):
@@ -274,8 +272,6 @@ def fref_to_fref_expanded(fref, xref):
     :param xref:
     :return fref_exp:
     """
-    # print('[fref_to_fref_expanded] fref: ', fref)
-    # print('[fref_to_fref_expanded] xref: ', xref)
     fref_exp = {'forward': {}, 'reverse': {}}
     for col in fref['forward'].keys():
         key = fref['forward'][col]
@@ -290,7 +286,6 @@ def fref_to_fref_expanded(fref, xref):
             # col is not categorical
             fref_exp['forward'][col] = key
             fref_exp['reverse'][key] = col
-    # print('[fref_to_fref_expanded] fref_exp: ', fref_exp)
     return fref_exp
 
 def fref_decode(df, fref):

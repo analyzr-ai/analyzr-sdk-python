@@ -19,8 +19,8 @@ from .utils import *
 CLIENT_ID = 'test'
 N_FEATURES = 2
 N_SAMPLES = 1000
-VERBOSE = False
 EPSILON = 1e-6
+VERBOSE = False
 
 with open('tests/config.json') as json_file: config = json.load(json_file)
 analyzer = Analyzer(host=config['host'])
@@ -78,16 +78,12 @@ class BufferTest(unittest.TestCase):
 
     def test_staging_multi_batch_compressed_no_staging(self):
         df = pd.read_csv('https://g2mstaticfiles.blob.core.windows.net/$web/titanic.csv', encoding = "ISO-8859-1", low_memory=False)
-        # print('df: ', df)
         request_id = str(uuid.uuid4())
         res = analyzer.cluster._buffer_save(df, batch_size=500, client_id=CLIENT_ID, request_id=request_id, compressed=True, staging=False)
         self.assertEqual(res['batches_saved'], 2)
         df2 = analyzer.cluster._buffer_read(client_id=CLIENT_ID, request_id=request_id, staging=False, dataframe_name='df')
-        # print('df2: ', df2)
         self.assertEqual(df.shape==df2.shape, True)
         self.assertEqual(len(df.columns), len(df2.columns))
-        # for i in range(0, len(df.columns)): self.assertEqual(df.columns[i], df2.columns[i])
-        # self.assertEqual(df.loc[890, 'Name']==df2.loc['890', 'Name'], True)
         res = analyzer.cluster._buffer_clear(client_id=CLIENT_ID, request_id=request_id)
         self.assertEqual(res['status'], 200)
         self.assertEqual(res['response']['message'], 'Buffer cleared')
@@ -225,20 +221,19 @@ class RunnerBaseTest(unittest.TestCase):
         numerical_vars = ['Pclass', 'Age', 'SibSp', 'Parch', 'Fare']   
         idx_var = ['PassengerId']
         bool_vars = []
-        verbose = True     
         df = load_titanic_dataset()
-        keys = analyzer.cluster._keys_load(model_id=request_id, verbose=True)
+        keys = analyzer.cluster._keys_load(model_id=request_id, verbose=VERBOSE)
         data, xref, zref, rref, fref, fref_exp, bref = analyzer.cluster._encode(
             df, categorical_vars=categorical_vars, numerical_vars=numerical_vars,
-            bool_vars=bool_vars, record_id_var=idx_var, verbose=verbose, keys=keys)
+            bool_vars=bool_vars, record_id_var=idx_var, verbose=VERBOSE, keys=keys)
         self.assertEqual(len(data), len(df))
         self.assertEqual(fref['forward']['Embarked'], 'X_8')
         self.assertEqual(fref['reverse']['X_8'], 'Embarked')
-        self.assertEqual(zref['Parch']['mean'], 0.43258426966292135)
-        self.assertEqual(zref['Pclass']['mean'], 2.240168539325843)
-        self.assertEqual(zref['SibSp']['stdev'], 0.9306921267673428)
-        self.assertEqual(zref['Fare']['mean'], 34.567251404494385)
-        self.assertEqual(zref['Fare']['stdev'], 52.93864817471089)
+        self.assertTrue(abs(zref['Parch']['mean']/0.43258426966292135 - 1) < EPSILON)
+        self.assertTrue(abs(zref['Pclass']['mean']/2.240168539325843 - 1) < EPSILON)
+        self.assertTrue(abs(zref['SibSp']['stdev']/0.9306921267673428 - 1) < EPSILON)
+        self.assertTrue(abs(zref['Fare']['mean']/34.567251404494385 - 1) < EPSILON)
+        self.assertTrue(abs(zref['Fare']['stdev']/52.93864817471089 - 1) < EPSILON)
 
     def test_load_keys_and_decode(self):
         request_id = str(uuid.uuid4())
@@ -246,23 +241,22 @@ class RunnerBaseTest(unittest.TestCase):
         numerical_vars = ['Pclass', 'Age', 'SibSp', 'Parch', 'Fare']   
         idx_var = ['PassengerId']
         bool_vars = []
-        verbose = True     
         df = load_titanic_dataset()
-        keys = analyzer.cluster._keys_load(model_id=request_id, verbose=True)
+        keys = analyzer.cluster._keys_load(model_id=request_id, verbose=VERBOSE)
         data, xref, zref, rref, fref, fref_exp, bref = analyzer.cluster._encode(
             df, categorical_vars=categorical_vars, numerical_vars=numerical_vars,
-            bool_vars=bool_vars, record_id_var=idx_var, verbose=verbose, keys=keys)
+            bool_vars=bool_vars, record_id_var=idx_var, verbose=VERBOSE, keys=keys)
         self.assertEqual(len(data), len(df))
         self.assertEqual(fref['forward']['Embarked'], 'X_8')
         self.assertEqual(fref['reverse']['X_8'], 'Embarked')
-        self.assertEqual(zref['Parch']['mean'], 0.43258426966292135)
-        self.assertEqual(zref['Pclass']['mean'], 2.240168539325843)
-        self.assertEqual(zref['SibSp']['stdev'], 0.9306921267673428)
-        self.assertEqual(zref['Fare']['mean'], 34.567251404494385)
-        self.assertEqual(zref['Fare']['stdev'], 52.93864817471089)
+        self.assertTrue(abs(zref['Parch']['mean']/0.43258426966292135 - 1) < EPSILON)
+        self.assertTrue(abs(zref['Pclass']['mean']/2.240168539325843 - 1) < EPSILON)
+        self.assertTrue(abs(zref['SibSp']['stdev']/0.9306921267673428 - 1) < EPSILON)
+        self.assertTrue(abs(zref['Fare']['mean']/34.567251404494385 - 1) < EPSILON)
+        self.assertTrue(abs(zref['Fare']['stdev']/52.93864817471089 - 1) < EPSILON)
         df2 = analyzer.cluster._decode(
                 data, categorical_vars=categorical_vars,
                 numerical_vars=numerical_vars, record_id_var=idx_var[0],xref=xref,
-                zref=zref, rref=rref, fref=fref, verbose=verbose)
+                zref=zref, rref=rref, fref=fref, verbose=VERBOSE)
         self.assertEqual(len(df2), len(data))
         self.assertEqual(len(df2), len(df))

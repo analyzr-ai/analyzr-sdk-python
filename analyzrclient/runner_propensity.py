@@ -325,7 +325,7 @@ class PropensityRunner(BaseRunner):
             bool_vars=[], algorithm='random-forest-classifier', train_size=0.5,
             buffer_batch_size=1000, verbose=False, timeout=600, step=2, poll=True,
             smote=False, param_grid=None, scoring=None, n_splits=None,
-            compressed=False, staging=True, encoding=True, out_of_core=False):
+            compressed=False, staging=True, encoding=True, out_of_core=False, unique_categories=[]):
         """
         Train propensity model on user-provided dataset
 
@@ -402,6 +402,9 @@ class PropensityRunner(BaseRunner):
         :param out_of_core: determines whether the model is going to be trained out of core or not. 
             Defaults to `False`
         :type out_of_core: boolean, optional
+        :param unique_categories: Unique categories of the categorical fields. 
+            Defaults to []
+        :type out_of_core: string[], optional
         :return: JSON object with the following attributes, as applicable:
                     `model_id` (UUID provided with initial request),
                     `features` (table of feature importances),
@@ -461,6 +464,7 @@ class PropensityRunner(BaseRunner):
                 scoring=scoring,
                 n_splits=n_splits,
                 out_of_core=out_of_core, 
+                unique_categories=unique_categories
             )
             if poll:
                 res2 = self._poll(
@@ -504,7 +508,7 @@ class PropensityRunner(BaseRunner):
             idx_field=None, outcome_var=None, categorical_fields=[],
             algorithm='random-forest-classifier', train_size=0.5, smote=False,
             param_grid=None, scoring=None, n_splits=None,
-            verbose=False, staging=False, out_of_core=False):
+            verbose=False, staging=False, out_of_core=False, unique_categories=[]):
         """
         :param request_id:
         :param client_id: Short name for account being used. Used for reporting
@@ -540,6 +544,7 @@ class PropensityRunner(BaseRunner):
             'scoring': scoring,
             'n_splits': n_splits,
             'out_of_core': out_of_core, 
+            'unique_categories': unique_categories, 
         })
         if verbose: print('Training request posted.')
         return res

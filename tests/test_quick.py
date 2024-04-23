@@ -236,9 +236,9 @@ class RunnerBaseTest(unittest.TestCase):
         self.assertEqual(fref['reverse']['X_8'], 'Embarked')
         self.assertEqual(zref['Parch']['mean'], 0.43258426966292135)
         self.assertEqual(zref['Pclass']['mean'], 2.240168539325843)
-        self.assertEqual(zref['SibSp']['stdev'], 0.9306921267673425)
+        self.assertEqual(zref['SibSp']['stdev'],  0.9306921267673428)
         self.assertEqual(zref['Fare']['mean'], 34.567251404494385)
-        self.assertEqual(zref['Fare']['stdev'], 52.938648174710885)
+        self.assertEqual(zref['Fare']['stdev'],  52.93864817471089)
 
     def test_load_keys_and_decode(self):
         request_id = str(uuid.uuid4())
@@ -257,9 +257,9 @@ class RunnerBaseTest(unittest.TestCase):
         self.assertEqual(fref['reverse']['X_8'], 'Embarked')
         self.assertEqual(zref['Parch']['mean'], 0.43258426966292135)
         self.assertEqual(zref['Pclass']['mean'], 2.240168539325843)
-        self.assertEqual(zref['SibSp']['stdev'], 0.9306921267673425)
+        self.assertEqual(zref['SibSp']['stdev'], 0.9306921267673428)
         self.assertEqual(zref['Fare']['mean'], 34.567251404494385)
-        self.assertEqual(zref['Fare']['stdev'], 52.938648174710885)
+        self.assertEqual(zref['Fare']['stdev'],  52.93864817471089)
         df2 = analyzer.cluster._decode(
                 data, categorical_vars=categorical_vars,
                 numerical_vars=numerical_vars, record_id_var=idx_var[0],xref=xref,

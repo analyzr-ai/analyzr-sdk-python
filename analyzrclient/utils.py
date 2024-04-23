@@ -61,8 +61,8 @@ def xref_encode_with_keys(series, xref):
             series2[idx] = xref['forward'][str(val)]
         else:
             series2[idx] = None
-    if len(skipped_vals)>0:
-        print('        WARNING! The following values were not present in the training encoding set and will be skipped: ', skipped_vals)
+    # if len(skipped_vals)>0:
+    #     print('WARNING! The following values were not present in the training encoding set and will be skipped: ', skipped_vals)
     return series2, xref
 
 def xref_decode(series, xref, verbose=False):

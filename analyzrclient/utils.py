@@ -78,26 +78,29 @@ def xref_decode(series, xref, verbose=False):
         series2[idx] = xref['reverse'][str(val)]
     return series2
 
-def zref_encode(series):
+def zref_encode(series, numerical=True):
     """
     Replaces numerical values in a Series with z scores
 
     :param series:
+    :param numerical:
     :return series2:
     :return zref:
     """
     zref = { 'mean': series.mean(), 'stdev': series.std() }
-    series2 = zref_encode_with_keys(series, zref)
+    series2 = zref_encode_with_keys(series, zref, numerical=numerical)
     return series2, zref
 
-def zref_encode_with_keys(series, zref):
+def zref_encode_with_keys(series, zref, numerical=True):
     """
     Replaces numerical values in a Series with z scores using existing encoding keys
 
     :param series:
+    :param numerical:
     :param zref:
     :return series2:
     """
+    if numerical==False: return series
     series2 = deepcopy(series)
 
     # Remove mean

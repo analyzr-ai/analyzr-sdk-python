@@ -60,3 +60,10 @@ def load_causal_dataset_v5():
     df['RecordId'] = df['RecordId'].astype('string')
     df['Treatment'] = df['Treatment'].astype('bool')
     return df
+
+def load_performance_analysis_dataset():
+    """
+    :return df:
+    """
+    df = pd.read_csv('https://g2mstaticfiles.blob.core.windows.net/$web/public_datasets/subscriber_data_clean.csv', encoding = "ISO-8859-1", low_memory=False)
+    return df 

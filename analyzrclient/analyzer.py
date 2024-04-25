@@ -10,6 +10,7 @@ from .runner_cluster import ClusterRunner
 from .runner_propensity import PropensityRunner
 from .runner_regression import RegressionRunner
 from .runner_causal import CausalRunner
+from .runner_performance import PerformanceRunner 
 from .runner_task import TaskRunner
 
 
@@ -38,6 +39,7 @@ class Analyzer:
         self.propensity = PropensityRunner(client=self.__client, base_url=self.__base_url)
         self.regression = RegressionRunner(client=self.__client, base_url=self.__base_url)
         self.causal = CausalRunner(client=self.__client, base_url=self.__base_url)
+        self.performance = PerformanceRunner(client=self.__client, base_url=self.__base_url)
         return
 
     def version(self):

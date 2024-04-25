@@ -332,7 +332,7 @@ class CausalRunner(BaseRunner):
     def __decode_raw_stats(self, raw, fref={}, zref={}, outcome_var=None, verbose=False):
         """
         Decode raw stats. Note that homomorphic encryption is only homomorphic with averages. 
-        Other stats are set to None durign decryption.
+        Other stats are set to None during decryption.
 
         :param raw:
         :param fref:

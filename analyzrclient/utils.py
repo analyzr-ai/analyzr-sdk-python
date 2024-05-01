@@ -51,13 +51,11 @@ def xref_encode_with_keys(series, xref):
     for idx, val in series2.items():
         if val is not None and val is not np.nan:
             if str(val) not in xref['forward'].keys():
-                # print('Value is not in xref forward', str(val))
                 # Adding missing value to keys
                 key = str(uuid.uuid4())
                 xref['forward'][str(val)] = key
                 xref['reverse'][key] = str(val)
                 if str(val) not in skipped_vals: skipped_vals.append(str(val))
-                # print('Value is in xref forward', str(val))
             series2[idx] = xref['forward'][str(val)]
         else:
             series2[idx] = None

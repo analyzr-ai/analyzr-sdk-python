@@ -346,22 +346,22 @@ class CausalRunner(BaseRunner):
         raw2 = raw.copy()
         raw2['variable'] = raw2['variable'].apply(lambda s: fref['reverse'][s] if s in fref['reverse'].keys() else s)
         for i in range(0, len(raw2)):
-            variable = raw2.iloc[i]['variable']
+            variable = raw2.loc[str(i),'variable']
             if variable in zref.keys():
                 for col in columns:
                     if col in ['control_mean', 'treatment_mean']: 
-                        raw2.iloc[i][col] = zref_decode(float(raw2.iloc[i][col]), zref[variable])
+                        raw2.loc[str(i), col] = zref_decode(float(raw2.loc[str(i), col]), zref[variable])
                     elif col=='difference_raw':
-                        raw2.iloc[i][col] = float(raw2.iloc[i]['treatment_mean']) - float(raw2.iloc[i]['control_mean'])
+                        raw2.loc[str(i), col] = float(raw2.loc[str(i),'treatment_mean']) - float(raw2.loc[str(i),'control_mean'])
                     elif col!='variable':
-                        raw2.iloc[i][col] = None
+                        raw2.loc[str(i), col] = None
                     else:
                         pass
             else:
                 for col in columns:
                     if col!='variable':
-                        val = raw2.iloc[i][col]
-                        if val is not None: raw2.iloc[i][col] = float(val) 
+                        val = raw2.loc[str(i), col]
+                        if val is not None: raw2.loc[str(i), col] = float(val) 
         return raw2
     
     def __decode_atx_stats(self, atx, fref={}, zref={}, outcome_var=None, verbose=False):

@@ -404,7 +404,7 @@ class PropensityRunner(BaseRunner):
         :type out_of_core: boolean, optional
         :param unique_categories: Unique categories of the categorical fields. 
             Defaults to []
-        :type out_of_core: string[], optional
+        :type unique_categories: string[], optional
         :return: JSON object with the following attributes, as applicable:
                     `model_id` (UUID provided with initial request),
                     `features` (table of feature importances),

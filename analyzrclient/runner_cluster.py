@@ -185,6 +185,9 @@ class ClusterRunner(BaseRunner):
             storage to buffer the data rather than a relational database
             (default is `True`)
         :type staging: boolean, optional
+        :param out_of_core: determines whether the model is going to be trained out of core or not. 
+            Defaults to `False`
+        :type out_of_core: boolean, optional 
         :return: JSON object with the following attributes:
                     `model_id` (UUID provided with initial request),
                     `request_id`: same as `model_id` (provided for backward compatibility),

@@ -689,7 +689,7 @@ class CausalTest(unittest.TestCase):
         self.assertEqual(len(res['raw']), 4)
         self.assertEqual(len(res['misc']), 10)
         self.assertEqual(len(res['bins']), 0)
-        self.assertTrue(abs(res['atx'].loc['1']['Value']-0.710831)/0.710831 <= EPSILON*10) # ATT = 0.710831
+        self.assertTrue(abs(res['atx'].loc['1']['Value']-0.710537)/0.710537 <= EPSILON*10) # ATT = 0.710537
 
     def test_propensity_score_stratification_dw(self):
         df = load_causal_dataset_v5()

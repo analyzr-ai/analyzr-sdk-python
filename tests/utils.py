@@ -67,3 +67,10 @@ def load_performance_analysis_dataset():
     """
     df = pd.read_csv('https://g2mstaticfiles.blob.core.windows.net/$web/public_datasets/subscriber_data_clean.csv', encoding = "ISO-8859-1", low_memory=False)
     return df 
+
+def load_mmm_dataset():
+    """
+    :return df:
+    """
+    df = pd.read_csv('https://g2mstaticfiles.blob.core.windows.net/$web/public_datasets/mmm2.csv', encoding = "ISO-8859-1", low_memory=False)
+    return df[['wk_strt_dt', 'sales', 'direct_mail', 'insert', 'newspaper', 'radio', 'tv', 'social_media', 'online_display']] 

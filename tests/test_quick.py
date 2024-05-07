@@ -213,6 +213,26 @@ class CausalTest(unittest.TestCase):
         self.assertEqual(len(res['bins']), 10)
         self.assertTrue(abs(res['atx'].loc['1']['Value']-0.2)/0.2 <= EPSILON) # ATT = 0.2
 
+class MMMTest(unittest.TestCase):
+
+    def test_mmm_train_with_encoding(self):
+        df = load_mmm_dataset().head(30)
+        res = analyzer.mmm.train(df, client_id=CLIENT_ID, 
+            idx_var=None, time_var='wk_strt_dt', outcome_var='sales', 
+            media_vars=['direct_mail', 'insert', 'newspaper', 'radio', 'tv', 'social_media', 'online_display'], 
+            other_vars=[], 
+            algorithm='mmm-carryover', 
+            buffer_batch_size=1000, verbose=VERBOSE, encoding=True)
+        model_id = res['model_id']
+        train_stats = res['train_stats']
+        test_stats = res['test_stats']
+        lag_stats = res['lag_stats']
+        contrib_stats = res['contrib_stats']
+        self.assertTrue( abs( (float(train_stats['Value'][1]) - 0.666750) / 0.666750 ) < EPSILON )
+        self.assertTrue( abs( (float(test_stats['Value'][1]) - 0.368148) / 0.368148 ) < EPSILON )
+        self.assertEqual(lag_stats.shape, (8, 8))
+        self.assertEqual(contrib_stats.shape, (16, 9))
+
 class PerformanceTest(unittest.TestCase):
 
     def test_analyze_train_with_encoding(self):

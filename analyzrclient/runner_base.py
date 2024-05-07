@@ -196,7 +196,8 @@ class BaseRunner:
         if res['status']!=200: print('WARNING! Buffer clear failed: {}'.format(res))
         return res
 
-    def _encode(self, df, keys=None, categorical_vars=[], numerical_vars=[], bool_vars=[], record_id_var=None, encode_field_names=True, verbose=False, numerical=True):
+    def _encode(self, df, keys=None, categorical_vars=[], numerical_vars=[], bool_vars=[], skip_vars=[], 
+                record_id_var=None, encode_field_names=True, verbose=False, numerical=True):
         """
         Encode dataframe for the categorical and numerical variables provided.
 
@@ -204,6 +205,8 @@ class BaseRunner:
         :param keys:
         :param categorical_vars:
         :param numerical_vars:
+        :param bool_vars:
+        :param skip_vars:
         :param record_id_var:
         :param encode_field_names:
         :param verbose: set to true for verbose output
@@ -216,15 +219,18 @@ class BaseRunner:
         """
         return self._encode_no_keys(
             df,
-            categorical_vars=categorical_vars, numerical_vars=numerical_vars, bool_vars=bool_vars, record_id_var=record_id_var,
+            categorical_vars=categorical_vars, numerical_vars=numerical_vars, bool_vars=bool_vars, 
+            skip_vars=skip_vars, record_id_var=record_id_var,
             encode_field_names=encode_field_names, verbose=verbose, numerical=numerical, 
         ) if keys is None else self._encode_with_keys(
             df, keys,
-            categorical_vars=categorical_vars, numerical_vars=numerical_vars, bool_vars=bool_vars, record_id_var=record_id_var,
+            categorical_vars=categorical_vars, numerical_vars=numerical_vars, bool_vars=bool_vars, 
+            skip_vars=skip_vars, record_id_var=record_id_var,
             encode_field_names=encode_field_names, verbose=verbose, numerical=numerical, 
         )
 
-    def _encode_no_keys(self, df, categorical_vars=[], numerical_vars=[], bool_vars=[], record_id_var=None, encode_field_names=True, verbose=False, numerical=True):
+    def _encode_no_keys(self, df, categorical_vars=[], numerical_vars=[], bool_vars=[], skip_vars=[], 
+                        record_id_var=None, encode_field_names=True, verbose=False, numerical=True):
         """
         Encode dataframe for the categorical and numerical variables provided. This
         assumes no pre-existing encoding, returns encoded data and matching
@@ -233,6 +239,8 @@ class BaseRunner:
         :param df:
         :param categorical_vars:
         :param numerical_vars:
+        :param bool_vars:
+        :param skip_vars:
         :param record_id_var:
         :param encode_field_names:
         :param verbose: set to true for verbose output
@@ -257,7 +265,8 @@ class BaseRunner:
         zref = {}
         for col in numerical_vars:
             if verbose: print('\t{}'.format(col))
-            df2[col], zref[col] = zref_encode(df[col], numerical=numerical)
+            if col not in skip_vars:
+                df2[col], zref[col] = zref_encode(df[col], numerical=numerical)
 
         # Encode boolean variables
         # if verbose: print('Encoding boolean variables:')
@@ -281,7 +290,8 @@ class BaseRunner:
 
         return df2, xref, zref, rref, fref, fref_exp, bref
 
-    def _encode_with_keys(self, df, keys, categorical_vars=[], numerical_vars=[], bool_vars=[], record_id_var=None, encode_field_names=True, verbose=False, numerical=True):
+    def _encode_with_keys(self, df, keys, categorical_vars=[], numerical_vars=[], bool_vars=[], skip_vars=[], 
+                          record_id_var=None, encode_field_names=True, verbose=False, numerical=True):
         """
         Encode dataframe for the categorical and numerical variables provided. This
         assumes pre-existing encoding keys are provided, returns encoded data and
@@ -294,6 +304,8 @@ class BaseRunner:
         :param keys:
         :param categorical_vars:
         :param numerical_vars:
+        :param bool_vars:
+        :param skip_vars:
         :param record_id_var:
         :param encode_field_names:
         :param verbose: set to true for verbose output
@@ -318,7 +330,8 @@ class BaseRunner:
         zref = keys['zref']
         for col in numerical_vars:
             if verbose: print('\t{}'.format(col))
-            df2[col] = zref_encode_with_keys(df[col], zref[col], numerical=numerical)
+            if col not in skip_vars:
+                df2[col] = zref_encode_with_keys(df[col], zref[col], numerical=numerical)
 
         # Encode boolean variables
         # if verbose: print('Encoding boolean variables:')
@@ -517,7 +530,7 @@ class BaseRunner:
         :param verbose: Set to true for verbose output
         :return:
         """
-        if verbose: print('Saving encoding keys locally...')
+        # if verbose: print('Saving encoding keys locally...')
         if not os.path.exists(TEMP_DIR): os.makedirs(TEMP_DIR)
         filename = '{}/{}.bin'.format(TEMP_DIR, model_id)
         file = open(filename, 'wb')
@@ -531,7 +544,7 @@ class BaseRunner:
         :param verbose: Set to true for verbose output
         :return keys:
         """
-        if verbose: print('Loading encoding keys...')
+        # if verbose: print('Loading encoding keys...')
         try:
             filename = '{}/{}.bin'.format(TEMP_DIR, model_id)
             file = open(filename, 'rb')

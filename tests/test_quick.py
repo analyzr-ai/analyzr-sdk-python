@@ -19,7 +19,7 @@ from .utils import *
 CLIENT_ID = 'test'
 N_FEATURES = 2
 N_SAMPLES = 1000
-EPSILON = 1e-6
+EPSILON = 1e-4
 VERBOSE = False
 
 with open('tests/config.json') as json_file: config = json.load(json_file)

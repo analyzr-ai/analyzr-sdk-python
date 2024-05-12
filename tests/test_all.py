@@ -718,7 +718,7 @@ class MMMTest(unittest.TestCase):
         self.assertTrue( abs( (float(train_stats['Value'][1]) - 0.666750) / 0.666750 ) < EPSILON )
         self.assertTrue( abs( (float(test_stats['Value'][1]) - 0.368148) / 0.368148 ) < EPSILON )
         self.assertEqual(lag_stats.shape, (8, 8))
-        self.assertEqual(contrib_stats.shape, (16, 9))
+        self.assertEqual(contrib_stats.shape, (17, 9))
 
     def test_mmm_train_with_encoding(self):
         df = load_mmm_dataset().head(30)
@@ -736,7 +736,7 @@ class MMMTest(unittest.TestCase):
         self.assertTrue( abs( (float(train_stats['Value'][1]) - 0.666750) / 0.666750 ) < EPSILON )
         self.assertTrue( abs( (float(test_stats['Value'][1]) - 0.368148) / 0.368148 ) < EPSILON )
         self.assertEqual(lag_stats.shape, (8, 8))
-        self.assertEqual(contrib_stats.shape, (16, 9))
+        self.assertEqual(contrib_stats.shape, (17, 9))
 
 class PerformanceTest(unittest.TestCase):
 

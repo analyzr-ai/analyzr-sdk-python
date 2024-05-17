@@ -738,6 +738,30 @@ class MMMTest(unittest.TestCase):
         self.assertEqual(lag_stats.shape, (8, 8))
         self.assertEqual(contrib_stats.shape, (17, 9))
 
+    def test_mmm_optimize_no_encoding(self):
+        # Train
+        df = load_mmm_dataset().head(30)
+        res = analyzer.mmm.train(df, client_id=CLIENT_ID, 
+            idx_var=None, time_var='wk_strt_dt', outcome_var='sales', 
+            media_vars=['direct_mail', 'insert', 'newspaper', 'radio', 'tv', 'social_media', 'online_display'], 
+            other_vars=[], 
+            algorithm='mmm-adstock', 
+            buffer_batch_size=1000, verbose=VERBOSE, encoding=False)
+        model_id = res['model_id']
+        # Optimize
+        obj = analyzer.mmm.optimize(
+            model_id=model_id, 
+            client_id=CLIENT_ID, 
+            budget=30e6, 
+            encoding=False, 
+        )
+        data2 = obj['data2']
+        self.assertEqual(data2.shape, (11, 2))
+        self.assertEqual(float(data2['Value'][0]), 0)
+        self.assertEqual(float(data2['Value'][1]), 48)
+        self.assertEqual(float(data2['Value'][3]), 706)
+
+
 class PerformanceTest(unittest.TestCase):
 
     def test_analyze_train_no_encoding(self):

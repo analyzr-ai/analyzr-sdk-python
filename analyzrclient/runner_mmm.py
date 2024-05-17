@@ -18,6 +18,123 @@ class MMMRunner(BaseRunner):
         self.__uri = '{}/analytics/'.format(self._base_url)
         return
 
+    def optimize(self, model_id=None, client_id=None, budget=None, 
+                 timeout=600, step=2, verbose=False, encoding=True):
+        """
+        Optimize marketing mix model
+
+        :param model_id: UUID for a specific model object. Refers to a model
+            that was previously trained
+        :type model_id: str, required
+        :param client_id: Short name for account being used. Used for reporting
+            purposes only
+        :type client_id: string, required
+        :param budget: total budget amount to be optimized
+        :type budget: float, required
+        :param timeout: Client will keep polling API for a period of `timeout`
+            seconds
+        :type timeout: int, optional
+        :param step: Polling interval, in seconds
+        :type step: int, optional
+        :param verbose: Set to true for verbose output
+        :type verbose: boolean, optional
+        :param encoding: Encode and decode data with homomorphic encryption
+        :type encoding: boolean, optional
+        :return: JSON object with the following attributes:
+                    `model_id` (UUID provided with initial request),
+                    `data2`: original dataset with cluster IDs appended
+        """
+
+        request_id = self._get_request_id()
+
+        if encoding is True:
+
+            # Load encoding keys
+            keys = self._keys_load(model_id=model_id, verbose=verbose)
+            if keys is None:
+                print('ERROR! Keys not found. ')
+                return None
+
+            # Encode data 
+            budget = budget # @TODO: implement logic
+            
+        # Optimize marketing mix model and retrieve results
+        self.__optimize(
+            request_id=request_id, 
+            model_id=model_id,
+            client_id=client_id, 
+            budget=budget, 
+            verbose=verbose, 
+        )
+        self._poll(
+            payload={
+                'request_id': request_id,
+                'client_id': client_id,
+                'command': 'task-status'
+            },
+            timeout=timeout,
+            step=step,
+            verbose=verbose
+        )
+        data2 = self.__retrieve_optimize_results(
+            request_id=request_id, 
+            client_id=client_id, 
+            verbose=verbose, 
+        )
+
+        # Clear buffer
+        res4 = self._buffer_clear(
+            request_id=request_id, 
+            client_id=client_id,
+            verbose=verbose, 
+        )
+
+        # Decode data
+        if encoding is True:
+            data2 = data2 # @TODO: implement logic
+
+        # Compile results
+        res5 = {}
+        res5['data2'] = data2
+        res5['model_id'] = model_id
+        return res5
+
+    def __optimize(self, request_id=None, model_id=None, client_id=None, budget=None, 
+                   verbose=False):
+        """
+        :param request_id:
+        :param model_id:
+        :param client_id: Short name for account being used. Used for reporting
+            purposes only
+        :param budget:
+        :param verbose: Set to true for verbose output
+        :return:
+        """
+        if verbose: print('Optimizing marketing mix model...')
+        res = self._client._post(self.__uri, {
+            'command': 'mmm-optimize',
+            'model_id': model_id,
+            'request_id': request_id,
+            'client_id': client_id, 
+            'budget': budget, 
+        })
+        return res
+
+    def __retrieve_optimize_results(
+            self, request_id=None, client_id=None, 
+            verbose=False):
+        """
+        :param request_id:
+        :param client_id: Short name for account being used. Used for reporting
+            purposes only
+        :param verbose: Set to true for verbose output
+        :return data2:
+        """
+        data2 = self._buffer_read(
+            request_id=request_id, client_id=client_id, dataframe_name='data2',
+            verbose=verbose)
+        return data2
+
     def check_status(
             self, model_id=None, client_id=None, verbose=False,
             encoding=True):

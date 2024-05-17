@@ -79,7 +79,7 @@ class RegressionRunner(BaseRunner):
             (default is `True`)
         :type staging: boolean, optional
         :param encoding: Encode and decode data with homomorphic encryption
-        :type compressed: boolean, optional
+        :type encoding: boolean, optional
         :return: JSON object with the following attributes:
                     `model_id` (UUID provided with initial request),
                     `data2`: original dataset with cluster IDs appended

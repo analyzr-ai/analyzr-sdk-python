@@ -54,10 +54,12 @@ class MMMRunner(BaseRunner):
             if keys is None:
                 print('ERROR! Keys not found. ')
                 return None
+            xref = keys['xref']
+            zref = keys['zref']
+            rref = keys['rref']
+            fref = keys['fref']
+            bref = keys['bref']
 
-            # Encode data 
-            budget = budget # @TODO: implement logic
-            
         # Optimize marketing mix model and retrieve results
         self.__optimize(
             request_id=request_id, 
@@ -91,7 +93,9 @@ class MMMRunner(BaseRunner):
 
         # Decode data
         if encoding is True:
-            data2 = data2 # @TODO: implement logic
+            for i, val in data2['Parameter'].items():
+                if val[:6]=='media_':
+                    data2.loc[i, 'Parameter'] = 'media_{}'.format(fref_decode_value(val[6:], fref))
 
         # Compile results
         res5 = {}

@@ -426,13 +426,15 @@ class BaseRunner:
             udf2[key2] = formula2
         return udf2 
 
-    def _decode(self, df, categorical_vars=[], numerical_vars=[], bool_vars=[], record_id_var=None, xref={}, zref={}, rref={}, fref={}, bref={}, verbose=False):
+    def _decode(self, df, categorical_vars=[], numerical_vars=[], bool_vars=[], skip_vars=[], record_id_var=None, xref={}, zref={}, rref={}, fref={}, bref={}, verbose=False):
         """
         Decode dataframe using the encoding keys provided (xref, zrfef, rref, fref)
 
         :param df:
         :param categorical_vars:
         :param numerical_vars:
+        :param bool_vars:
+        :param skip_vars:
         :param record_id_var:
         :param xref: cross-reference dictionary for categorical variables
         :param zref: cross-reference dictionary for numerical variables
@@ -460,7 +462,8 @@ class BaseRunner:
         for col in numerical_vars:
             if col in df2.columns:
                 if verbose: print('\t{}'.format(col))
-                df2[col] = zref_decode(df2[col].astype('float'), zref[col])
+                if col not in skip_vars:
+                    df2[col] = zref_decode(df2[col].astype('float'), zref[col])
 
         # Decode boolean variables
         # if verbose: print('Decoding boolean variables:')

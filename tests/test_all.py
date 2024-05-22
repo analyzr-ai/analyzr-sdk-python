@@ -756,7 +756,7 @@ class MMMTest(unittest.TestCase):
             encoding=False, 
         )
         data2 = obj['data2']
-        self.assertEqual(data2.shape, (11, 2))
+        self.assertEqual(data2.shape, (13, 2))
         self.assertEqual(float(data2['Value'][0]), 0)
         self.assertEqual(float(data2['Value'][1]), 48)
         self.assertEqual(float(data2['Value'][3]), 706)
@@ -779,7 +779,7 @@ class MMMTest(unittest.TestCase):
             encoding=True, 
         )
         data2 = obj['data2']
-        self.assertEqual(data2.shape, (11, 2))
+        self.assertEqual(data2.shape, (13, 2))
         self.assertEqual(float(data2['Value'][0]), 0)
         self.assertEqual(float(data2['Value'][1]), 48)
         self.assertEqual(float(data2['Value'][3]), 706)

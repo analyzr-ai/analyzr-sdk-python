@@ -13,13 +13,24 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 """
 import pandas as pd
 
-def load_titanic_dataset():
+SELECTED_TITANIC_FIELDS = ['PassengerId', 'Survived', 'Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare', 'Embarked']
+IDX_FIELD_TITANIC = 'PassengerId'
+SELECTED_BANKING_FIELDS = ['index', 'campaign', 'duration', 'balance', 'y', 'housing', 'education', 'marital', 'job', 'loan', 'default', 'age']
+IDX_FIELD_BANKING = 'index'
+
+def load_titanic_dataset(out_of_core=False, chunksize=None):
     """
+    :param out_of_core: 
+    :param chunksize:
     :return df:
     """
-    df = pd.read_csv('https://g2mstaticfiles.blob.core.windows.net/$web/titanic.csv', encoding = "ISO-8859-1", low_memory=False)
-    df = df[['PassengerId', 'Survived', 'Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare', 'Embarked']].dropna()
-    df['PassengerId'] = df['PassengerId'].astype('string')
+    if out_of_core is False: 
+        df = pd.read_csv('https://g2mstaticfiles.blob.core.windows.net/$web/titanic.csv', encoding = "ISO-8859-1", low_memory=False)
+        df = df[SELECTED_TITANIC_FIELDS].dropna()
+        df[IDX_FIELD_TITANIC] = df[IDX_FIELD_TITANIC].astype('string')
+    else: 
+        chunk_size = chunksize if chunksize is not None else 200
+        df = list(pd.read_csv('https://g2mstaticfiles.blob.core.windows.net/$web/titanic.csv', encoding = "ISO-8859-1", low_memory=False, chunksize=chunk_size))
     return df
 
 def load_banking_dataset():
@@ -27,8 +38,8 @@ def load_banking_dataset():
     :return df:
     """
     df = pd.read_csv('https://g2mstaticfiles.blob.core.windows.net/$web/bank_full_with_index.csv', encoding = "ISO-8859-1", low_memory=False)
-    df = df[['index', 'campaign', 'duration', 'balance', 'y', 'housing', 'education', 'marital', 'job', 'loan', 'default', 'age']].dropna()
-    df['index'] = df['index'].astype('string')
+    df = df[[SELECTED_BANKING_FIELDS]].dropna()
+    df[IDX_FIELD_BANKING] = df[IDX_FIELD_BANKING].astype('string')
     return df
 
 def generate_synthetic_dataset(n_features=2, n_samples=1000):
@@ -74,3 +85,7 @@ def load_mmm_dataset():
     """
     df = pd.read_csv('https://g2mstaticfiles.blob.core.windows.net/$web/public_datasets/mmm2.csv', encoding = "ISO-8859-1", low_memory=False)
     return df[['wk_strt_dt', 'sales', 'direct_mail', 'insert', 'newspaper', 'radio', 'tv', 'social_media', 'online_display']] 
+
+
+def aggregateUniqueCategories(aggregated_unique_categories, batch_unique_categories):
+    return list(set(aggregated_unique_categories).union(batch_unique_categories))

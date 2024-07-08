@@ -96,9 +96,17 @@ class ClusterRunner(BaseRunner):
         stats_features = self._buffer_read(
             request_id=request_id, client_id=client_id, dataframe_name='stats_features',
             verbose=verbose, staging=True)
+        print(res, stats_mean, stats_features)
         if not res.empty:
             df2 = self._decode(
                 res, categorical_vars=categorical_vars,
+                numerical_vars=numerical_vars, record_id_var=idx_var,xref=xref,
+                zref=zref, rref=rref, fref=fref, verbose=verbose)
+            stats_mean = self._decode_stats_mean(
+                stats_mean, categorical_vars=categorical_vars, 
+                xref=xref, fref=fref, verbose=verbose)
+            stats_features = self._decode(
+                stats_features, categorical_vars=categorical_vars,
                 numerical_vars=numerical_vars, record_id_var=idx_var,xref=xref,
                 zref=zref, rref=rref, fref=fref, verbose=verbose)
             if df2 is not None and not stats_mean.empty and not stats_features.empty: 
@@ -136,8 +144,8 @@ class ClusterRunner(BaseRunner):
     def run(
             self, df, client_id=None, request_id=None, idx_var=None, categorical_vars=[],
             numerical_vars=[], algorithm='pca-kmeans', n_components=5,
-            buffer_batch_size=1000, cluster_batch_size=None,
-            verbose=False, poll=True, compressed=False, staging=True, out_of_core=False):
+            buffer_batch_size=1000, cluster_batch_size=None, clear_buffer=True, 
+            verbose=False, poll=True, compressed=False, staging=True, out_of_core=False, unique_categories=[], train_predict=True):
         """
         Run clustering algorithm on user-provided dataset
 
@@ -187,7 +195,16 @@ class ClusterRunner(BaseRunner):
         :type staging: boolean, optional
         :param out_of_core: determines whether the model is going to be trained out of core or not. 
             Defaults to `False`
-        :type out_of_core: boolean, optional 
+        :type out_of_core: boolean, optional
+        :param clear_buffer: determines whether the buffer is going to be cleared or not. 
+            Defaults to `True`
+        :type clear_buffer: boolean, optional
+        :param unique_categories: List of categorical unique values for ecah feature. 
+            Defaults to `[]`
+        :type unique_categories: list, optional  
+        :param train_predict: determines whether the model needs just partial fitting or predicting as well.
+            Defaults to `True`
+        :type train_predict: boolean, optional  
         :return: JSON object with the following attributes:
                     `model_id` (UUID provided with initial request),
                     `request_id`: same as `model_id` (provided for backward compatibility),
@@ -201,18 +218,18 @@ class ClusterRunner(BaseRunner):
         return self.__train(
             df, categorical_vars=categorical_vars, numerical_vars=numerical_vars,
             idx_var=idx_var, buffer_batch_size=buffer_batch_size,
-            cluster_batch_size=cluster_batch_size, algorithm=algorithm,
+            cluster_batch_size=cluster_batch_size, algorithm=algorithm, clear_buffer=clear_buffer,
             n_components=n_components, request_id=request_id, client_id=client_id,
             verbose=verbose, compressed=compressed, poll=poll, staging=staging,
-            out_of_core=out_of_core
+            out_of_core=out_of_core, unique_categories=unique_categories, train_predict=train_predict
         )
 
     def __train(
             self, df, categorical_vars=[], numerical_vars=[], bool_vars=[],
             idx_var=None, verbose=False, buffer_batch_size=1000,
             algorithm='pca-kmeans', n_components=5, cluster_batch_size=None,
-            request_id=None, client_id=None, timeout=600, step=2,
-            compressed=False, poll=True, staging=False, out_of_core=False):
+            request_id=None, client_id=None, timeout=600, step=2, clear_buffer=True, 
+            compressed=False, poll=True, staging=False, out_of_core=False, unique_categories=[], train_predict=True):
         """
         """
         # Encode data and save it to buffer
@@ -222,10 +239,7 @@ class ClusterRunner(BaseRunner):
         data, xref, zref, rref, fref, fref_exp, bref = self._encode(
             df, categorical_vars=categorical_vars, numerical_vars=numerical_vars,
             bool_vars=bool_vars, record_id_var=idx_var, verbose=verbose, keys=keys)
-        # Save encoding keys locally 
-        self._keys_save(
-            model_id=request_id,
-            keys={
+        keys={
                 'xref': xref,
                 'zref': zref,
                 'rref': rref,
@@ -233,7 +247,23 @@ class ClusterRunner(BaseRunner):
                 'fref_exp': fref_exp,
                 'bref': bref,
                 'idx_var': idx_var
-            },
+            }
+        # Keeping track of unique_categories across each categorical variable/key (xref)
+        current_unique_categories = set(unique_categories) if len(unique_categories) > 0 else set()
+
+        fref_forward = keys['fref']['forward']
+        for cat_var in categorical_vars:
+            specific_unique_values = data[fref_forward[cat_var]].unique()
+            for unique_value in specific_unique_values: 
+                current_unique_categories.add(f"{fref_forward[cat_var]}_{unique_value}")
+
+        # Convert the set back to a list
+        current_unique_categories = list(current_unique_categories)
+
+        # Save encoding keys locally 
+        self._keys_save(
+            model_id=request_id,
+            keys=keys,
             verbose=verbose)
 
         # Save encoded data to buffer
@@ -254,6 +284,8 @@ class ClusterRunner(BaseRunner):
                 verbose=verbose,
                 staging=staging,
                 out_of_core=out_of_core,
+                unique_categories=unique_categories, 
+                train_predict=train_predict
             )
             if poll:
                 res2 = self._poll(
@@ -272,25 +304,30 @@ class ClusterRunner(BaseRunner):
                         numerical_vars=numerical_vars, idx_var=idx_var,
                         xref=xref, zref=zref, rref=rref, fref=fref,
                         verbose=verbose)
+                elif res2['response']['status'] in ['Fit Predict Complete']:
+                    pass
                 else:
                     print('WARNING! Training request came back with status: {}'.format(res2['response']['status']))
         else:
             print('ERROR! Buffer save failed: {}'.format(res))
 
-        # Clear buffer
-        if poll: res3 = self._buffer_clear(
-            request_id=res['request_id'], client_id=client_id,
-            verbose=verbose, out_of_core=out_of_core)
-
         #  Compile results
-        if verbose and not poll: print('Clustering job started with polling disabled. You will need to request results for this request ID.')
-        if not out_of_core: 
+        if verbose and not poll and not out_of_core: print('Clustering job started with polling disabled. You will need to request results for this request ID.')
+        if out_of_core is False: 
             res5 = self.__post_process_results(
                 df, df2, idx_var, categorical_vars, verbose, out_of_core=out_of_core) if poll else {}
         else: 
             res5 = self.__get_stats(request_id=res['request_id'], client_id=client_id, categorical_vars=categorical_vars, numerical_vars=numerical_vars, idx_var=idx_var,
                         xref=xref, zref=zref, rref=rref, fref=fref, verbose=verbose) if poll else {}
             
+        # Clear buffer
+        if clear_buffer: res3 = self._buffer_clear(
+            request_id=res['request_id'], client_id=client_id,
+            verbose=verbose, out_of_core=out_of_core)
+
+        if res5 is None: res5 = {}
+        res5['unique_categories'] = current_unique_categories
+        res5['keys'] = keys
         res5['request_id'] = request_id # append request ID for future reference
         res5['model_id'] = request_id # append request ID for future reference
         return res5
@@ -298,7 +335,7 @@ class ClusterRunner(BaseRunner):
     def __cluster_train(
             self, request_id=None, client_id=None, idx_field=None,
             categorical_fields=[], algorithm='pca-kmeans', n_components=5,
-            batch_size=None, verbose=False, staging=False, out_of_core=False):
+            batch_size=None, verbose=False, staging=False, out_of_core=False, unique_categories=[], train_predict=True):
         """
         :param request_id:
         :param client_id: Short name for account being used. Used for reporting
@@ -311,6 +348,9 @@ class ClusterRunner(BaseRunner):
         :param batch_size:
         :param verbose: Set to true for verbose output
         :param staging:
+        :param out_of_core: 
+        :param unique_categories: 
+        :param train_predict:
         :return res:
         """
         if verbose: print('Clustering data in buffer...')
@@ -329,6 +369,8 @@ class ClusterRunner(BaseRunner):
             'categorical_fields': categorical_fields,
             'staging': staging,
             'out_of_core': out_of_core, 
+            'unique_categories': unique_categories, 
+            'train_predict': train_predict
         })
         return res
 

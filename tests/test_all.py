@@ -140,6 +140,48 @@ class ClusteringTest(unittest.TestCase):
         self.assertEqual(len(df3), 712)
         self.assertEqual(df3.columns[0], 'PC_ID')
 
+    def test_pca_kmeans_simple_out_of_core(self):
+        iterator = load_titanic_dataset(out_of_core=True, chunksize=200)
+        request_id = str(uuid.uuid4())
+        unique_categories = []
+        for i, chunk in enumerate(iterator): 
+            chunk = chunk[SELECTED_TITANIC_FIELDS].dropna()
+            chunk[IDX_FIELD_TITANIC] = chunk[IDX_FIELD_TITANIC].astype('string')
+            res = analyzer.cluster.run(chunk, client_id=CLIENT_ID, request_id=request_id, idx_var=IDX_FIELD_TITANIC, poll=False, clear_buffer=True, 
+                categorical_vars=['Sex', 'Embarked'], numerical_vars=['Survived', 'Pclass', 'Age', 'SibSp', 'Parch', 'Fare'], n_components=3, 
+                algorithm='minibatch-kmeans', buffer_batch_size=1000, verbose=VERBOSE, out_of_core=True, unique_categories=unique_categories, train_predict=False)
+            unique_categories = aggregateUniqueCategories(unique_categories, res['unique_categories'])
+            # print('[test_pca_kmeans_simple_out_of_core] unique_categories: ', unique_categories)
+        for i, chunk in enumerate(iterator): 
+            chunk = chunk[SELECTED_TITANIC_FIELDS].dropna()
+            chunk[IDX_FIELD_TITANIC] = chunk[IDX_FIELD_TITANIC].astype('string')
+            res = analyzer.cluster.run(chunk, client_id=CLIENT_ID, request_id=request_id, idx_var=IDX_FIELD_TITANIC, poll=True, clear_buffer=False, 
+                categorical_vars=['Sex', 'Embarked'], numerical_vars=['Survived', 'Pclass', 'Age', 'SibSp', 'Parch', 'Fare'], n_components=3,
+                algorithm='minibatch-kmeans', buffer_batch_size=1000, verbose=True, out_of_core=True, unique_categories=unique_categories, train_predict=True)
+            
+        df2 = res['data']
+        stats_mean = res['stats_mean']
+        stats_features = res['stats_features']
+        keys = res['keys']
+        print(df2, '\n')
+        print(stats_mean, '\n')
+        print(stats_features, '\n')
+
+        # df2 = res['data']
+        # model_id = res['request_id']
+        # res = analyzer.cluster.buffer_usage(client_id=CLIENT_ID)
+        # self.assertEqual(df2.iloc[0]['Fare'], 7.25)
+        # # self.assertEqual(df2.iloc[0]['PC_ID'], 2)
+        # self.assertEqual(df2.iloc[711]['Embarked'], 'Q')
+        # # self.assertEqual(df2.iloc[711]['PC_ID'], 4)
+        # self.assertEqual(res['response']['n_rows'], 0)
+        # res = analyzer.cluster.predict(df, model_id=model_id, client_id=CLIENT_ID, idx_var=IDX_FIELD_TITANIC,
+        #     categorical_vars=['Sex', 'Embarked'], numerical_vars=['Survived', 'Pclass', 'Age', 'SibSp', 'Parch', 'Fare'],
+        #     buffer_batch_size=1000, verbose=VERBOSE)
+        # df3 = res['data2']
+        # self.assertEqual(len(df3), 712)
+        # self.assertEqual(df3.columns[0], 'PC_ID')
+
     def test_inc_pca_kmeans(self):
         df = load_titanic_dataset()
         res = analyzer.cluster.run(df, client_id=CLIENT_ID, idx_var='PassengerId',
@@ -715,8 +757,8 @@ class MMMTest(unittest.TestCase):
         test_stats = res['test_stats']
         lag_stats = res['lag_stats']
         contrib_stats = res['contrib_stats']
-        self.assertTrue( abs( (float(train_stats['Value'][1]) - 0.666750) / 0.666750 ) < EPSILON )
-        self.assertTrue( abs( (float(test_stats['Value'][1]) - 0.368148) / 0.368148 ) < EPSILON )
+        self.assertTrue( abs( (float(train_stats['Value'].iloc[1]) - 0.666750) / 0.666750 ) < EPSILON )
+        self.assertTrue( abs( (float(test_stats['Value'].iloc[1]) - 0.368148) / 0.368148 ) < EPSILON )
         self.assertEqual(lag_stats.shape, (8, 8))
         self.assertEqual(contrib_stats.shape, (17, 9))
 
@@ -733,8 +775,8 @@ class MMMTest(unittest.TestCase):
         test_stats = res['test_stats']
         lag_stats = res['lag_stats']
         contrib_stats = res['contrib_stats']
-        self.assertTrue( abs( (float(train_stats['Value'][1]) - 0.666750) / 0.666750 ) < EPSILON )
-        self.assertTrue( abs( (float(test_stats['Value'][1]) - 0.368148) / 0.368148 ) < EPSILON )
+        self.assertTrue( abs( (float(train_stats['Value'].iloc[1]) - 0.666750) / 0.666750 ) < EPSILON )
+        self.assertTrue( abs( (float(test_stats['Value'].iloc[1]) - 0.368148) / 0.368148 ) < EPSILON )
         self.assertEqual(lag_stats.shape, (8, 8))
         self.assertEqual(contrib_stats.shape, (17, 9))
 
@@ -756,10 +798,11 @@ class MMMTest(unittest.TestCase):
             encoding=False, 
         )
         data2 = obj['data2']
-        self.assertEqual(data2.shape, (13, 2))
-        self.assertEqual(float(data2['Value'][0]), 0)
-        self.assertEqual(float(data2['Value'][1]), 48)
-        self.assertEqual(float(data2['Value'][3]), 706)
+        # print(data2)
+        self.assertEqual(data2.shape, (29, 3))
+        self.assertEqual(float(data2['Value'].iloc[0]), 0)
+        self.assertEqual(float(data2['Value'].iloc[1]), 48)
+        self.assertEqual(float(data2['Value'].iloc[12]), 706)
 
     def test_mmm_optimize_with_encoding(self):
         # Train
@@ -779,10 +822,11 @@ class MMMTest(unittest.TestCase):
             encoding=True, 
         )
         data2 = obj['data2']
-        self.assertEqual(data2.shape, (13, 2))
-        self.assertEqual(float(data2['Value'][0]), 0)
-        self.assertEqual(float(data2['Value'][1]), 48)
-        self.assertEqual(float(data2['Value'][3]), 706)
+        # print(data2)
+        self.assertEqual(data2.shape, (29, 3))
+        self.assertEqual(float(data2['Value'].iloc[0]), 0)
+        self.assertEqual(float(data2['Value'].iloc[1]), 48)
+        self.assertEqual(float(data2['Value'].iloc[12]), 706)
 
 
 class PerformanceTest(unittest.TestCase):

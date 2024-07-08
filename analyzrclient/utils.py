@@ -14,6 +14,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 import uuid
 import numpy as np
 import pandas as pd
+import re
 from copy import deepcopy
 
 def xref_encode(series):
@@ -59,8 +60,8 @@ def xref_encode_with_keys(series, xref):
             series2[idx] = xref['forward'][str(val)]
         else:
             series2[idx] = None
-    if len(skipped_vals)>0:
-        print('WARNING! The following values were not present in the training encoding set and will be skipped: ', skipped_vals)
+    # if len(skipped_vals)>0:
+    #     print('WARNING! The following values were not present in the training encoding set and will be skipped: ', skipped_vals)
     return series2, xref
 
 def xref_decode(series, xref, verbose=False):
@@ -289,7 +290,7 @@ def fref_to_fref_expanded(fref, xref):
             fref_exp['reverse'][key] = col
     return fref_exp
 
-def fref_decode(df, fref):
+def fref_decode(df, fref, xref={}, categorical_vars=[]):
     """
     Decode field names
 
@@ -300,10 +301,10 @@ def fref_decode(df, fref):
     if fref=={}: return df
     df2 = deepcopy(df)
     # df2.columns = [ fref['reverse'][col] for col in df2.columns ]
-    df2.columns = fref_decode_columns(df2.columns, fref)
+    df2.columns = fref_decode_columns(df2.columns, fref, xref, categorical_vars)
     return df2
 
-def fref_decode_columns(cols, fref):
+def fref_decode_columns(cols, fref, xref={}, categorical_vars=[]):
     """
     Decode array of column names
 
@@ -312,10 +313,10 @@ def fref_decode_columns(cols, fref):
     :return cols2:
     """
     if fref=={}: return cols
-    cols2 = [ fref_decode_value(col, fref) for col in cols ]
+    cols2 = [ fref_decode_value(col, fref, xref, categorical_vars) for col in cols ]
     return cols2
 
-def fref_decode_value(col, fref):
+def fref_decode_value(col, fref, xref={}, categorical_vars=[]):
     """
     Decode single column name
 
@@ -326,8 +327,22 @@ def fref_decode_value(col, fref):
     col2 = col
     if fref!={} and col in fref['reverse'].keys():
         col2 =  fref['reverse'][col]
+    if col not in fref['reverse'].keys(): 
+        col_name, category = _separate_column_name(col)
+        if col_name is not None and category is not None: 
+            decoded_col_name = fref['reverse'][col_name]
+            col2 = decoded_col_name + '_' + xref[decoded_col_name]['reverse'][category]
     return col2
 
+def _separate_column_name(col):
+
+    match = re.match(r'(X_\d+)_(.*)', col)
+    if match:
+        prefix = match.group(1)
+        uuid = match.group(2)
+        return prefix, uuid
+    else:
+        return None, None
 def compute_cluster_stats(df, categorical_fields):
     """
     :param df:

@@ -106,7 +106,9 @@ class BaseRunner:
         :param staging:
         :return df:
         """
+        # print('[_buffer_read]', dataframe_name)
         res2 = self.__read(client_id=client_id, request_id=request_id, dataframe_name=dataframe_name, verbose=verbose, staging=staging)
+        # print('[_buffer_read]', res2)
         if raw: return res2
         if res2['status']!=200:
             print('ERROR! Buffer read failed: {}'.format(res2))
@@ -185,7 +187,7 @@ class BaseRunner:
         :param staging:
         :return res:
         """
-        if verbose: print('Clearing buffer with out_of_core...', out_of_core)
+        if verbose: print('Clearing buffer...')
         uri = '{}/buffer/'.format(self._base_url)
         res = self._client._post(uri, {
             'command': 'clear',
@@ -478,6 +480,32 @@ class BaseRunner:
             df2 = rref_decode(df2, record_id_var, rref, verbose=True)
 
         return df2
+    
+    def _decode_stats_mean(self, df, categorical_vars=[], xref={}, fref={}, verbose=False):
+        """
+        Decode dataframe using the encoding keys provided (xref, zrfef, rref, fref)
+
+        :param df:
+        :param categorical_vars:
+        :param numerical_vars:
+        :param bool_vars:
+        :param skip_vars:
+        :param record_id_var:
+        :param xref: cross-reference dictionary for categorical variables
+        :param zref: cross-reference dictionary for numerical variables
+        :param rref: cross-reference dictionary for the record ID variable
+        :param fref: cross-reference dictionary for field names
+        :param verbose: Set to true for verbose output
+        :return df2:
+        """
+        if df is None or df.empty: return df
+        df2 = deepcopy(df)
+        print(df2.columns)
+        # Decode field names
+        if verbose: print('Decoding field names...')
+        df2 = fref_decode(df2, fref, xref, categorical_vars) # decode field names first
+        print(df2.columns)
+        return df2
 
     def _poll(self, payload={}, timeout=600, step=1, verbose=False):
         """
@@ -495,7 +523,7 @@ class BaseRunner:
             try:
                 res = self._client._post(uri, payload)
                 if verbose: sys.stdout.write('[_poll][{}] {}\r'.format(counter, res))
-                if res['response']['status'] in ['Complete', 'Failed'] or 'Failed:' in res['response']['status']: break
+                if res['response']['status'] in ['Complete', 'Failed', 'Fit Predict Complete'] or 'Failed:' in res['response']['status']: break
             except:
                 pass
             counter += step

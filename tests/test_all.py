@@ -756,10 +756,10 @@ class MMMTest(unittest.TestCase):
             encoding=False, 
         )
         data2 = obj['data2']
-        self.assertEqual(data2.shape, (13, 2))
+        self.assertEqual(data2.shape, (29, 3))
         self.assertEqual(float(data2['Value'][0]), 0)
         self.assertEqual(float(data2['Value'][1]), 48)
-        self.assertEqual(float(data2['Value'][3]), 706)
+        self.assertEqual(float(data2['Value'][12]), 706)
 
     def test_mmm_optimize_with_encoding(self):
         # Train
@@ -779,10 +779,10 @@ class MMMTest(unittest.TestCase):
             encoding=True, 
         )
         data2 = obj['data2']
-        self.assertEqual(data2.shape, (13, 2))
+        self.assertEqual(data2.shape, (29, 3))
         self.assertEqual(float(data2['Value'][0]), 0)
         self.assertEqual(float(data2['Value'][1]), 48)
-        self.assertEqual(float(data2['Value'][3]), 706)
+        self.assertEqual(float(data2['Value'][12]), 706)
 
 
 class PerformanceTest(unittest.TestCase):

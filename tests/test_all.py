@@ -715,8 +715,8 @@ class MMMTest(unittest.TestCase):
         test_stats = res['test_stats']
         lag_stats = res['lag_stats']
         contrib_stats = res['contrib_stats']
-        self.assertTrue( abs( (float(train_stats['Value'].iloc[1]) - 0.666750) / 0.666750 ) < EPSILON )
-        self.assertTrue( abs( (float(test_stats['Value'].iloc[1]) - 0.368148) / 0.368148 ) < EPSILON )
+        self.assertTrue( abs( (float(train_stats['Value'][1]) - 0.666750) / 0.666750 ) < EPSILON )
+        self.assertTrue( abs( (float(test_stats['Value'][1]) - 0.368148) / 0.368148 ) < EPSILON )
         self.assertEqual(lag_stats.shape, (8, 8))
         self.assertEqual(contrib_stats.shape, (17, 9))
 
@@ -733,8 +733,8 @@ class MMMTest(unittest.TestCase):
         test_stats = res['test_stats']
         lag_stats = res['lag_stats']
         contrib_stats = res['contrib_stats']
-        self.assertTrue( abs( (float(train_stats['Value'].iloc[1]) - 0.666750) / 0.666750 ) < EPSILON )
-        self.assertTrue( abs( (float(test_stats['Value'].iloc[1]) - 0.368148) / 0.368148 ) < EPSILON )
+        self.assertTrue( abs( (float(train_stats['Value'][1]) - 0.666750) / 0.666750 ) < EPSILON )
+        self.assertTrue( abs( (float(test_stats['Value'][1]) - 0.368148) / 0.368148 ) < EPSILON )
         self.assertEqual(lag_stats.shape, (8, 8))
         self.assertEqual(contrib_stats.shape, (17, 9))
 
@@ -757,9 +757,9 @@ class MMMTest(unittest.TestCase):
         )
         data2 = obj['data2']
         self.assertEqual(data2.shape, (29, 3))
-        self.assertEqual(float(data2[data2['Parameter'] == 'status']['Value'].iloc[0]), 0)
-        self.assertEqual(float(data2[data2['Parameter'] == 'nb_iter']['Value'].iloc[0]), 48)
-        self.assertEqual(float(data2[data2['Parameter'] == 'func_iter']['Value'].iloc[0]), 706)
+        self.assertEqual(float(data2['Value'][0]), 0)
+        self.assertEqual(float(data2['Value'][1]), 48)
+        self.assertEqual(float(data2['Value'][12]), 706)
 
     def test_mmm_optimize_with_encoding(self):
         # Train
@@ -780,9 +780,9 @@ class MMMTest(unittest.TestCase):
         )
         data2 = obj['data2']
         self.assertEqual(data2.shape, (29, 3))
-        self.assertEqual(float(data2[data2['Parameter'] == 'status']['Value'].iloc[0]), 0)
-        self.assertEqual(float(data2[data2['Parameter'] == 'nb_iter']['Value'].iloc[0]), 48)
-        self.assertEqual(float(data2[data2['Parameter'] == 'func_iter']['Value'].iloc[0]), 706)
+        self.assertEqual(float(data2['Value'][0]), 0)
+        self.assertEqual(float(data2['Value'][1]), 48)
+        self.assertEqual(float(data2['Value'][12]), 706)
 
 
 class PerformanceTest(unittest.TestCase):
@@ -934,7 +934,7 @@ class PerformanceTest(unittest.TestCase):
             encoding=False, 
         )
         analysis = res['analysis']
-        self.assertEqual(len(analysis.keys()), 3)
+        self.assertEqual(len(analysis.keys()), 4)
         self.assertEqual(analysis['drivers']['measure'], 'net_additions')
         self.assertEqual(int(analysis['drivers']['stats']['current']), -883)
 
@@ -1193,7 +1193,7 @@ class PerformanceTest(unittest.TestCase):
             encoding=False, 
         )
         analysis = res['analysis']
-        self.assertEqual(len(analysis.keys()), 3)
+        self.assertEqual(len(analysis.keys()), 4)
         self.assertEqual(analysis['drivers']['measure'], 'net_additions')
         self.assertEqual(int(analysis['drivers']['stats']['current']), -883)
 

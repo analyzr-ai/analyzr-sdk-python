@@ -6,6 +6,8 @@ from .runner_base import BaseRunner
 from .constants import *
 from .utils import *
 
+EXCLUDED_FIELDS = ['address', 'main_dimension', 'measure', 'period', 'frequency', 'total', 'lineages']
+
 class PerformanceRunner(BaseRunner):
     """
     Run the performance analysis pipeline
@@ -223,7 +225,7 @@ class PerformanceRunner(BaseRunner):
         if verbose: print('Retrieving training results...')
         analysis = self._buffer_read(
             request_id=request_id, client_id=client_id,
-            dataframe_name='res', verbose=verbose, staging=True, dataframe=False)
+            dataframe_name='perf', verbose=verbose, staging=True, dataframe=False)
         if encoding: 
             analysis = {
                 'drivers': self.__decode_analysis_driver(analysis['drivers'], fref), 
@@ -273,7 +275,7 @@ class PerformanceRunner(BaseRunner):
         obj2['main_dimension']['dimension'] = fref['reverse'][obj['main_dimension']['dimension']]
         obj2['main_dimension']['member'] = xref[obj2['main_dimension']['dimension']]['reverse'][obj['main_dimension']['member']]
         for dim in obj.keys():
-            if dim not in ['measure', 'address', 'period', 'total', 'main_dimension']:
+            if dim not in EXCLUDED_FIELDS:
                 dim2 = fref['reverse'][dim]
                 obj2[dim2] = {}
                 for member in obj[dim].keys():

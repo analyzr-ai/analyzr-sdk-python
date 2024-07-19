@@ -97,7 +97,7 @@ class BaseRunner:
             if verbose: print('[__batch_save] WARNING! API call failed for batch {} of {}'.format(idx, n))
         return success
 
-    def _buffer_read(self, client_id=None, request_id=None, dataframe_name='df', verbose=False, raw=False, staging=False):
+    def _buffer_read(self, client_id=None, request_id=None, dataframe_name='df', verbose=False, raw=False, staging=False, dataframe=True):
         """
         :param client_id: Short name for account being used. Used for reporting purposes only
         :param request_id:
@@ -106,15 +106,13 @@ class BaseRunner:
         :param staging:
         :return df:
         """
-        # if DEBUG: print('[_buffer_read] making call to read buffer')
         res2 = self.__read(client_id=client_id, request_id=request_id, dataframe_name=dataframe_name, verbose=verbose, staging=staging)
-        # if DEBUG: print('[_buffer_read] Buffer returned response')
         if raw: return res2
         if res2['status']!=200:
             print('ERROR! Buffer read failed: {}'.format(res2))
             return pd.DataFrame(None)
-        # if DEBUG: print('[_buffer_read] Buffer read successfully')
         if res2['response']['data'] is None: return pd.DataFrame()
+        if dataframe==False: return json.loads(res2['response']['data'])
         return pd.DataFrame(res2['response']['data']) if not staging else pd.read_csv(StringIO(res2['response']['data']))
 
     def __read(self, client_id=None, request_id=None, dataframe_name='df', verbose=False, staging=False):
@@ -198,7 +196,8 @@ class BaseRunner:
         if res['status']!=200: print('WARNING! Buffer clear failed: {}'.format(res))
         return res
 
-    def _encode(self, df, keys=None, categorical_vars=[], numerical_vars=[], bool_vars=[], record_id_var=None, encode_field_names=True, verbose=False):
+    def _encode(self, df, keys=None, categorical_vars=[], numerical_vars=[], bool_vars=[], skip_vars=[], 
+                record_id_var=None, encode_field_names=True, verbose=False, numerical=True):
         """
         Encode dataframe for the categorical and numerical variables provided.
 
@@ -206,9 +205,12 @@ class BaseRunner:
         :param keys:
         :param categorical_vars:
         :param numerical_vars:
+        :param bool_vars:
+        :param skip_vars:
         :param record_id_var:
         :param encode_field_names:
-        :param verbose: Set to true for verbose output
+        :param verbose: set to true for verbose output
+        :param numerical: when set to true, encodes numerical values 
         :return df2:
         :return xref: cross-reference dictionary for categorical variables
         :return zref: cross-reference dictionary for numerical variables
@@ -217,15 +219,18 @@ class BaseRunner:
         """
         return self._encode_no_keys(
             df,
-            categorical_vars=categorical_vars, numerical_vars=numerical_vars, bool_vars=bool_vars, record_id_var=record_id_var,
-            encode_field_names=encode_field_names, verbose=verbose,
+            categorical_vars=categorical_vars, numerical_vars=numerical_vars, bool_vars=bool_vars, 
+            skip_vars=skip_vars, record_id_var=record_id_var,
+            encode_field_names=encode_field_names, verbose=verbose, numerical=numerical, 
         ) if keys is None else self._encode_with_keys(
             df, keys,
-            categorical_vars=categorical_vars, numerical_vars=numerical_vars, bool_vars=bool_vars, record_id_var=record_id_var,
-            encode_field_names=encode_field_names, verbose=verbose,
+            categorical_vars=categorical_vars, numerical_vars=numerical_vars, bool_vars=bool_vars, 
+            skip_vars=skip_vars, record_id_var=record_id_var,
+            encode_field_names=encode_field_names, verbose=verbose, numerical=numerical, 
         )
 
-    def _encode_no_keys(self, df, categorical_vars=[], numerical_vars=[], bool_vars=[], record_id_var=None, encode_field_names=True, verbose=False):
+    def _encode_no_keys(self, df, categorical_vars=[], numerical_vars=[], bool_vars=[], skip_vars=[], 
+                        record_id_var=None, encode_field_names=True, verbose=False, numerical=True):
         """
         Encode dataframe for the categorical and numerical variables provided. This
         assumes no pre-existing encoding, returns encoded data and matching
@@ -234,9 +239,12 @@ class BaseRunner:
         :param df:
         :param categorical_vars:
         :param numerical_vars:
+        :param bool_vars:
+        :param skip_vars:
         :param record_id_var:
         :param encode_field_names:
-        :param verbose: Set to true for verbose output
+        :param verbose: set to true for verbose output
+        :param numerical: when set to true, encodes numerical values 
         :return df2:
         :return xref: cross-reference dictionary for categorical variables
         :return zref: cross-reference dictionary for numerical variables
@@ -257,7 +265,8 @@ class BaseRunner:
         zref = {}
         for col in numerical_vars:
             if verbose: print('\t{}'.format(col))
-            df2[col], zref[col] = zref_encode(df[col])
+            if col not in skip_vars:
+                df2[col], zref[col] = zref_encode(df[col], numerical=numerical)
 
         # Encode boolean variables
         # if verbose: print('Encoding boolean variables:')
@@ -281,7 +290,8 @@ class BaseRunner:
 
         return df2, xref, zref, rref, fref, fref_exp, bref
 
-    def _encode_with_keys(self, df, keys, categorical_vars=[], numerical_vars=[], bool_vars=[], record_id_var=None, encode_field_names=True, verbose=False):
+    def _encode_with_keys(self, df, keys, categorical_vars=[], numerical_vars=[], bool_vars=[], skip_vars=[], 
+                          record_id_var=None, encode_field_names=True, verbose=False, numerical=True):
         """
         Encode dataframe for the categorical and numerical variables provided. This
         assumes pre-existing encoding keys are provided, returns encoded data and
@@ -294,9 +304,12 @@ class BaseRunner:
         :param keys:
         :param categorical_vars:
         :param numerical_vars:
+        :param bool_vars:
+        :param skip_vars:
         :param record_id_var:
         :param encode_field_names:
-        :param verbose: Set to true for verbose output
+        :param verbose: set to true for verbose output
+        :param numerical: when set to true, encodes numerical values 
         :return df2:
         :return xref: cross-reference dictionary for categorical variables
         :return zref: cross-reference dictionary for numerical variables
@@ -317,7 +330,8 @@ class BaseRunner:
         zref = keys['zref']
         for col in numerical_vars:
             if verbose: print('\t{}'.format(col))
-            df2[col] = zref_encode_with_keys(df[col], zref[col])
+            if col not in skip_vars:
+                df2[col] = zref_encode_with_keys(df[col], zref[col], numerical=numerical)
 
         # Encode boolean variables
         # if verbose: print('Encoding boolean variables:')
@@ -349,13 +363,78 @@ class BaseRunner:
 
         return df2, xref, zref, rref, fref, fref_exp, bref
 
-    def _decode(self, df, categorical_vars=[], numerical_vars=[], bool_vars=[], record_id_var=None, xref={}, zref={}, rref={}, fref={}, bref={}, verbose=False):
+    def _encode_edges(self, edges, fref):
+        """
+        Encode primary graph edges
+
+        :param edges:
+        :param fref:
+        :return edges2:
+        """
+        edges2 = [] 
+        for edge in edges:
+            edge2 = (fref['forward'][edge[0]], fref['forward'][edge[1]])
+            edges2.append(edge2)
+        return edges2
+
+    def _encode_hierarchies(self, hierarchies, fref):
+        """
+        Encode dimensional hierarchies
+
+        :param hierarchies:
+        :param fref:
+        :return hierarchies2:
+        """
+        hierarchies2 = [] 
+        for item in hierarchies:
+            item2 = self._encode_hierarchy_item(item, fref)
+            hierarchies2.append(item2)
+        return hierarchies2
+
+    def _encode_hierarchy_item(self, item, fref):
+        """
+        Encode item and its children in dimensional hierarchy
+
+        :param item:
+        :param fref:
+        :return item2:
+        """
+        item2 = {}
+        item2['dimension'] = fref['forward'][item['dimension']]
+        item2['name'] = item2['dimension']
+        if item['child'] is not None:
+            item2['child'] = self._encode_hierarchy_item(item['child'], fref)
+        else:
+            item2['child'] = None 
+        return item2 
+
+    def _encode_udf(self, udf, fref):
+        """
+        Encode user-defined functions
+
+        :param udf:
+        :param fref:
+        :return udf2:
+        """
+        udf2 = {}
+        for key in udf.keys():
+            key2 = fref['forward'][key] 
+            field_names = sorted(list(fref['forward'].keys()), key=len, reverse=True) # sort to avoid partial matches
+            formula2 = udf[key]
+            for name in field_names:
+                formula2 = formula2.replace(name, fref['forward'][name])
+            udf2[key2] = formula2
+        return udf2 
+
+    def _decode(self, df, categorical_vars=[], numerical_vars=[], bool_vars=[], skip_vars=[], record_id_var=None, xref={}, zref={}, rref={}, fref={}, bref={}, verbose=False):
         """
         Decode dataframe using the encoding keys provided (xref, zrfef, rref, fref)
 
         :param df:
         :param categorical_vars:
         :param numerical_vars:
+        :param bool_vars:
+        :param skip_vars:
         :param record_id_var:
         :param xref: cross-reference dictionary for categorical variables
         :param zref: cross-reference dictionary for numerical variables
@@ -383,7 +462,8 @@ class BaseRunner:
         for col in numerical_vars:
             if col in df2.columns:
                 if verbose: print('\t{}'.format(col))
-                df2[col] = zref_decode(df2[col].astype('float'), zref[col])
+                if col not in skip_vars:
+                    df2[col] = zref_decode(df2[col].astype('float'), zref[col])
 
         # Decode boolean variables
         # if verbose: print('Decoding boolean variables:')
@@ -453,7 +533,7 @@ class BaseRunner:
         :param verbose: Set to true for verbose output
         :return:
         """
-        if verbose: print('Saving encoding keys locally...')
+        # if verbose: print('Saving encoding keys locally...')
         if not os.path.exists(TEMP_DIR): os.makedirs(TEMP_DIR)
         filename = '{}/{}.bin'.format(TEMP_DIR, model_id)
         file = open(filename, 'wb')
@@ -467,7 +547,7 @@ class BaseRunner:
         :param verbose: Set to true for verbose output
         :return keys:
         """
-        if verbose: print('Loading encoding keys...')
+        # if verbose: print('Loading encoding keys...')
         try:
             filename = '{}/{}.bin'.format(TEMP_DIR, model_id)
             file = open(filename, 'rb')

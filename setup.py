@@ -7,13 +7,13 @@ README = (HERE / "README.md").read_text()
 
 setup(
     name='analyzr-sdk-python',
-    version='1.3.76',
-    description='Python SDK for Analyzr API',
+    version='1.4.0',
+    description='Python SDK for the G2M Platform API',
     long_description=README,
     long_description_content_type="text/markdown",
     url="https://github.com/analyzr-ai/analyzr-sdk-python",
-    author='Analyzr Team',
-    author_email='support@analyzr.ai',
+    author='G2M Team',
+    author_email='support@g2m.ai',
     license='Apache 2.0',
     classifiers=[
         "Programming Language :: Python :: 3",

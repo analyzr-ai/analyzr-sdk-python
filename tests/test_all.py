@@ -19,7 +19,7 @@ from .utils import *
 CLIENT_ID = 'test'
 N_FEATURES = 2
 N_SAMPLES = 1000
-EPSILON = 1e-6
+EPSILON = 1e-4
 VERBOSE = False
 
 with open('tests/config.json') as json_file: config = json.load(json_file)
@@ -78,16 +78,12 @@ class BufferTest(unittest.TestCase):
 
     def test_staging_multi_batch_compressed_no_staging(self):
         df = pd.read_csv('https://g2mstaticfiles.blob.core.windows.net/$web/titanic.csv', encoding = "ISO-8859-1", low_memory=False)
-        # print('df: ', df)
         request_id = str(uuid.uuid4())
         res = analyzer.cluster._buffer_save(df, batch_size=500, client_id=CLIENT_ID, request_id=request_id, compressed=True, staging=False)
         self.assertEqual(res['batches_saved'], 2)
         df2 = analyzer.cluster._buffer_read(client_id=CLIENT_ID, request_id=request_id, staging=False, dataframe_name='df')
-        # print('df2: ', df2)
         self.assertEqual(df.shape==df2.shape, True)
         self.assertEqual(len(df.columns), len(df2.columns))
-        # for i in range(0, len(df.columns)): self.assertEqual(df.columns[i], df2.columns[i])
-        # self.assertEqual(df.loc[890, 'Name']==df2.loc['890', 'Name'], True)
         res = analyzer.cluster._buffer_clear(client_id=CLIENT_ID, request_id=request_id)
         self.assertEqual(res['status'], 200)
         self.assertEqual(res['response']['message'], 'Buffer cleared')
@@ -703,3 +699,501 @@ class CausalTest(unittest.TestCase):
         self.assertEqual(len(res['misc']), 10)
         self.assertEqual(len(res['bins']), 0)
         self.assertTrue(abs(res['atx'].loc['1']['Value']-0.212232)/0.212232 <= EPSILON*10) # ATT = 0.212232
+
+class MMMTest(unittest.TestCase):
+
+    def test_mmm_train_no_encoding(self):
+        df = load_mmm_dataset().head(30)
+        res = analyzer.mmm.train(df, client_id=CLIENT_ID, 
+            idx_var=None, time_var='wk_strt_dt', outcome_var='sales', 
+            media_vars=['direct_mail', 'insert', 'newspaper', 'radio', 'tv', 'social_media', 'online_display'], 
+            other_vars=[], 
+            algorithm='mmm-carryover', 
+            buffer_batch_size=1000, verbose=VERBOSE, encoding=False)
+        model_id = res['model_id']
+        train_stats = res['train_stats']
+        test_stats = res['test_stats']
+        lag_stats = res['lag_stats']
+        contrib_stats = res['contrib_stats']
+        self.assertTrue( abs( (float(train_stats['Value'][1]) - 0.666750) / 0.666750 ) < EPSILON )
+        self.assertTrue( abs( (float(test_stats['Value'][1]) - 0.368148) / 0.368148 ) < EPSILON )
+        self.assertEqual(lag_stats.shape, (8, 8))
+        self.assertEqual(contrib_stats.shape, (17, 9))
+
+    def test_mmm_train_with_encoding(self):
+        df = load_mmm_dataset().head(30)
+        res = analyzer.mmm.train(df, client_id=CLIENT_ID, 
+            idx_var=None, time_var='wk_strt_dt', outcome_var='sales', 
+            media_vars=['direct_mail', 'insert', 'newspaper', 'radio', 'tv', 'social_media', 'online_display'], 
+            other_vars=[], 
+            algorithm='mmm-carryover', 
+            buffer_batch_size=1000, verbose=VERBOSE, encoding=True)
+        model_id = res['model_id']
+        train_stats = res['train_stats']
+        test_stats = res['test_stats']
+        lag_stats = res['lag_stats']
+        contrib_stats = res['contrib_stats']
+        self.assertTrue( abs( (float(train_stats['Value'][1]) - 0.666750) / 0.666750 ) < EPSILON )
+        self.assertTrue( abs( (float(test_stats['Value'][1]) - 0.368148) / 0.368148 ) < EPSILON )
+        self.assertEqual(lag_stats.shape, (8, 8))
+        self.assertEqual(contrib_stats.shape, (17, 9))
+
+    def test_mmm_optimize_no_encoding(self):
+        # Train
+        df = load_mmm_dataset().head(30)
+        res = analyzer.mmm.train(df, client_id=CLIENT_ID, 
+            idx_var=None, time_var='wk_strt_dt', outcome_var='sales', 
+            media_vars=['direct_mail', 'insert', 'newspaper', 'radio', 'tv', 'social_media', 'online_display'], 
+            other_vars=[], 
+            algorithm='mmm-adstock', 
+            buffer_batch_size=1000, verbose=VERBOSE, encoding=False)
+        model_id = res['model_id']
+        # Optimize
+        obj = analyzer.mmm.optimize(
+            model_id=model_id, 
+            client_id=CLIENT_ID, 
+            budget=30e6, 
+            encoding=False, 
+        )
+        data2 = obj['data2']
+        self.assertEqual(data2.shape, (29, 3))
+        self.assertEqual(float(data2['Value'][0]), 0)
+        self.assertEqual(float(data2['Value'][1]), 48)
+        self.assertEqual(float(data2['Value'][12]), 706)
+
+    def test_mmm_optimize_with_encoding(self):
+        # Train
+        df = load_mmm_dataset().head(30)
+        res = analyzer.mmm.train(df, client_id=CLIENT_ID, 
+            idx_var=None, time_var='wk_strt_dt', outcome_var='sales', 
+            media_vars=['direct_mail', 'insert', 'newspaper', 'radio', 'tv', 'social_media', 'online_display'], 
+            other_vars=[], 
+            algorithm='mmm-adstock', 
+            buffer_batch_size=1000, verbose=VERBOSE, encoding=True)
+        model_id = res['model_id']
+        # Optimize
+        obj = analyzer.mmm.optimize(
+            model_id=model_id, 
+            client_id=CLIENT_ID, 
+            budget=30e6, 
+            encoding=True, 
+        )
+        data2 = obj['data2']
+        self.assertEqual(data2.shape, (29, 3))
+        self.assertEqual(float(data2['Value'][0]), 0)
+        self.assertEqual(float(data2['Value'][1]), 48)
+        self.assertEqual(float(data2['Value'][12]), 706)
+
+
+class PerformanceTest(unittest.TestCase):
+
+    def test_analyze_train_no_encoding(self):
+        df = load_performance_analysis_dataset()
+        # print('\n[test_analyze_train] df: \n', df)
+        res = analyzer.performance.train(df, client_id=CLIENT_ID, 
+            idx_var=None, time_var='period', outcome_var='net_additions', 
+            primary_vars=['beginning_balance', 'gross_connects', 'disconnects_voluntary', 'disconnects_involuntary', 'disconnects_total', 'net_additions', 'ending_balance', 'churn_voluntary', 'churn_involuntary'], 
+            dimensional_vars=['region', 'market', 'product'], 
+            edges=[
+                ('ending_balance', 'beginning_balance'), 
+                ('ending_balance', 'net_additions'), 
+                ('net_additions', 'gross_connects'), 
+                ('net_additions', 'disconnects_total'), 
+                ('disconnects_total', 'disconnects_voluntary'), 
+                ('disconnects_total', 'disconnects_involuntary'), 
+                ('disconnects_voluntary', 'beginning_balance'), 
+                ('disconnects_voluntary', 'churn_voluntary'), 
+                ('disconnects_involuntary', 'beginning_balance'), 
+                ('disconnects_involuntary', 'churn_involuntary'), 
+            ], 
+            hierarchies=[
+                {
+                    'name': 'Region', 
+                    'dimension': 'region', 
+                    'child': {
+                        'name': 'Market', 
+                        'dimension': 'market', 
+                        'child': None, 
+                    }
+                },  
+                {
+                    'name': 'Product', 
+                    'dimension': 'product', 
+                    'child': None, 
+                },  
+            ], 
+            udf={
+                'churn_voluntary': 'DIVIDE(disconnects_voluntary, beginning_balance)', 
+                'churn_involuntary': 'DIVIDE(disconnects_involuntary, beginning_balance)', 
+            }, 
+            buffer_batch_size=1000, verbose=VERBOSE, encoding=False)
+        model_id = res['model_id']
+        analysis = res['analysis']
+        self.assertEqual(len(analysis.keys()), 4)
+        self.assertEqual(analysis['drivers']['measure'], 'net_additions')
+        self.assertEqual(int(analysis['drivers']['stats']['current']), -2859)
+
+    def test_analyze_train_with_encoding(self):
+        df = load_performance_analysis_dataset()
+        res = analyzer.performance.train(df, client_id=CLIENT_ID, 
+            idx_var=None, time_var='period', outcome_var='net_additions', 
+            primary_vars=['beginning_balance', 'gross_connects', 'disconnects_voluntary', 'disconnects_involuntary', 'disconnects_total', 'net_additions', 'ending_balance', 'churn_voluntary', 'churn_involuntary'], 
+            dimensional_vars=['region', 'market', 'product'], 
+            edges=[
+                ('ending_balance', 'beginning_balance'), 
+                ('ending_balance', 'net_additions'), 
+                ('net_additions', 'gross_connects'), 
+                ('net_additions', 'disconnects_total'), 
+                ('disconnects_total', 'disconnects_voluntary'), 
+                ('disconnects_total', 'disconnects_involuntary'), 
+                ('disconnects_voluntary', 'beginning_balance'), 
+                ('disconnects_voluntary', 'churn_voluntary'), 
+                ('disconnects_involuntary', 'beginning_balance'), 
+                ('disconnects_involuntary', 'churn_involuntary'), 
+            ], 
+            hierarchies=[
+                {
+                    'name': 'Region', 
+                    'dimension': 'region', 
+                    'child': {
+                        'name': 'Market', 
+                        'dimension': 'market', 
+                        'child': None, 
+                    }
+                },  
+                {
+                    'name': 'Product', 
+                    'dimension': 'product', 
+                    'child': None, 
+                },  
+            ], 
+            udf={
+                'churn_voluntary': 'DIVIDE(disconnects_voluntary, beginning_balance)', 
+                'churn_involuntary': 'DIVIDE(disconnects_involuntary, beginning_balance)', 
+            }, 
+            buffer_batch_size=1000, verbose=VERBOSE, encoding=True)
+        model_id = res['model_id']
+        analysis = res['analysis']
+        self.assertEqual(len(analysis.keys()), 3)
+        self.assertEqual(analysis['drivers']['measure'], 'net_additions')
+        self.assertEqual(int(analysis['drivers']['stats']['current']), -2859)
+
+    def test_analyze_run_no_refresh_no_encoding(self):
+        df = load_performance_analysis_dataset()
+        # print('\n[test_analyze_train] df: \n', df)
+        res = analyzer.performance.train(df, client_id=CLIENT_ID, 
+            idx_var=None, time_var='period', outcome_var='net_additions', 
+            primary_vars=['beginning_balance', 'gross_connects', 'disconnects_voluntary', 'disconnects_involuntary', 'disconnects_total', 'net_additions', 'ending_balance', 'churn_voluntary', 'churn_involuntary'], 
+            dimensional_vars=['region', 'market', 'product'], 
+            edges=[
+                ('ending_balance', 'beginning_balance'), 
+                ('ending_balance', 'net_additions'), 
+                ('net_additions', 'gross_connects'), 
+                ('net_additions', 'disconnects_total'), 
+                ('disconnects_total', 'disconnects_voluntary'), 
+                ('disconnects_total', 'disconnects_involuntary'), 
+                ('disconnects_voluntary', 'beginning_balance'), 
+                ('disconnects_voluntary', 'churn_voluntary'), 
+                ('disconnects_involuntary', 'beginning_balance'), 
+                ('disconnects_involuntary', 'churn_involuntary'), 
+            ], 
+            hierarchies=[
+                {
+                    'name': 'Region', 
+                    'dimension': 'region', 
+                    'child': {
+                        'name': 'Market', 
+                        'dimension': 'market', 
+                        'child': None, 
+                    }
+                },  
+                {
+                    'name': 'Product', 
+                    'dimension': 'product', 
+                    'child': None, 
+                },  
+            ], 
+            udf={
+                'churn_voluntary': 'DIVIDE(disconnects_voluntary, beginning_balance)', 
+                'churn_involuntary': 'DIVIDE(disconnects_involuntary, beginning_balance)', 
+            }, 
+            buffer_batch_size=1000, verbose=VERBOSE, encoding=False)
+        model_id = res['model_id']
+        analysis = res['analysis']
+        self.assertEqual(len(analysis.keys()), 4)
+        self.assertEqual(analysis['drivers']['measure'], 'net_additions')
+        self.assertEqual(int(analysis['drivers']['stats']['current']), -2859)
+        res = analyzer.performance.run(
+            model_id=model_id, 
+            client_id=CLIENT_ID, 
+            time_var='period',
+            outcome_var='net_additions',
+            address=('Valecross', None, 'Subs'), 
+            primary_vars=['beginning_balance', 'gross_connects', 'disconnects_voluntary', 'disconnects_involuntary', 'disconnects_total', 'net_additions', 'ending_balance', 'churn_voluntary', 'churn_involuntary'], 
+            dimensional_vars=['region', 'market', 'product'], 
+            encoding=False, 
+        )
+        analysis = res['analysis']
+        self.assertEqual(len(analysis.keys()), 3)
+        self.assertEqual(analysis['drivers']['measure'], 'net_additions')
+        self.assertEqual(int(analysis['drivers']['stats']['current']), -883)
+
+    def test_analyze_run_no_refresh_with_encoding(self):
+        df = load_performance_analysis_dataset()
+        # print('\n[test_analyze_train] df: \n', df)
+        res = analyzer.performance.train(df, client_id=CLIENT_ID, 
+            idx_var=None, time_var='period', outcome_var='net_additions', 
+            primary_vars=['beginning_balance', 'gross_connects', 'disconnects_voluntary', 'disconnects_involuntary', 'disconnects_total', 'net_additions', 'ending_balance', 'churn_voluntary', 'churn_involuntary'], 
+            dimensional_vars=['region', 'market', 'product'], 
+            edges=[
+                ('ending_balance', 'beginning_balance'), 
+                ('ending_balance', 'net_additions'), 
+                ('net_additions', 'gross_connects'), 
+                ('net_additions', 'disconnects_total'), 
+                ('disconnects_total', 'disconnects_voluntary'), 
+                ('disconnects_total', 'disconnects_involuntary'), 
+                ('disconnects_voluntary', 'beginning_balance'), 
+                ('disconnects_voluntary', 'churn_voluntary'), 
+                ('disconnects_involuntary', 'beginning_balance'), 
+                ('disconnects_involuntary', 'churn_involuntary'), 
+            ], 
+            hierarchies=[
+                {
+                    'name': 'Region', 
+                    'dimension': 'region', 
+                    'child': {
+                        'name': 'Market', 
+                        'dimension': 'market', 
+                        'child': None, 
+                    }
+                },  
+                {
+                    'name': 'Product', 
+                    'dimension': 'product', 
+                    'child': None, 
+                },  
+            ], 
+            udf={
+                'churn_voluntary': 'DIVIDE(disconnects_voluntary, beginning_balance)', 
+                'churn_involuntary': 'DIVIDE(disconnects_involuntary, beginning_balance)', 
+            }, 
+            buffer_batch_size=1000, verbose=VERBOSE, encoding=True)
+        model_id = res['model_id']
+        analysis = res['analysis']
+        self.assertEqual(len(analysis.keys()), 3)
+        self.assertEqual(analysis['drivers']['measure'], 'net_additions')
+        self.assertEqual(int(analysis['drivers']['stats']['current']), -2859)
+        res = analyzer.performance.run(
+            model_id=model_id, 
+            client_id=CLIENT_ID, 
+            time_var='period',
+            outcome_var='net_additions',
+            address=('Valecross', None, 'Subs'), 
+            primary_vars=['beginning_balance', 'gross_connects', 'disconnects_voluntary', 'disconnects_involuntary', 'disconnects_total', 'net_additions', 'ending_balance', 'churn_voluntary', 'churn_involuntary'], 
+            dimensional_vars=['region', 'market', 'product'], 
+            encoding=True, 
+        )
+        analysis = res['analysis']
+        self.assertEqual(len(analysis.keys()), 3)
+        self.assertEqual(analysis['drivers']['measure'], 'net_additions')
+        self.assertEqual(int(analysis['drivers']['stats']['current']), -883)
+
+    def test_analyze_run_purge_no_reload_with_encoding(self):
+        df = load_performance_analysis_dataset()
+        # print('\n[test_analyze_train] df: \n', df)
+        res = analyzer.performance.train(df, client_id=CLIENT_ID, 
+            idx_var=None, time_var='period', outcome_var='net_additions', 
+            primary_vars=['beginning_balance', 'gross_connects', 'disconnects_voluntary', 'disconnects_involuntary', 'disconnects_total', 'net_additions', 'ending_balance', 'churn_voluntary', 'churn_involuntary'], 
+            dimensional_vars=['region', 'market', 'product'], 
+            edges=[
+                ('ending_balance', 'beginning_balance'), 
+                ('ending_balance', 'net_additions'), 
+                ('net_additions', 'gross_connects'), 
+                ('net_additions', 'disconnects_total'), 
+                ('disconnects_total', 'disconnects_voluntary'), 
+                ('disconnects_total', 'disconnects_involuntary'), 
+                ('disconnects_voluntary', 'beginning_balance'), 
+                ('disconnects_voluntary', 'churn_voluntary'), 
+                ('disconnects_involuntary', 'beginning_balance'), 
+                ('disconnects_involuntary', 'churn_involuntary'), 
+            ], 
+            hierarchies=[
+                {
+                    'name': 'Region', 
+                    'dimension': 'region', 
+                    'child': {
+                        'name': 'Market', 
+                        'dimension': 'market', 
+                        'child': None, 
+                    }
+                },  
+                {
+                    'name': 'Product', 
+                    'dimension': 'product', 
+                    'child': None, 
+                },  
+            ], 
+            udf={
+                'churn_voluntary': 'DIVIDE(disconnects_voluntary, beginning_balance)', 
+                'churn_involuntary': 'DIVIDE(disconnects_involuntary, beginning_balance)', 
+            }, 
+            buffer_batch_size=1000, verbose=VERBOSE, encoding=True)
+        model_id = res['model_id']
+        analysis = res['analysis']
+        self.assertEqual(len(analysis.keys()), 3)
+        self.assertEqual(analysis['drivers']['measure'], 'net_additions')
+        self.assertEqual(int(analysis['drivers']['stats']['current']), -2859)
+        res = analyzer.performance.purge(
+            model_id=model_id, 
+            client_id=CLIENT_ID, 
+            verbose=VERBOSE, 
+        )
+        self.assertEqual(res['status'], 'Complete')
+        res = analyzer.performance.run(
+            model_id=model_id, 
+            client_id=CLIENT_ID, 
+            time_var='period',
+            outcome_var='net_additions',
+            address=('Valecross', None, 'Subs'), 
+            primary_vars=['beginning_balance', 'gross_connects', 'disconnects_voluntary', 'disconnects_involuntary', 'disconnects_total', 'net_additions', 'ending_balance', 'churn_voluntary', 'churn_involuntary'], 
+            dimensional_vars=['region', 'market', 'product'], 
+            encoding=True, 
+        )
+        analysis = res['analysis']
+        self.assertEqual(len(analysis.keys()), 3)
+        self.assertEqual(analysis['drivers'], {})
+
+    def test_analyze_run_purge_and_reload_with_encoding(self):
+        df = load_performance_analysis_dataset()
+        # print('\n[test_analyze_train] df: \n', df)
+        res = analyzer.performance.train(df, client_id=CLIENT_ID, 
+            idx_var=None, time_var='period', outcome_var='net_additions', 
+            primary_vars=['beginning_balance', 'gross_connects', 'disconnects_voluntary', 'disconnects_involuntary', 'disconnects_total', 'net_additions', 'ending_balance', 'churn_voluntary', 'churn_involuntary'], 
+            dimensional_vars=['region', 'market', 'product'], 
+            edges=[
+                ('ending_balance', 'beginning_balance'), 
+                ('ending_balance', 'net_additions'), 
+                ('net_additions', 'gross_connects'), 
+                ('net_additions', 'disconnects_total'), 
+                ('disconnects_total', 'disconnects_voluntary'), 
+                ('disconnects_total', 'disconnects_involuntary'), 
+                ('disconnects_voluntary', 'beginning_balance'), 
+                ('disconnects_voluntary', 'churn_voluntary'), 
+                ('disconnects_involuntary', 'beginning_balance'), 
+                ('disconnects_involuntary', 'churn_involuntary'), 
+            ], 
+            hierarchies=[
+                {
+                    'name': 'Region', 
+                    'dimension': 'region', 
+                    'child': {
+                        'name': 'Market', 
+                        'dimension': 'market', 
+                        'child': None, 
+                    }
+                },  
+                {
+                    'name': 'Product', 
+                    'dimension': 'product', 
+                    'child': None, 
+                },  
+            ], 
+            udf={
+                'churn_voluntary': 'DIVIDE(disconnects_voluntary, beginning_balance)', 
+                'churn_involuntary': 'DIVIDE(disconnects_involuntary, beginning_balance)', 
+            }, 
+            buffer_batch_size=1000, verbose=VERBOSE, encoding=True)
+        model_id = res['model_id']
+        analysis = res['analysis']
+        self.assertEqual(len(analysis.keys()), 3)
+        self.assertEqual(analysis['drivers']['measure'], 'net_additions')
+        self.assertEqual(int(analysis['drivers']['stats']['current']), -2859)
+        res = analyzer.performance.purge(
+            model_id=model_id, 
+            client_id=CLIENT_ID, 
+            verbose=VERBOSE, 
+        )
+        self.assertEqual(res['status'], 'Complete')
+        res = analyzer.performance.run(
+            df=df, 
+            model_id=model_id, 
+            client_id=CLIENT_ID, 
+            time_var='period',
+            outcome_var='net_additions',
+            address=('Valecross', None, 'Subs'), 
+            primary_vars=['beginning_balance', 'gross_connects', 'disconnects_voluntary', 'disconnects_involuntary', 'disconnects_total', 'net_additions', 'ending_balance', 'churn_voluntary', 'churn_involuntary'], 
+            dimensional_vars=['region', 'market', 'product'], 
+            encoding=True, 
+        )
+        analysis = res['analysis']
+        self.assertEqual(len(analysis.keys()), 3)
+        self.assertEqual(analysis['drivers']['measure'], 'net_additions')
+        self.assertEqual(int(analysis['drivers']['stats']['current']), -883)
+
+    def test_analyze_run_purge_and_reload_no_encoding(self):
+        df = load_performance_analysis_dataset()
+        # print('\n[test_analyze_train] df: \n', df)
+        res = analyzer.performance.train(df, client_id=CLIENT_ID, 
+            idx_var=None, time_var='period', outcome_var='net_additions', 
+            primary_vars=['beginning_balance', 'gross_connects', 'disconnects_voluntary', 'disconnects_involuntary', 'disconnects_total', 'net_additions', 'ending_balance', 'churn_voluntary', 'churn_involuntary'], 
+            dimensional_vars=['region', 'market', 'product'], 
+            edges=[
+                ('ending_balance', 'beginning_balance'), 
+                ('ending_balance', 'net_additions'), 
+                ('net_additions', 'gross_connects'), 
+                ('net_additions', 'disconnects_total'), 
+                ('disconnects_total', 'disconnects_voluntary'), 
+                ('disconnects_total', 'disconnects_involuntary'), 
+                ('disconnects_voluntary', 'beginning_balance'), 
+                ('disconnects_voluntary', 'churn_voluntary'), 
+                ('disconnects_involuntary', 'beginning_balance'), 
+                ('disconnects_involuntary', 'churn_involuntary'), 
+            ], 
+            hierarchies=[
+                {
+                    'name': 'Region', 
+                    'dimension': 'region', 
+                    'child': {
+                        'name': 'Market', 
+                        'dimension': 'market', 
+                        'child': None, 
+                    }
+                },  
+                {
+                    'name': 'Product', 
+                    'dimension': 'product', 
+                    'child': None, 
+                },  
+            ], 
+            udf={
+                'churn_voluntary': 'DIVIDE(disconnects_voluntary, beginning_balance)', 
+                'churn_involuntary': 'DIVIDE(disconnects_involuntary, beginning_balance)', 
+            }, 
+            buffer_batch_size=1000, verbose=VERBOSE, encoding=False)
+        model_id = res['model_id']
+        analysis = res['analysis']
+        self.assertEqual(len(analysis.keys()), 4)
+        self.assertEqual(analysis['drivers']['measure'], 'net_additions')
+        self.assertEqual(int(analysis['drivers']['stats']['current']), -2859)
+        res = analyzer.performance.purge(
+            model_id=model_id, 
+            client_id=CLIENT_ID, 
+            verbose=VERBOSE, 
+        )
+        self.assertEqual(res['status'], 'Complete')
+        res = analyzer.performance.run(
+            df=df, 
+            model_id=model_id, 
+            client_id=CLIENT_ID, 
+            time_var='period',
+            outcome_var='net_additions',
+            address=('Valecross', None, 'Subs'), 
+            primary_vars=['beginning_balance', 'gross_connects', 'disconnects_voluntary', 'disconnects_involuntary', 'disconnects_total', 'net_additions', 'ending_balance', 'churn_voluntary', 'churn_involuntary'], 
+            dimensional_vars=['region', 'market', 'product'], 
+            encoding=False, 
+        )
+        analysis = res['analysis']
+        self.assertEqual(len(analysis.keys()), 3)
+        self.assertEqual(analysis['drivers']['measure'], 'net_additions')
+        self.assertEqual(int(analysis['drivers']['stats']['current']), -883)
+

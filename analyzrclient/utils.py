@@ -76,26 +76,29 @@ def xref_decode(series, xref, verbose=False):
         series2[idx] = xref['reverse'][str(val)]
     return series2
 
-def zref_encode(series):
+def zref_encode(series, numerical=True):
     """
     Replaces numerical values in a Series with z scores
 
     :param series:
+    :param numerical:
     :return series2:
     :return zref:
     """
     zref = { 'mean': series.mean(), 'stdev': series.std() }
-    series2 = zref_encode_with_keys(series, zref)
+    series2 = zref_encode_with_keys(series, zref, numerical=numerical)
     return series2, zref
 
-def zref_encode_with_keys(series, zref):
+def zref_encode_with_keys(series, zref, numerical=True):
     """
     Replaces numerical values in a Series with z scores using existing encoding keys
 
     :param series:
+    :param numerical:
     :param zref:
     :return series2:
     """
+    if numerical==False: return series
     series2 = deepcopy(series)
 
     # Remove mean
@@ -270,8 +273,6 @@ def fref_to_fref_expanded(fref, xref):
     :param xref:
     :return fref_exp:
     """
-    # print('[fref_to_fref_expanded] fref: ', fref)
-    # print('[fref_to_fref_expanded] xref: ', xref)
     fref_exp = {'forward': {}, 'reverse': {}}
     for col in fref['forward'].keys():
         key = fref['forward'][col]
@@ -286,7 +287,6 @@ def fref_to_fref_expanded(fref, xref):
             # col is not categorical
             fref_exp['forward'][col] = key
             fref_exp['reverse'][key] = col
-    # print('[fref_to_fref_expanded] fref_exp: ', fref_exp)
     return fref_exp
 
 def fref_decode(df, fref):

@@ -934,7 +934,7 @@ class PerformanceTest(unittest.TestCase):
             encoding=False, 
         )
         analysis = res['analysis']
-        self.assertEqual(len(analysis.keys()), 3)
+        self.assertEqual(len(analysis.keys()), 4)
         self.assertEqual(analysis['drivers']['measure'], 'net_additions')
         self.assertEqual(int(analysis['drivers']['stats']['current']), -883)
 
@@ -1193,7 +1193,7 @@ class PerformanceTest(unittest.TestCase):
             encoding=False, 
         )
         analysis = res['analysis']
-        self.assertEqual(len(analysis.keys()), 3)
+        self.assertEqual(len(analysis.keys()), 4)
         self.assertEqual(analysis['drivers']['measure'], 'net_additions')
         self.assertEqual(int(analysis['drivers']['stats']['current']), -883)
 

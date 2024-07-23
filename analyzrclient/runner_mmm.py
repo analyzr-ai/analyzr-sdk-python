@@ -178,13 +178,14 @@ class MMMRunner(BaseRunner):
                         return None
                 else:
                     keys = {}
-                train_stats, test_stats, lag_stats, contrib_stats = self.__retrieve_train_results(
+                train_stats, train_data, test_stats, lag_stats, contrib_stats = self.__retrieve_train_results(
                         request_id=model_id,
                         client_id=client_id,
                         fref=keys['fref_exp'] if encoding else {},
                         zref=keys['zref'] if encoding else {}, 
                         verbose=verbose,
                         encoding=encoding)
+                res1['train_data'] = train_data
                 res1['train_stats'] = train_stats
                 res1['test_stats'] = test_stats
                 res1['lag_stats'] = lag_stats
@@ -313,7 +314,7 @@ class MMMRunner(BaseRunner):
                     step=step,
                     verbose=verbose)
                 if res2['response']['status'] in ['Complete']:
-                    train_stats, test_stats, lag_stats, contrib_stats = self.__retrieve_train_results(
+                    train_stats, train_data, test_stats, lag_stats, contrib_stats = self.__retrieve_train_results(
                         request_id=request_id,
                         client_id=client_id,
                         fref=fref_exp if encoding else {},
@@ -336,6 +337,7 @@ class MMMRunner(BaseRunner):
         res5 = {}
         res5['model_id'] = request_id
         if poll:
+            res5['train_data'] = train_data
             res5['train_stats'] = train_stats
             res5['test_stats'] = test_stats
             res5['lag_stats'] = lag_stats
@@ -405,6 +407,14 @@ class MMMRunner(BaseRunner):
         else:
             if verbose: print('WARNING! Training error stats dataframe is empty')
 
+         # Training error stats
+        if verbose: print('    Retrieving training data stats...')
+        train_data = self._buffer_read(
+            request_id=request_id, client_id=client_id, dataframe_name='train_data',
+            verbose=verbose)
+        if train_data.empty:
+            if verbose: print('WARNING! Training time series dataframe is empty')
+
         # Testing error stats
         if verbose: print('    Retrieving testing error stats...')
         test_stats = self._buffer_read(
@@ -433,6 +443,6 @@ class MMMRunner(BaseRunner):
             if col not in ['stat', 'metric']:
                 contrib_stats[col] = contrib_stats[col].astype('float')
 
-        return train_stats, test_stats, lag_stats, contrib_stats 
+        return train_stats, train_data, test_stats, lag_stats, contrib_stats 
      
 

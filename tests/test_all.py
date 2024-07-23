@@ -712,6 +712,7 @@ class MMMTest(unittest.TestCase):
             buffer_batch_size=1000, verbose=VERBOSE, encoding=False)
         model_id = res['model_id']
         train_stats = res['train_stats']
+        train_data = res['train_data']
         test_stats = res['test_stats']
         lag_stats = res['lag_stats']
         contrib_stats = res['contrib_stats']
@@ -730,6 +731,7 @@ class MMMTest(unittest.TestCase):
             buffer_batch_size=1000, verbose=VERBOSE, encoding=True)
         model_id = res['model_id']
         train_stats = res['train_stats']
+        train_data = res['train_data']
         test_stats = res['test_stats']
         lag_stats = res['lag_stats']
         contrib_stats = res['contrib_stats']

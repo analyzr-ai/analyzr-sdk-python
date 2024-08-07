@@ -616,7 +616,7 @@ class CausalTest(unittest.TestCase):
             algorithm='propensity-score-matching-ci', 
             buffer_batch_size=1000, verbose=VERBOSE, encoding=True)
         model_id = res['model_id']
-        self.assertEqual(len(res['atx']), 9) 
+        self.assertEqual(len(res['atx']), 11) 
         self.assertEqual(len(res['raw']), 4)
         self.assertEqual(len(res['misc']), 10)
         self.assertEqual(len(res['bins']), 10)
@@ -629,7 +629,7 @@ class CausalTest(unittest.TestCase):
             algorithm='propensity-score-blocking-ci', 
             buffer_batch_size=1000, verbose=VERBOSE, encoding=True)
         model_id = res['model_id']
-        self.assertEqual(len(res['atx']), 9) 
+        self.assertEqual(len(res['atx']), 11) 
         self.assertEqual(len(res['raw']), 4)
         self.assertEqual(len(res['misc']), 10)
         self.assertEqual(len(res['bins']), 0)
@@ -642,7 +642,7 @@ class CausalTest(unittest.TestCase):
             algorithm='propensity-score-weighting-ci', 
             buffer_batch_size=1000, verbose=VERBOSE, encoding=True)
         model_id = res['model_id']
-        self.assertEqual(len(res['atx']), 9) 
+        self.assertEqual(len(res['atx']), 11) 
         self.assertEqual(len(res['raw']), 4)
         self.assertEqual(len(res['misc']), 10)
         self.assertEqual(len(res['bins']), 0)
@@ -655,7 +655,7 @@ class CausalTest(unittest.TestCase):
             algorithm='ols-ci', 
             buffer_batch_size=1000, verbose=VERBOSE, encoding=True)
         model_id = res['model_id']
-        self.assertEqual(len(res['atx']), 9) 
+        self.assertEqual(len(res['atx']), 11) 
         self.assertEqual(len(res['raw']), 4)
         self.assertEqual(len(res['misc']), 10)
         self.assertEqual(len(res['bins']), 0)
@@ -668,7 +668,7 @@ class CausalTest(unittest.TestCase):
             algorithm='propensity-score-matching-dw', standard_error=False, 
             buffer_batch_size=1000, verbose=VERBOSE, encoding=True)
         model_id = res['model_id']
-        self.assertEqual(len(res['atx']), 9) 
+        self.assertEqual(len(res['atx']), 11) 
         self.assertEqual(len(res['raw']), 4)
         self.assertEqual(len(res['misc']), 10)
         self.assertEqual(len(res['bins']), 0)
@@ -681,7 +681,7 @@ class CausalTest(unittest.TestCase):
             algorithm='propensity-score-weighting-dw', standard_error=False, 
             buffer_batch_size=1000, verbose=VERBOSE, encoding=True)
         model_id = res['model_id']
-        self.assertEqual(len(res['atx']), 9) 
+        self.assertEqual(len(res['atx']), 11) 
         self.assertEqual(len(res['raw']), 4)
         self.assertEqual(len(res['misc']), 10)
         self.assertEqual(len(res['bins']), 0)
@@ -694,7 +694,7 @@ class CausalTest(unittest.TestCase):
             algorithm='propensity-score-stratification-dw', standard_error=False, 
             buffer_batch_size=1000, verbose=VERBOSE, encoding=True)
         model_id = res['model_id']
-        self.assertEqual(len(res['atx']), 9) 
+        self.assertEqual(len(res['atx']), 11) 
         self.assertEqual(len(res['raw']), 4)
         self.assertEqual(len(res['misc']), 10)
         self.assertEqual(len(res['bins']), 0)

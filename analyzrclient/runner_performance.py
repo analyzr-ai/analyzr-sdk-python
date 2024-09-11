@@ -6,7 +6,7 @@ from .runner_base import BaseRunner
 from .constants import *
 from .utils import *
 
-EXCLUDED_FIELDS = ['address', 'main_dimension', 'measure', 'period', 'frequency', 'total', 'lineages']
+EXCLUDED_FIELDS = ['address', 'main_dimension', 'main_stat', 'measure', 'period', 'frequency', 'total', 'lineages']
 
 class PerformanceRunner(BaseRunner):
     """
@@ -26,7 +26,7 @@ class PerformanceRunner(BaseRunner):
     
     def train(self, df, client_id=None,
             idx_var=None, time_var=None, outcome_var=None, primary_vars=[], dimensional_vars=[], 
-            edges=[], hierarchies=[], udf={}, 
+            edges=[], hierarchies=[], udf={}, coef={}, 
             buffer_batch_size=1000, verbose=False, timeout=600, step=2, poll=True,
             compressed=False, staging=True, encoding=True):
         """
@@ -62,6 +62,9 @@ class PerformanceRunner(BaseRunner):
         :param udf: user-defined functions documenting how the primary drivers relate to 
             each other, when applicable. See tutorials and sample code for examples. 
         :type udf: dict, optional
+        :param coef: Coefficients that can overwrite the edge coefficient produced on running Lasso Regressions 
+            for every child-parent relationship in the directed graph. See tutorials and sample code for examples. 
+        :type coef: dict, optional
         :param buffer_batch_size: Batch size for the purpose of uploading data
             from the client to the server's buffer
         :type buffer_batch_size: int, optional
@@ -130,6 +133,7 @@ class PerformanceRunner(BaseRunner):
                 edges=self._encode_edges(edges, fref) if encoding else edges, 
                 hierarchies=self._encode_hierarchies(hierarchies, fref) if encoding else hierarchies, 
                 udf=self._encode_udf(udf, fref) if encoding else udf, 
+                coef=self._encode_coefs(coef, fref) if encoding else coef, 
                 verbose=verbose,
                 staging=staging,
             )
@@ -172,7 +176,7 @@ class PerformanceRunner(BaseRunner):
     
     def __train(self, request_id=None, client_id=None,
             idx_field=None, time_field=None, outcome_var=None, primary_fields=[], dimensional_fields=[],
-            edges=[], hierarchies=[], udf={}, 
+            edges=[], hierarchies=[], udf={}, coef={}, 
             verbose=False, staging=False):
         """
         :param request_id:
@@ -187,6 +191,7 @@ class PerformanceRunner(BaseRunner):
         :param edges:
         :param hierarchies: 
         :param udf: 
+        :param coef: 
         :param verbose: Set to true for verbose output
         :param staging:
         :return:
@@ -204,6 +209,7 @@ class PerformanceRunner(BaseRunner):
             'edges': edges, 
             'hierarchies': hierarchies, 
             'udf': udf, 
+            'coef': coef, 
             'staging': staging,
         })
         if verbose: print('Training request posted.')
@@ -276,11 +282,12 @@ class PerformanceRunner(BaseRunner):
         obj2['main_dimension']['member'] = xref[obj2['main_dimension']['dimension']]['reverse'][obj['main_dimension']['member']]
         for dim in obj.keys():
             if dim not in EXCLUDED_FIELDS:
-                dim2 = fref['reverse'][dim]
-                obj2[dim2] = {}
-                for member in obj[dim].keys():
-                    member2 = xref[dim2]['reverse'][member] if member!='residual' else member 
-                    obj2[dim2][member2] = obj[dim][member]
+                if dim in fref['reverse'].keys():
+                    dim2 = fref['reverse'][dim]
+                    obj2[dim2] = {}
+                    for member in obj[dim].keys():
+                        member2 = xref[dim2]['reverse'][member] if member!='residual' else member 
+                        obj2[dim2][member2] = obj[dim][member]
         return obj2 
 
     def run(self, df=None, model_id=None, client_id=None,

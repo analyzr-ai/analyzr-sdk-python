@@ -425,6 +425,20 @@ class BaseRunner:
                 formula2 = formula2.replace(name, fref['forward'][name])
             udf2[key2] = formula2
         return udf2 
+    
+    def _encode_coefs(self, coef, fref):
+        """
+        Encode coef
+
+        :param coef:
+        :param fref:
+        :return coef2:
+        """
+        coef2 = {}
+        for key in coef.keys(): # Unencoded key
+            key2 = fref['forward'][key] # Encoded replacement key 
+            coef2[key2] = coef[key] # Encoded key has the same coef as unencoded key
+        return coef2
 
     def _decode(self, df, categorical_vars=[], numerical_vars=[], bool_vars=[], skip_vars=[], record_id_var=None, xref={}, zref={}, rref={}, fref={}, bref={}, verbose=False):
         """

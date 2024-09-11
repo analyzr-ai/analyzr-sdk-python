@@ -7,7 +7,7 @@ README = (HERE / "README.md").read_text()
 
 setup(
     name='analyzr-sdk-python',
-    version='1.4.0',
+    version='1.4.1',
     description='Python SDK for the G2M Platform API',
     long_description=README,
     long_description_content_type="text/markdown",

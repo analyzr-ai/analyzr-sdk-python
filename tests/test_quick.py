@@ -273,6 +273,9 @@ class PerformanceTest(unittest.TestCase):
                 'churn_voluntary': 'DIVIDE(disconnects_voluntary, beginning_balance)', 
                 'churn_involuntary': 'DIVIDE(disconnects_involuntary, beginning_balance)', 
             }, 
+            # coef={
+            #     'disconnects_total': 1.0, 
+            # },
             buffer_batch_size=1000, verbose=VERBOSE, encoding=True)
         model_id = res['model_id']
         analysis = res['analysis']

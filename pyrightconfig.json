@@ -1,0 +1,8 @@
+{
+  "include": ["analyzrclient"],
+  "exclude": ["tests"],
+  "typeCheckingMode": "standard",
+  "pythonVersion": "3.12",
+  "pythonPlatform": "All",
+  "reportMissingTypeStubs": false
+}

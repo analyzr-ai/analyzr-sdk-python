@@ -1,42 +1,118 @@
 # Python SDK for the Analyzr API
 
 ## Overview
-This Python client will give you access to the Analyzr API. See files in the `examples` folder
-for examples showing how to use the client. Note that a `client_id` should always be provided when querying the API; it is used for reporting purposes.
-* For general information please see https://analyzr.ai.
-* For help and support see https://help.analyzr.ai.
-* For SDK reference documentation see  https://analyzr-sdk-python.readthedocs.io.
 
-## Installation instructions
-Getting the client set up will require the following:
+This Python client provides access to the G2M Analyzr API for running ML analytics workflows including clustering, propensity scoring, regression, causal analysis, marketing mix modeling, and performance analysis.
 
-1. Install the latest version of the client on your local machine:
-```
-pip install analyzr-sdk-python
-```
+- General information: https://analyzr.ai
+- Help and support: https://help.analyzr.ai
+- SDK reference documentation: https://analyzr-sdk-python.readthedocs.io
 
-2. Get an API username and password from your Analyzr admin (you may need SSO credentials from your local admin instead).
+## Installation
 
-3. Confirm you are able to connect to the API, and check the API version
-as follows from a Python session:
-```
->>> from analyzrclient import Analyzer
->>> analyzer = Analyzer(host="<your host>")
->>> analyzer.login()
-Login successful
->>> Analyzer().version()
-{'status': 200, 'response': {'version': 'x.x.xxx', 'tenant': <your tenant name>, 'copyright': '2024 (c) Go2Market Insights Inc. All rights reserved.'}}
+### For users
+
+```bash
+pip install analyzr
 ```
 
-## Testing instructions
-If you are developing the SDK and would like to test the repo, clone it locally using git then 
-run the following from the root directory:
+### For developers
+
+1. Clone the repository:
+```bash
+git clone https://github.com/analyzr-ai/analyzr-sdk-python.git
+cd analyzr-sdk-python
 ```
-python -m unittest tests.test_all -v   # all tests
-python -m unittest tests.test_quick -v # quick tests
+
+2. Create and activate a virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # Linux/macOS
+venv\Scripts\activate     # Windows
 ```
-Make sure you update the `config.json` file first to include the name of your API tenant. 
-To run a single test case do:
+
+3. Install the package in editable mode with dev dependencies:
+```bash
+pip install -e ".[dev]"
 ```
-python -m unittest tests.test_all.PropensityTest.test_logistic_regression_classifier -v
+
+This installs the SDK locally so changes to source files are reflected immediately without reinstalling.
+
+## Quick start
+
+```python
+from analyzrclient import Analyzer
+
+analyzer = Analyzer(host="<your-tenant>.analyzr.ai")
+analyzer.login()
+analyzer.version()
+```
+
+## Testing
+
+Tests run against a live API tenant. Before running tests, update `tests/config.json` with your API host:
+
+```json
+{
+  "host": "<your-tenant>.analyzr.ai"
+}
+```
+
+### Running tests
+
+```bash
+# All quick tests
+pytest tests/test_quick.py
+
+# Full test suite
+pytest tests/test_all.py
+
+# Verbose output (shows each test name and PASSED/FAILED)
+pytest tests/test_quick.py -v
+
+# Show print statements and log output (disables stdout capture)
+pytest tests/test_quick.py -v -s
+
+# Run a specific test class
+pytest tests/test_quick.py::ClusteringTest -v
+
+# Run a single test method
+pytest tests/test_quick.py::ClusteringTest::test_birch -v
+
+# Exclude a test class (useful for skipping slow or WIP tests)
+pytest tests/test_quick.py -v -k "not Performance"
+
+# Run only tests matching a keyword
+pytest tests/test_quick.py -v -k "propensity"
+
+# Stop on first failure
+pytest tests/test_quick.py -v -x
+
+# Show local variables in tracebacks
+pytest tests/test_quick.py -v --tb=long
+
+# Run with short traceback (just the assertion)
+pytest tests/test_quick.py -v --tb=short
+```
+
+### Test files
+
+| File | Description |
+|------|-------------|
+| `tests/test_quick.py` | One test per analytics domain — fast validation |
+| `tests/test_all.py` | Full coverage with multiple algorithms per domain |
+| `tests/utils.py` | Shared dataset loaders (Titanic, banking, causal, MMM, performance) |
+| `tests/config.json` | API tenant configuration (not committed) |
+
+### Type checking
+
+```bash
+pyright
+```
+
+### Linting
+
+```bash
+ruff check .
+ruff format .
 ```

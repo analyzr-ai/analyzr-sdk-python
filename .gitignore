@@ -131,3 +131,24 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Ruff
+.ruff_cache/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test config (contains tenant-specific credentials)
+tests/config.json
+
+# Local dev artifacts
+*.pickle
+.analyzr/

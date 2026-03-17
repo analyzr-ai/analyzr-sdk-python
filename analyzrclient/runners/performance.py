@@ -30,87 +30,109 @@ class PerformanceRunner(BaseRunner):
         self._uri = f'{self._base_url}/analytics/'
 
     def train(
-        self, df: pd.DataFrame, config: PerformanceModelConfig,
+        self, df: pd.DataFrame | None, config: PerformanceModelConfig,
         client_id: str | None = None,
         buffer_batch_size: int = 1000, verbose: bool = False,
         timeout: int = 600, step: int = 2, poll: bool = True,
         compressed: bool = False, staging: bool = True,
         encoding: bool = True,
+        store_type: str = 'pandas',
+        database_config: dict[str, Any] | None = None,
     ) -> PerformanceTrainResult:
-        """Train a performance analysis model."""
+        """Train a performance analysis model.
+
+        For cloud data sources (Snowflake, Databricks), set store_type='trino'
+        and provide database_config with connection details. The API will ingest
+        the source data into Parquet/Iceberg and use Trino for analysis queries.
+        In this mode, df should be None — data comes from the external source.
+        """
         request_id = self._get_request_id()
         if verbose:
             log.info('Model ID: %s', request_id)
 
+        is_cloud = store_type != 'pandas'
         fref: dict[str, Any] = {}
         xref: dict[str, Any] = {}
 
-        if encoding:
-            data, xref, zref, rref, fref, fref_exp, bref = self._encode(
-                df, categorical_vars=config.dimensional_vars,
-                numerical_vars=config.primary_vars, bool_vars=[],
-                record_id_var=config.idx_var, verbose=verbose, numerical=False,
-            )
-            self._keys_save(
-                model_id=request_id,
-                keys={'xref': xref, 'zref': zref, 'rref': rref,
-                      'fref': fref, 'fref_exp': fref_exp, 'bref': bref},
-            )
-        else:
-            data = df
+        if is_cloud and encoding:
+            log.warning('Encoding is not supported for cloud databases. Setting encoding=False.')
+            encoding = False
 
-        res = self._buffer.save(
-            data, client_id=client_id, request_id=request_id,
-            verbose=verbose, batch_size=buffer_batch_size,
-            compressed=compressed, staging=staging,
-        )
+        if not is_cloud:
+            if df is None:
+                raise AnalyzrError('DataFrame is required when store_type is pandas')
+            if encoding:
+                data, xref, zref, rref, fref, fref_exp, bref = self._encode(
+                    df, categorical_vars=config.dimensional_vars,
+                    numerical_vars=config.primary_vars, bool_vars=[],
+                    record_id_var=config.idx_var, verbose=verbose, numerical=False,
+                )
+                self._keys_save(
+                    model_id=request_id,
+                    keys={'xref': xref, 'zref': zref, 'rref': rref,
+                          'fref': fref, 'fref_exp': fref_exp, 'bref': bref},
+                )
+            else:
+                data = df
+
+            res = self._buffer.save(
+                data, client_id=client_id, request_id=request_id,
+                verbose=verbose, batch_size=buffer_batch_size,
+                compressed=compressed, staging=staging,
+            )
+            if res['batches_saved'] != res['total_batches']:
+                log.error('Buffer save failed: %s', res)
+                raise AnalyzrError('Buffer save failed', detail=f'request_id={request_id}, response={res}')
 
         analysis: dict[str, Any] = {}
 
-        if res['batches_saved'] == res['total_batches']:
-            self._client.post(self._uri, {
-                'command': 'analyze-train',
-                'request_id': request_id,
-                'client_id': client_id,
-                'idx_field': fref['forward'][config.idx_var] if encoding and config.idx_var else config.idx_var,
-                'time_field': fref['forward'][config.time_var] if encoding else config.time_var,
-                'outcome_var': fref['forward'][config.outcome_var] if encoding else config.outcome_var,
-                'primary_fields': [fref['forward'][v] for v in config.primary_vars] if encoding else config.primary_vars,
-                'dimensional_fields': [fref['forward'][v] for v in config.dimensional_vars] if encoding else config.dimensional_vars,
-                'edges': self._perf_codec.encode_edges(config.edges, fref) if encoding else config.edges,
-                'hierarchies': self._perf_codec.encode_hierarchies(config.hierarchies, fref) if encoding else config.hierarchies,
-                'udf': self._perf_codec.encode_udf(config.udf, fref) if encoding else config.udf,
-                'coef': self._perf_codec.encode_coefs(config.coef, fref) if encoding else config.coef,
-                'staging': staging,
-            })
-            if poll:
-                res2 = self._poller.poll(
-                    payload={'request_id': request_id, 'client_id': client_id, 'command': 'task-status'},
-                    timeout=timeout, step=step, verbose=verbose,
-                )
-                if res2.get('response', {}).get('status') == 'Complete':
-                    read_config = PerformanceReadConfig(
-                        outcome_var=fref['forward'][config.outcome_var] if encoding else config.outcome_var,
-                    )
-                    raw_analysis = self._read_performance_analysis(
-                        request_id=request_id, client_id=client_id, read_config=read_config,
-                    )
-                    if self._codec is None:
-                        log.error('No codec configured for performance runner')
-                        raise AnalyzrError('No codec configured for performance runner')
-                    encode_keys = {'fref': fref if encoding else {}, 'xref': xref if encoding else {}}
-                    result = self._codec.decode_train_results(
-                        {}, encode_keys, config, request_id, encoding,
-                        raw_analysis=raw_analysis,
-                    )
-                    analysis = result.analysis
-                else:
-                    log.warning('Training returned status: %s', res2.get('response', {}).get('status'))
-        else:
-            log.error('Buffer save failed: %s', res)
-            raise AnalyzrError('Buffer save failed', detail=f'request_id={request_id}, response={res}')
+        train_payload: dict[str, Any] = {
+            'command': 'analyze-train',
+            'request_id': request_id,
+            'job_id': request_id,
+            'client_id': client_id,
+            'idx_field': fref['forward'][config.idx_var] if encoding and config.idx_var else config.idx_var,
+            'time_field': fref['forward'][config.time_var] if encoding else config.time_var,
+            'outcome_var': fref['forward'][config.outcome_var] if encoding else config.outcome_var,
+            'primary_fields': [fref['forward'][v] for v in config.primary_vars] if encoding else config.primary_vars,
+            'dimensional_fields': [fref['forward'][v] for v in config.dimensional_vars] if encoding else config.dimensional_vars,
+            'edges': self._perf_codec.encode_edges(config.edges, fref) if encoding else config.edges,
+            'hierarchies': self._perf_codec.encode_hierarchies(config.hierarchies, fref) if encoding else config.hierarchies,
+            'udf': self._perf_codec.encode_udf(config.udf, fref) if encoding else config.udf,
+            'coef': self._perf_codec.encode_coefs(config.coef, fref) if encoding else config.coef,
+            'staging': staging,
+            'store_type': store_type,
+        }
+        if database_config is not None:
+            train_payload['database_config'] = database_config
+
+        self._client.post(self._uri, train_payload)
 
         if poll:
+            res2 = self._poller.poll(
+                payload={'request_id': request_id, 'client_id': client_id, 'command': 'task-status'},
+                timeout=timeout, step=step, verbose=verbose,
+            )
+            if res2.get('response', {}).get('status') == 'Complete':
+                read_config = PerformanceReadConfig(
+                    outcome_var=fref['forward'][config.outcome_var] if encoding else config.outcome_var,
+                )
+                raw_analysis = self._read_performance_analysis(
+                    request_id=request_id, client_id=client_id, read_config=read_config,
+                )
+                if self._codec is None:
+                    log.error('No codec configured for performance runner')
+                    raise AnalyzrError('No codec configured for performance runner')
+                encode_keys = {'fref': fref if encoding else {}, 'xref': xref if encoding else {}}
+                result = self._codec.decode_train_results(
+                    {}, encode_keys, config, request_id, encoding,
+                    raw_analysis=raw_analysis,
+                )
+                analysis = result.analysis
+            else:
+                log.warning('Training returned status: %s', res2.get('response', {}).get('status'))
+
+        if poll and not is_cloud:
             self._buffer.clear(request_id=request_id, client_id=client_id, verbose=verbose)
 
         return PerformanceTrainResult(model_id=request_id, analysis=analysis)

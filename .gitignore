@@ -149,6 +149,9 @@ Thumbs.db
 # Test config (contains tenant-specific credentials)
 tests/config.json
 
+# Local integration tests (developer-specific, not for CI)
+tests/test_misc.py
+
 # Local dev artifacts
 *.pickle
 .analyzr/

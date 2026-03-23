@@ -1,3 +1,5 @@
+"""Top-level Analyzr client exposing all analytics runner namespaces."""
+
 from __future__ import annotations
 
 import datetime
@@ -20,15 +22,14 @@ log = logging.getLogger(__name__)
 
 
 class Analyzer:
-    """Parent class for Analyzr client.
+    """Entry point for all Analyzr SDK operations.
 
-    This is the class that should be instantiated by the client.
-    For detailed methods, see the appropriate runner class.
+    Instantiate this class with your tenant host to access every analytics
+    runner (cluster, propensity, regression, causal, MMM, performance, task).
+    Each runner is available as a named attribute.
 
-    :param host: the FQDN for your API tenant
-    :type host: str, required
-    :param verbose: Set to true for verbose output
-    :type verbose: bool, optional
+    :param host: Fully-qualified domain name of your Analyzr API tenant.
+    :param verbose: Enable verbose logging during initialisation.
     """
 
     _client: SamlSsoAuthClient
@@ -44,51 +45,76 @@ class Analyzer:
 
     def __init__(self, host: str | None = None, verbose: bool = False) -> None:
         self._client = SamlSsoAuthClient(host=host, verbose=verbose)
-        self._base_url = f'https://{host}/api/v1'
-        self._uri = f'{self._base_url}/analytics/'
+        self._base_url = f"https://{host}/api/v1"
+        self._uri = f"{self._base_url}/analytics/"
         self.test = TaskRunner(client=self._client, base_url=self._base_url)
         self.cluster = ClusterRunner(client=self._client, base_url=self._base_url)
         self.propensity = PropensityRunner(client=self._client, base_url=self._base_url)
         self.regression = RegressionRunner(client=self._client, base_url=self._base_url)
         self.causal = CausalRunner(client=self._client, base_url=self._base_url)
         self.mmm = MMMRunner(client=self._client, base_url=self._base_url)
-        self.performance = PerformanceRunner(client=self._client, base_url=self._base_url)
+        self.performance = PerformanceRunner(
+            client=self._client, base_url=self._base_url
+        )
 
     def version(self) -> dict[str, Any]:
-        """Provide version info."""
+        """Return combined client and API version information.
+
+        :return: Dictionary with ``api`` (status, version, tenant), ``client`` (version),
+                 and ``copyright`` keys.
+        :rtype: dict[str, Any]
+        """
         copy_client = self.client_version()
         copy_api = self.api_version()
         return {
-            'api': {
-                'status': copy_api['status'],
-                'version': copy_api['response']['version'] if copy_api['status'] == 200 else 'N/A',
-                'tenant': copy_api['response']['tenant'] if copy_api['status'] == 200 else 'N/A',
+            "api": {
+                "status": copy_api["status"],
+                "version": copy_api["response"]["version"]
+                if copy_api["status"] == 200
+                else "N/A",
+                "tenant": copy_api["response"]["tenant"]
+                if copy_api["status"] == 200
+                else "N/A",
             },
-            'client': {
-                'version': copy_client['version'],
+            "client": {
+                "version": copy_client["version"],
             },
-            'copyright': copy_client['copyright'],
+            "copyright": copy_client["copyright"],
         }
 
     def api_version(self) -> dict[str, Any]:
-        """Provide API version info."""
-        return self._client.post(self._uri, {'command': 'version'})
+        """Fetch version and tenant metadata directly from the remote API.
+
+        :return: Raw API response dict containing ``status`` and ``response`` keys.
+        :rtype: dict[str, Any]
+        """
+        return self._client.post(self._uri, {"command": "version"})
 
     def client_version(self) -> dict[str, str]:
-        """Provide client version info."""
+        """Return the installed SDK version and copyright notice.
+
+        :return: Dictionary with ``version`` and ``copyright`` string keys.
+        :rtype: dict[str, str]
+        """
         return {
-            'version': f'{CLIENT_VERSION}',
-            'copyright': f'{datetime.date.today().year} (c) Go2Market Insights Inc. All rights reserved. Patent pending. ',
+            "version": CLIENT_VERSION,
+            "copyright": f"{datetime.date.today().year} (c) Go2Market Insights Inc. All rights reserved. Patent pending. ",
         }
 
     def login(self, verbose: bool = False) -> None:
-        """Log in to Analyzr API."""
+        """Authenticate the client against the Analyzr API using SAML SSO.
+
+        :param verbose: Enable verbose output during the login flow.
+        """
         status_code = self._client.login(verbose=verbose)
         if status_code == 200:
-            log.info('Login successful')
+            log.info("Login successful")
         else:
-            log.warning('Could not log in (status code: %s)', status_code)
+            log.warning("Could not log in (status code: %s)", status_code)
 
     def logout(self, verbose: bool = False) -> None:
-        """Log out of Analyzr API."""
+        """Terminate the current authenticated session.
+
+        :param verbose: Enable verbose output during the logout flow.
+        """
         self._client.logout(verbose=verbose)
